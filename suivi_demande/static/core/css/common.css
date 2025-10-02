@@ -1,0 +1,294 @@
+/* CSS Commun - Crédit du Congo */
+/* Palette officielle Crédit du Congo - Groupe Attijariwafa bank */
+
+:root {
+  /* Palette principale du logo */
+  --jaune-or: #F5C842;
+  --orange: #FF6B47;
+  --rouge-corail: #FF4444;
+  --noir: #2C2C2C;
+  --marron-fonce: #8B4513;
+  
+  /* Dégradés du logo */
+  --gradient-principal: linear-gradient(135deg, #F5C842 0%, #FF6B47 50%, #FF4444 100%);
+  --gradient-sidebar: linear-gradient(180deg, #2C2C2C 0%, #424242 100%);
+  
+  /* Couleurs neutres */
+  --blanc: #ffffff;
+  --gris-clair: #f5f5f5;
+  --gris: #757575;
+  --gris-fonce: #424242;
+  
+  /* Couleurs fonctionnelles */
+  --success: #4caf50;
+  --warning: #ff9800;
+  --danger: #f44336;
+  --info: #2196f3;
+  
+  /* Variables de design */
+  --radius: 10px;
+  --shadow: 0 2px 10px rgba(0,0,0,0.08);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
+  --transition: all 0.3s ease;
+  
+  /* Typographie */
+  --font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+/* Reset global */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--gris-clair);
+  color: var(--gris-fonce);
+  line-height: 1.6;
+}
+
+/* Utilitaires communs */
+.d-flex {
+  display: flex;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.justify-content-between {
+  justify-content: space-between;
+}
+
+.gap-1 {
+  gap: 0.5rem;
+}
+
+.gap-2 {
+  gap: 1rem;
+}
+
+.gap-3 {
+  gap: 1.5rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.5rem;
+}
+
+.mb-2 {
+  margin-bottom: 1rem;
+}
+
+.mb-3 {
+  margin-bottom: 1.5rem;
+}
+
+.mb-4 {
+  margin-bottom: 2rem;
+}
+
+/* Boutons communs */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--rouge-corail);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--marron-fonce);
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-success:hover {
+  background: #45a049;
+}
+
+.btn-warning {
+  background: var(--warning);
+  color: white;
+}
+
+.btn-warning:hover {
+  background: #e68900;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #d32f2f;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--gris);
+  color: var(--gris);
+}
+
+.btn-outline:hover {
+  background: var(--gris-clair);
+}
+
+/* Cartes communes */
+.card {
+  background: var(--blanc);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Sections communes */
+.section {
+  background: var(--blanc);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--rouge-corail);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--jaune-or);
+}
+
+.section h2 i {
+  color: var(--jaune-or);
+}
+
+/* Avatar utilisateur commun */
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--noir);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Logo commun */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-text {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+/* États vides communs */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--gris);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--jaune-or);
+}
+
+/* Badges de statut communs */
+.badge {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.badge-success {
+  background-color: #e8f5e9;
+  color: var(--success);
+}
+
+.badge-warning {
+  background-color: #fff3e0;
+  color: var(--warning);
+}
+
+.badge-danger {
+  background-color: #ffebee;
+  color: var(--danger);
+}
+
+.badge-info {
+  background-color: #e3f2fd;
+  color: var(--info);
+}
+
+/* Animations communes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease;
+}
+
+.slide-in {
+  animation: slideIn 0.5s ease;
+}
+
+/* Responsive commun */
+@media (max-width: 768px) {
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .section {
+    padding: 1rem;
+  }
+  
+  .card {
+    padding: 1rem;
+  }
+}

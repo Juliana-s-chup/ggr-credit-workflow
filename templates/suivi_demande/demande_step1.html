@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Demande de crédit - Étape 1{% endblock %}
+{% block content %}
+<section class="py-4 border-bottom">
+  <div class="container d-flex justify-content-between align-items-center">
+    <h1 class="h5 mb-0">Demande de crédit</h1>
+    <div class="text-muted small">Crédit du Congo • Espace client</div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 mb-3 mb-lg-0">
+        <div class="list-group">
+          <div class="list-group-item {% if step == 1 %}active{% endif %}">1 • Informations personnelles</div>
+          <div class="list-group-item {% if step == 2 %}active{% endif %}">2 • Situation financière</div>
+          <div class="list-group-item {% if step == 3 %}active{% endif %}">3 • Détails du crédit</div>
+          <div class="list-group-item {% if step == 4 %}active{% endif %}">4 • Documents & Validation</div>
+        </div>
+      </div>
+      <div class="col-lg-9">
+        <div class="card">
+          <div class="card-header">
+            Informations personnelles
+            {% if request.session.profile_prefilled %}
+              <span class="badge bg-success ms-2">
+                <i class="fas fa-check"></i> Données pré-remplies
+              </span>
+            {% endif %}
+          </div>
+          <div class="card-body">
+            {% if request.session.profile_prefilled %}
+              <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i>
+                <strong>Informations pré-remplies :</strong> Nous avons utilisé les données de votre profil pour pré-remplir ce formulaire. Vous pouvez les modifier si nécessaire.
+              </div>
+            {% else %}
+              <p class="text-secondary">Renseignez vos informations personnelles pour commencer votre demande.</p>
+            {% endif %}
+            <form method="post" novalidate>
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Nom</label>
+                  <input type="text" name="nom" value="{{ form.nom.value|default_if_none:'' }}" class="form-control" required />
+                  {% if form.nom.errors %}<div class="text-danger small">{{ form.nom.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Prénom</label>
+                  <input type="text" name="prenom" value="{{ form.prenom.value|default_if_none:'' }}" class="form-control" required />
+                  {% if form.prenom.errors %}<div class="text-danger small">{{ form.prenom.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Date de naissance</label>
+                  <input type="date" name="date_naissance" value="{{ form.date_naissance.value|default_if_none:'' }}" class="form-control" required />
+                  {% if form.date_naissance.errors %}<div class="text-danger small">{{ form.date_naissance.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Lieu de naissance</label>
+                  <input type="text" name="lieu_naissance" value="{{ form.lieu_naissance.value|default_if_none:'' }}" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nationalité</label>
+                  <input type="text" name="nationalite" value="{{ form.nationalite.value|default_if_none:'' }}" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Situation familiale</label>
+                  <select name="situation_familiale" class="form-select">
+                    {% for val, label in form.SITUATION_FAM %}
+                      <option value="{{ val }}" {% if form.situation_familiale.value == val %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Nombre de personnes à charge</label>
+                  <input type="number" min="0" name="nb_personnes_charge" value="{{ form.nb_personnes_charge.value|default_if_none:0 }}" class="form-control" />
+                </div>
+                <div class="col-12">
+                  <label class="form-label">Adresse</label>
+                  <textarea name="adresse" rows="2" class="form-control">{{ form.adresse.value|default_if_none:'' }}</textarea>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Ville</label>
+                  <input type="text" name="ville" value="{{ form.ville.value|default_if_none:'' }}" class="form-control" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Pays</label>
+                  <select name="pays" class="form-select">
+                    {% for val, label in form.PAYS_CHOICES %}
+                      <option value="{{ val }}" {% if form.pays.value %}{% if form.pays.value == val %}selected{% endif %}{% else %}{% if val == 'Congo' %}selected{% endif %}{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                  </select>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Téléphone</label>
+                  <input type="tel" name="telephone" id="telephone" value="{{ form.telephone.value|default_if_none:'' }}" class="form-control"
+                         inputmode="tel" placeholder="Ex: +242 06 12 34 56"
+                         pattern="^[+0-9][0-9\s-]{6,}$" title="Numéro de téléphone (ex: +242 06 12 34 56)" />
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Email</label>
+                  <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" class="form-control" />
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mt-4">
+                <a class="btn btn-outline-secondary disabled">Précédent</a>
+                <button type="submit" class="btn btn-primary">Suivant</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="text-center text-muted small mt-3">
+          © {% now "Y" %} Crédit du Congo. <a href="#">Politique de confidentialité</a> | <a href="#">Conditions générales</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Capitalisation simple pour la nationalité à la sortie du champ
+  (function(){
+    const nat = document.querySelector('input[name="nationalite"]');
+    if (nat){
+      nat.addEventListener('blur', function(){
+        const v = (this.value || '').trim();
+        this.value = v.split(/\s+/).map(s=> s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join(' ');
+      });
+    }
+    // Masque léger pour le téléphone: conserve chiffres, +, espaces; espace toutes les 2-3 digits
+    const tel = document.getElementById('telephone');
+    if (tel){
+      tel.addEventListener('input', function(){
+        let x = this.value.replace(/[^+0-9]/g,'').replace(/(\++)/g,'+');
+        // Insertion d'espaces toutes les 2 chiffres après l'indicatif probable
+        // Laisse tel quel si l'utilisateur a sa propre mise en forme
+        if (x.startsWith('+')){
+          const indicatif = x.slice(0,4); // heuristique simple
+          let rest = x.slice(4);
+          rest = rest.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+          this.value = (indicatif + ' ' + rest).trim();
+        } else {
+          this.value = x.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}

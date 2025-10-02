@@ -1,0 +1,429 @@
+/* Dashboard BOE - Crédit du Congo */
+/* Palette officielle Crédit du Congo - Groupe Attijariwafa bank */
+
+:root {
+  /* Palette officielle exacte du logo Crédit du Congo */
+  --jaune-or: #F5C842;
+  --orange: #FF6B47;
+  --rouge-corail: #FF4444;
+  --noir: #2C2C2C;
+  --marron-fonce: #8B4513;
+  
+  /* Dégradés du logo */
+  --gradient-principal: linear-gradient(135deg, #F5C842 0%, #FF6B47 50%, #FF4444 100%);
+  --gradient-sidebar: linear-gradient(180deg, #2C2C2C 0%, #424242 100%);
+  
+  /* Couleurs neutres */
+  --blanc: #ffffff;
+  --gris-clair: #f5f5f5;
+  --gris: #757575;
+  --gris-fonce: #424242;
+  
+  /* Couleurs fonctionnelles */
+  --success: #4caf50;
+  --warning: #ff9800;
+  --danger: #f44336;
+  --info: #2196f3;
+  
+  --radius: 10px;
+  --shadow: 0 2px 10px rgba(0,0,0,0.08);
+  --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
+  --transition: all 0.3s ease;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--gris-clair);
+  color: var(--gris-fonce);
+  display: flex;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  background: var(--gradient-sidebar);
+  color: white;
+  padding: 2rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  box-shadow: 2px 0 15px rgba(0,0,0,0.15);
+  position: fixed;
+  height: 100vh;
+  z-index: 1000;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(245, 184, 0, 0.3);
+  margin-bottom: 1rem;
+}
+
+.logo-text {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.section-title {
+  text-align: center;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--jaune-or);
+  margin-bottom: 1.5rem;
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+  list-style: none;
+}
+
+.nav-item {
+  display: flex;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: var(--transition);
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  background: var(--gradient-principal);
+  color: var(--blanc);
+  font-weight: 500;
+}
+
+.nav-link i {
+  width: 24px;
+  text-align: center;
+}
+
+.new-badge {
+  margin-left: auto;
+  background: var(--rouge-corail);
+  color: white;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Main Content */
+.main-content {
+  flex: 1;
+  margin-left: 280px;
+  padding: 2rem;
+  background-color: var(--gris-clair);
+}
+
+/* Header */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-title {
+  color: var(--rouge-corail);
+  font-size: 1.5rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.user-profile {
+  background: var(--gradient-principal);
+  color: var(--blanc);
+  padding: 0.5rem 1.2rem;
+  border-radius: var(--radius);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow);
+}
+
+.user-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--noir);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+/* Content Sections */
+.content-section {
+  display: none;
+}
+
+.content-section.active {
+  display: block;
+  animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: var(--blanc);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+  border-left: 4px solid var(--jaune-or);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+}
+
+.card h3 {
+  font-size: 2rem;
+  color: var(--rouge-corail);
+  margin: 0.5rem 0;
+  font-weight: 600;
+}
+
+.card p {
+  color: var(--gris);
+  font-size: 0.9rem;
+}
+
+.card-icon {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  color: rgba(33, 33, 33, 0.1);
+  font-size: 2.5rem;
+}
+
+/* Section */
+.section {
+  background: var(--blanc);
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 2rem;
+}
+
+.section h2 {
+  margin-bottom: 1.5rem;
+  color: var(--rouge-corail);
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--jaune-or);
+}
+
+.section h2 i {
+  color: var(--jaune-or);
+}
+
+/* Table */
+.table-responsive {
+  overflow-x: auto;
+}
+
+.boe-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.boe-table thead th {
+  background: linear-gradient(135deg, var(--noir) 0%, var(--noir-clair) 100%);
+  color: white;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.boe-table tbody tr {
+  transition: var(--transition);
+}
+
+.boe-table tbody tr:hover {
+  background-color: rgba(255, 111, 0, 0.05);
+}
+
+.boe-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+}
+
+.dossier-ref {
+  color: var(--rouge);
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.dossier-ref:hover {
+  text-decoration: underline;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  min-width: 120px;
+}
+
+.status-approved {
+  background-color: #e8f5e9;
+  color: var(--success);
+}
+
+.status-pending {
+  background-color: #fff3e0;
+  color: var(--warning);
+}
+
+/* Buttons */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 0.85rem;
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+  text-decoration: none;
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--rouge-corail);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--marron-fonce);
+  transform: translateY(-2px);
+}
+
+.btn-success {
+  background: var(--success);
+  color: white;
+}
+
+.btn-success:hover {
+  background: #388e3c;
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--gris);
+  color: var(--gris);
+}
+
+.btn-outline:hover {
+  background: var(--gris-clair);
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 3rem;
+  color: var(--gris);
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: var(--jaune-or);
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 1.5rem;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

@@ -1,0 +1,517 @@
+{% extends "base.html" %}
+{% block title %}Vérification des informations - Crédit du Congo{% endblock %}
+
+{% block extra_head %}
+<style>
+  :root {
+    --rouge: #6a1919;
+    --rouge-clair: #9e3d3d;
+    --or: #e0c78c;
+    --or-fonce: #d0b574;
+    --clair: #fefaf3;
+    --blanc: #ffffff;
+    --gris: #444;
+    --gris-clair: #666;
+    --gris-fond: #f5f5f5;
+    --border: #e0e0e0;
+    --success: #28a745;
+    --warning: #ffc107;
+    --danger: #dc3545;
+    --info: #17a2b8;
+    --radius: 8px;
+    --shadow: 0 2px 10px rgba(0,0,0,0.08);
+    --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
+    --transition: all 0.3s ease;
+  }
+
+  .verification-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .verification-header {
+    background: linear-gradient(135deg, var(--rouge), var(--rouge-clair));
+    color: white;
+    padding: 2rem;
+    border-radius: var(--radius) var(--radius) 0 0;
+    text-align: center;
+  }
+
+  .verification-header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.8rem;
+    font-weight: 600;
+  }
+
+  .verification-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+  }
+
+  .verification-content {
+    background: var(--blanc);
+    padding: 2rem;
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .progress-bar {
+    background: var(--gris-fond);
+    height: 8px;
+    border-radius: 4px;
+    margin-bottom: 2rem;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    background: linear-gradient(90deg, var(--rouge), var(--or));
+    height: 100%;
+    width: 25%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .step.active {
+    background: var(--or);
+    color: var(--rouge);
+  }
+
+  .step.completed {
+    background: var(--success);
+    color: white;
+  }
+
+  .step.pending {
+    background: var(--gris-fond);
+    color: var(--gris-clair);
+  }
+
+  .info-summary {
+    background: linear-gradient(135deg, var(--clair), #fff8f0);
+    border: 2px solid var(--or);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .summary-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .summary-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--success);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+  }
+
+  .summary-text h3 {
+    margin: 0 0 0.25rem 0;
+    color: var(--rouge);
+    font-size: 1.3rem;
+  }
+
+  .summary-text p {
+    margin: 0;
+    color: var(--gris-clair);
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+  }
+
+  .info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .info-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gris-clair);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .info-value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gris);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .action-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 0.75rem 2rem;
+    border-radius: var(--radius);
+    font-weight: 600;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--rouge), var(--rouge-clair));
+    color: white;
+    box-shadow: var(--shadow);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .btn-outline {
+    background: transparent;
+    border: 2px solid var(--border);
+    color: var(--gris);
+  }
+
+  .btn-outline:hover {
+    background: var(--gris-fond);
+    border-color: var(--gris-clair);
+  }
+
+  .btn-warning {
+    background: var(--warning);
+    color: var(--gris);
+  }
+
+  .btn-warning:hover {
+    background: #e0a800;
+  }
+
+  .modification-form {
+    display: none;
+    background: var(--gris-fond);
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    margin-top: 1rem;
+  }
+
+  .modification-form.active {
+    display: block;
+    animation: slideDown 0.3s ease;
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .form-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gris);
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    transition: var(--transition);
+  }
+
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--rouge);
+    box-shadow: 0 0 0 3px rgba(106, 25, 25, 0.1);
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+    padding: 1rem;
+    background: var(--clair);
+    border-radius: var(--radius);
+    border: 1px solid var(--or);
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .checkbox-group label {
+    margin: 0;
+    color: var(--rouge);
+    font-weight: 500;
+  }
+
+  @media (max-width: 768px) {
+    .verification-container {
+      margin: 1rem auto;
+    }
+
+    .verification-header,
+    .verification-content {
+      padding: 1.5rem;
+    }
+
+    .action-buttons {
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .info-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="verification-container">
+  <div class="verification-header">
+    <h1><i class="fas fa-check-circle"></i> Vérification des informations</h1>
+    <p>Nous avons pré-rempli vos informations. Vérifiez et confirmez pour continuer.</p>
+  </div>
+
+  <div class="verification-content">
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-fill"></div>
+    </div>
+
+    <!-- Step Indicator -->
+    <div class="step-indicator">
+      <div class="step active">
+        <i class="fas fa-user-check"></i>
+        <span>Vérification</span>
+      </div>
+      <div class="step pending">
+        <i class="fas fa-credit-card"></i>
+        <span>Crédit</span>
+      </div>
+      <div class="step pending">
+        <i class="fas fa-file-upload"></i>
+        <span>Documents</span>
+      </div>
+      <div class="step pending">
+        <i class="fas fa-check"></i>
+        <span>Validation</span>
+      </div>
+    </div>
+
+    <!-- Info Summary -->
+    <div class="info-summary">
+      <div class="summary-header">
+        <div class="summary-icon">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="summary-text">
+          <h3>Informations pré-remplies</h3>
+          <p>Ces informations proviennent de votre profil. Vous pouvez les modifier si nécessaire.</p>
+        </div>
+      </div>
+
+      <div class="info-grid">
+        <div class="info-item">
+          <div class="info-label">Nom complet</div>
+          <div class="info-value">{{ step1_data.prenom }} {{ step1_data.nom }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Email</div>
+          <div class="info-value">{{ step1_data.email }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Téléphone</div>
+          <div class="info-value">{{ step1_data.telephone }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">CNI</div>
+          <div class="info-value">{{ step1_data.cni|default:"Non renseigné" }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Adresse</div>
+          <div class="info-value">{{ step1_data.adresse }}</div>
+        </div>
+        <div class="info-item">
+          <div class="info-label">Ville</div>
+          <div class="info-value">{{ step1_data.ville|default:"Non renseigné" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="confirm">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-check"></i>
+          Confirmer et continuer
+        </button>
+      </form>
+
+      <button type="button" class="btn btn-warning" onclick="toggleModificationForm()">
+        <i class="fas fa-edit"></i>
+        Modifier ces informations
+      </button>
+
+      <form method="post" style="display: inline;">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="modify">
+        <button type="submit" class="btn btn-outline">
+          <i class="fas fa-form"></i>
+          Formulaire complet
+        </button>
+      </form>
+    </div>
+
+    <!-- Modification Form (Hidden by default) -->
+    <div class="modification-form" id="modificationForm">
+      <h4 style="margin-bottom: 1rem; color: var(--rouge);">
+        <i class="fas fa-edit"></i> Modifier les informations
+      </h4>
+      
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="update_profile">
+        
+        <div class="form-row">
+          <div class="form-group">
+            {{ form.nom.label_tag }}
+            {{ form.nom }}
+          </div>
+          <div class="form-group">
+            {{ form.prenom.label_tag }}
+            {{ form.prenom }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            {{ form.email.label_tag }}
+            {{ form.email }}
+          </div>
+          <div class="form-group">
+            {{ form.telephone.label_tag }}
+            {{ form.telephone }}
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            {{ form.cni.label_tag }}
+            {{ form.cni }}
+          </div>
+          <div class="form-group">
+            {{ form.ville.label_tag }}
+            {{ form.ville }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          {{ form.adresse.label_tag }}
+          {{ form.adresse }}
+        </div>
+
+        <div class="checkbox-group">
+          <input type="checkbox" name="update_user_profile" id="update_profile" checked>
+          <label for="update_profile">
+            <i class="fas fa-sync-alt"></i>
+            Mettre à jour mon profil avec ces informations
+          </label>
+        </div>
+
+        <div class="action-buttons">
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i>
+            Enregistrer et continuer
+          </button>
+          <button type="button" class="btn btn-outline" onclick="toggleModificationForm()">
+            <i class="fas fa-times"></i>
+            Annuler
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+function toggleModificationForm() {
+  const form = document.getElementById('modificationForm');
+  form.classList.toggle('active');
+  
+  if (form.classList.contains('active')) {
+    form.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+</script>
+{% endblock %}

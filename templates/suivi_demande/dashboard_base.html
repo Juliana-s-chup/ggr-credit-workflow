@@ -1,0 +1,282 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %} - Crédit du Congo</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- CSS Framework -->
+    <link rel="stylesheet" type="text/css" href="{% static 'suivi_demande/css/design-system.css' %}">
+    
+    <!-- Dashboard specific CSS -->
+    {% block extra_css %}{% endblock %}
+    
+    <style>
+        /* Layout principal */
+        .dashboard-layout {
+            display: flex;
+            min-height: 100vh;
+            background: var(--light-bg);
+        }
+        
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: var(--spacing-8);
+            transition: margin-left var(--transition-normal);
+        }
+        
+        /* Header unifié */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--spacing-8);
+            padding: var(--spacing-6);
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .dashboard-title {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+            color: var(--primary-coral);
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-bold);
+        }
+        
+        .user-profile-header {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-4);
+            padding: var(--spacing-3) var(--spacing-6);
+            background: var(--gradient-primary);
+            color: var(--white);
+            border-radius: var(--radius-lg);
+            font-weight: var(--font-weight-semibold);
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-normal);
+        }
+        
+        .user-profile-header:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .user-avatar-header {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-full);
+            background: var(--white);
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-lg);
+        }
+        
+        /* Navigation sections */
+        .content-sections {
+            min-height: 60vh;
+        }
+        
+        .content-section {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        /* Stats grid unifié */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing-6);
+            margin-bottom: var(--spacing-8);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar-banking {
+                transform: translateX(-100%);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .stats-grid {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                padding: var(--spacing-4);
+            }
+            
+            .dashboard-header {
+                flex-direction: column;
+                gap: var(--spacing-4);
+                text-align: center;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar-banking">
+            <!-- Logo officiel -->
+            <div class="logo-official">
+                <div class="logo-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <div>
+                    <div class="font-bold text-lg">Crédit du Congo</div>
+                    <div class="text-xs opacity-80">Groupe Attijariwafa Bank</div>
+                </div>
+            </div>
+            
+            <!-- Section titre -->
+            <div class="text-center mt-8 mb-6">
+                <div class="text-sm font-semibold text-primary-gold uppercase tracking-wide">
+                    {% block dashboard_role %}Dashboard{% endblock %}
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav-banking flex-1">
+                {% block navigation %}
+                <a href="#" class="nav-item-banking active" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Tableau de Bord</span>
+                </a>
+                {% endblock %}
+            </nav>
+            
+            <!-- Footer sidebar -->
+            <div class="mt-auto pt-6 border-t border-white border-opacity-20">
+                <div class="text-xs text-center opacity-60">
+                    Version 2.0.1<br>
+                    © 2024 Crédit du Congo
+                </div>
+            </div>
+        </aside>
+        
+        <!-- Contenu principal -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="dashboard-header">
+                <h1 class="dashboard-title">
+                    <i class="{% block header_icon %}fas fa-tachometer-alt{% endblock %}"></i>
+                    {% block page_title %}Dashboard{% endblock %}
+                </h1>
+                
+                <div class="flex items-center gap-4">
+                    <!-- Notifications -->
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge badge-error">3</span>
+                    </button>
+                    
+                    <!-- Profil utilisateur -->
+                    <div class="user-profile-header">
+                        <div class="user-avatar-header">
+                            {{ user.first_name.0|default:user.username.0|upper }}
+                        </div>
+                        <div>
+                            <div class="font-semibold">{{ user.get_full_name|default:user.username }}</div>
+                            <div class="text-xs opacity-80">{% block user_role %}Utilisateur{% endblock %}</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            
+            <!-- Contenu des sections -->
+            <div class="content-sections">
+                {% block content %}
+                <!-- Section Dashboard par défaut -->
+                <section class="content-section active" id="dashboard-section">
+                    <div class="stats-grid">
+                        {% block stats_cards %}
+                        <div class="kpi-card">
+                            <div class="kpi-value">0</div>
+                            <div class="kpi-label">Statistique</div>
+                        </div>
+                        {% endblock %}
+                    </div>
+                    
+                    {% block dashboard_content %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-lg font-semibold">Contenu du dashboard</h3>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Contenu à personnaliser selon le rôle.</p>
+                        </div>
+                    </div>
+                    {% endblock %}
+                </section>
+                {% endblock %}
+            </div>
+        </main>
+    </div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Navigation entre sections
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('[data-section]');
+            const sections = document.querySelectorAll('.content-section');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Retirer active de tous les éléments
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    sections.forEach(section => section.classList.remove('active'));
+                    
+                    // Ajouter active à l'élément cliqué
+                    this.classList.add('active');
+                    
+                    // Afficher la section correspondante
+                    const sectionId = this.dataset.section + '-section';
+                    const targetSection = document.getElementById(sectionId);
+                    if (targetSection) {
+                        targetSection.classList.add('active');
+                    }
+                });
+            });
+            
+            // Animation des KPI cards
+            const kpiCards = document.querySelectorAll('.kpi-card');
+            kpiCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+                card.classList.add('animate-slide-up');
+            });
+        });
+        
+        {% block extra_js %}{% endblock %}
+    </script>
+</body>
+</html>

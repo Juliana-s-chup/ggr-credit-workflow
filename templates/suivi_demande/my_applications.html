@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Mes dossiers - Crédit du Congo{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h4 m-0">📁 Mes Dossiers de Crédit</h1>
+  <a href="{% url 'demande_start' %}" class="btn btn-primary">
+    <i class="fas fa-plus"></i> Nouvelle Demande
+  </a>
+</div>
+
+{% if dossiers %}
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Référence</th>
+          <th>Produit</th>
+          <th>Montant</th>
+          <th>Statut Client</th>
+          <th>Statut Agent</th>
+          <th>Soumis le</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dossier in dossiers %}
+          <tr>
+            <td><strong>{{ dossier.reference }}</strong></td>
+            <td>{{ dossier.produit }}</td>
+            <td>{{ dossier.montant|floatformat:0 }} FCFA</td>
+            <td>
+              <span class="badge 
+                {% if dossier.statut_client == 'EN_ATTENTE' %}bg-warning{% endif %}
+                {% if dossier.statut_client == 'EN_COURS_TRAITEMENT' %}bg-info{% endif %}
+                {% if dossier.statut_client == 'TERMINE' %}bg-success{% endif %}
+                {% if dossier.statut_client == 'SE_RAPPROCHER_GEST' %}bg-danger{% endif %}
+              ">
+                {{ dossier.get_statut_client_display }}
+              </span>
+            </td>
+            <td>
+              <small class="text-muted">{{ dossier.get_statut_agent_display }}</small>
+            </td>
+            <td>{{ dossier.date_soumission|date:"d/m/Y H:i" }}</td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary" href="{% url 'dossier_detail' dossier.pk %}">
+                <i class="fas fa-eye"></i> Voir
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="text-center py-5">
+    <div class="mb-4">
+      <i class="fas fa-folder-open fa-4x text-muted"></i>
+    </div>
+    <p class="lead mb-3">Vous n'avez pas encore de dossier de crédit.</p>
+    <p class="text-muted mb-4">Commencez votre demande de crédit en quelques étapes simples.</p>
+    <a href="{% url 'demande_start' %}" class="btn btn-primary btn-lg">
+      <i class="fas fa-rocket"></i> Créer ma première demande
+    </a>
+  </div>
+{% endif %}
+{% endblock %}

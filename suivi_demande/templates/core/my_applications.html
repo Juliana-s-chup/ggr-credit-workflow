@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Mes dossiers - GGR Credit{% endblock %}
+{% block content %}
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3">Mes dossiers</h1>
+    <a class="btn btn-success" href="/nouveau-dossier/">Créer un nouveau dossier</a>
+  </div>
+
+  {% if applications %}
+    <div class="table-responsive">
+      <table class="table table-striped table-hover align-middle">
+        <thead class="table-light">
+          <tr>
+            <th>ID</th>
+            <th>Titre</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Créé le</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for app in applications %}
+            <tr>
+              <td>{{ app.id }}</td>
+              <td>{{ app.title }}</td>
+              <td>{{ app.amount }}</td>
+              <td><span class="badge text-bg-secondary">{{ app.get_status_display }}</span></td>
+              <td>{{ app.created_at }}</td>
+              <td>
+                <a class="btn btn-sm btn-outline-primary" href="{% url 'edit_application' app.id %}">Modifier</a>
+                <a class="btn btn-sm btn-outline-danger ms-2" href="{% url 'delete_application' app.id %}">Supprimer</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <div class="alert alert-info">Aucun dossier pour le moment.</div>
+  {% endif %}
+{% endblock %}

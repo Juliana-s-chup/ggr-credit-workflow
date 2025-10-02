@@ -1,0 +1,525 @@
+{% extends "suivi_demande/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Dashboard Gestionnaire{% endblock %}
+
+{% block dashboard_role %}Gestionnaire de Clientèle{% endblock %}
+
+{% block user_role %}Gestionnaire{% endblock %}
+
+{% block page_title %}Gestion de Portefeuille{% endblock %}
+
+{% block header_icon %}fas fa-users-cog{% endblock %}
+
+{% block navigation %}
+<a href="#" class="nav-item-banking active" data-section="dashboard">
+    <i class="fas fa-tachometer-alt"></i>
+    <span>Tableau de Bord</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="dossiers">
+    <i class="fas fa-folder-open"></i>
+    <span>Mes Dossiers</span>
+    <span class="badge badge-info ml-auto">{{ dossiers_en_cours|length|default:8 }}</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="clients">
+    <i class="fas fa-users"></i>
+    <span>Mes Clients</span>
+    <span class="badge badge-success ml-auto">{{ mes_clients|length|default:24 }}</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="nouveau-dossier">
+    <i class="fas fa-plus-circle"></i>
+    <span>Nouveau Dossier</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="rapports">
+    <i class="fas fa-chart-bar"></i>
+    <span>Rapports</span>
+</a>
+{% endblock %}
+
+{% block stats_cards %}
+<div class="kpi-card">
+    <div class="kpi-value">{{ dossiers_en_cours|length|default:8 }}</div>
+    <div class="kpi-label">Dossiers en Cours</div>
+    <div class="text-xs text-warning mt-2">
+        <i class="fas fa-clock"></i> À traiter: {{ dossiers_urgents|default:3 }}
+    </div>
+</div>
+
+<div class="kpi-card">
+    <div class="kpi-value">{{ dossiers_ce_mois|default:15 }}</div>
+    <div class="kpi-label">Traités ce Mois</div>
+    <div class="text-xs text-success mt-2">
+        <i class="fas fa-arrow-up"></i> +20% vs mois dernier
+    </div>
+</div>
+
+<div class="kpi-card">
+    <div class="kpi-value">{{ taux_validation|default:85 }}%</div>
+    <div class="kpi-label">Taux de Validation</div>
+    <div class="text-xs text-info mt-2">
+        <i class="fas fa-target"></i> Objectif: 80%
+    </div>
+</div>
+
+<div class="kpi-card">
+    <div class="kpi-value">{{ portefeuille_total|default:"12.5M" }}</div>
+    <div class="kpi-label">Portefeuille Total</div>
+    <div class="text-xs text-primary mt-2">
+        <i class="fas fa-wallet"></i> FCFA
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Section Dashboard -->
+<section class="content-section active" id="dashboard-section">
+    <div class="stats-grid mb-8">
+        {% block stats_cards %}{% endblock %}
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <!-- Dossiers Urgents -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    Dossiers Urgents
+                </h3>
+            </div>
+            <div class="card-body">
+                {% for dossier in dossiers_urgents|slice:":5" %}
+                <div class="flex items-center justify-between p-4 border-l-4 border-warning bg-yellow-50 rounded mb-3">
+                    <div>
+                        <div class="font-semibold text-primary">{{ dossier.reference }}</div>
+                        <div class="text-sm text-muted">{{ dossier.client.get_full_name }}</div>
+                        <div class="text-xs text-warning">
+                            <i class="fas fa-clock"></i> 
+                            Échéance: {{ dossier.date_echeance|default:"Aujourd'hui" }}
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="badge badge-warning">{{ dossier.montant|floatformat:0 }} FCFA</span>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> Traiter
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-muted">
+                    <i class="fas fa-check-circle text-success text-3xl mb-4"></i>
+                    <p>Aucun dossier urgent</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Activité Récente -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <i class="fas fa-history text-info"></i>
+                    Activité Récente
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-2 h-2 bg-success rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium">Dossier transmis à l'analyste</div>
+                            <div class="text-xs text-muted">CR-2024-0156 • Il y a 1h</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-2 h-2 bg-info rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium">Nouveau dossier reçu</div>
+                            <div class="text-xs text-muted">CR-2024-0159 • Il y a 3h</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-2 h-2 bg-warning rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium">Documents manquants</div>
+                            <div class="text-xs text-muted">CR-2024-0157 • Il y a 5h</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graphiques Performance -->
+    <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-semibold">Performance Mensuelle</h3>
+                </div>
+                <div class="card-body">
+                    <div class="h-64 flex items-center justify-center bg-gray-50 rounded">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-chart-line text-4xl mb-4"></i>
+                            <p>Graphique de performance</p>
+                            <p class="text-xs">(Évolution des dossiers traités)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Répartition par Statut</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">En Cours</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-20 h-2 bg-gray-200 rounded">
+                                <div class="w-1/2 h-full bg-warning rounded"></div>
+                            </div>
+                            <span class="text-xs font-medium">45%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Validés</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-20 h-2 bg-gray-200 rounded">
+                                <div class="w-1/3 h-full bg-success rounded"></div>
+                            </div>
+                            <span class="text-xs font-medium">35%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">En Attente</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-20 h-2 bg-gray-200 rounded">
+                                <div class="w-1/5 h-full bg-info rounded"></div>
+                            </div>
+                            <span class="text-xs font-medium">20%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Dossiers -->
+<section class="content-section" id="dossiers-section">
+    <div class="card">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Mes Dossiers en Cours</h3>
+                <div class="flex gap-2">
+                    <select class="form-input text-sm">
+                        <option>Tous les statuts</option>
+                        <option>Nouveau</option>
+                        <option>En cours</option>
+                        <option>Validé</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 font-semibold">Référence</th>
+                            <th class="text-left py-3 px-4 font-semibold">Client</th>
+                            <th class="text-left py-3 px-4 font-semibold">Produit</th>
+                            <th class="text-left py-3 px-4 font-semibold">Montant</th>
+                            <th class="text-left py-3 px-4 font-semibold">Statut</th>
+                            <th class="text-left py-3 px-4 font-semibold">Date</th>
+                            <th class="text-left py-3 px-4 font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dossier in dossiers %}
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 px-4">
+                                <a href="{% url 'dossier_detail' dossier.pk %}" class="font-medium text-primary hover:underline">
+                                    {{ dossier.reference }}
+                                </a>
+                                <div class="text-xs text-muted">{{ dossier.date_soumission|date:"d/m/Y" }}</div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="font-medium">{{ dossier.client.get_full_name|default:dossier.client.username }}</div>
+                                <div class="text-xs text-muted">{{ dossier.client.email }}</div>
+                            </td>
+                            <td class="py-4 px-4">{{ dossier.produit }}</td>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold">{{ dossier.montant|floatformat:0 }} FCFA</span>
+                            </td>
+                            <td class="py-4 px-4">
+                                {% if dossier.statut_agent == 'NOUVEAU' %}
+                                    <span class="status-banking status-pending">Nouveau</span>
+                                {% elif dossier.statut_agent == 'TRANSMIS_ANALYSTE' %}
+                                    <span class="status-banking status-processing">En Analyse</span>
+                                {% elif dossier.statut_agent == 'APPROUVE_ATTENTE_FONDS' %}
+                                    <span class="status-banking status-approved">Approuvé</span>
+                                {% elif dossier.statut_agent == 'REFUSE' %}
+                                    <span class="status-banking status-rejected">Refusé</span>
+                                {% else %}
+                                    <span class="status-banking status-pending">{{ dossier.get_statut_agent_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="text-sm">{{ dossier.date_soumission|date:"d/m/Y" }}</div>
+                                <div class="text-xs text-muted">{{ dossier.date_soumission|timesince }} ago</div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex gap-2">
+                                    <button class="btn btn-primary btn-sm" onclick="voirDossier('{{ dossier.pk }}')">
+                                        <i class="fas fa-eye"></i> Voir
+                                    </button>
+                                    {% if dossier.statut_agent == 'NOUVEAU' %}
+                                    <button class="btn btn-success btn-sm" onclick="validerDossier('{{ dossier.pk }}')">
+                                        <i class="fas fa-check"></i> Valider
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="py-12 text-center text-muted">
+                                <i class="fas fa-inbox text-4xl mb-4"></i>
+                                <p>Aucun dossier en cours</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Clients -->
+<section class="content-section" id="clients-section">
+    <div class="card">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Mes Clients</h3>
+                <button class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Nouveau Client
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for client in mes_clients|slice:":9" %}
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="user-avatar-header">
+                            {{ client.first_name.0|default:client.username.0|upper }}
+                        </div>
+                        <div>
+                            <div class="font-semibold">{{ client.get_full_name|default:client.username }}</div>
+                            <div class="text-xs text-muted">{{ client.email }}</div>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span class="text-muted">Dossiers:</span>
+                            <span class="font-semibold ml-1">{{ client.dossiers.count|default:0 }}</span>
+                        </div>
+                        <div>
+                            <span class="text-muted">Dernière activité:</span>
+                            <span class="font-semibold ml-1">{{ client.last_login|date:"d/m"|default:"N/A" }}</span>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <button class="btn btn-secondary btn-sm flex-1">
+                            <i class="fas fa-eye"></i> Voir
+                        </button>
+                        <button class="btn btn-primary btn-sm flex-1">
+                            <i class="fas fa-plus"></i> Dossier
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12 text-muted">
+                    <i class="fas fa-users text-4xl mb-4"></i>
+                    <p>Aucun client assigné</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Nouveau Dossier -->
+<section class="content-section" id="nouveau-dossier-section">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Créer un Nouveau Dossier</h3>
+        </div>
+        <div class="card-body">
+            <form class="space-y-6">
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">Client</label>
+                        <select class="form-input">
+                            <option>Sélectionner un client</option>
+                            {% for client in mes_clients %}
+                            <option value="{{ client.id }}">{{ client.get_full_name|default:client.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Produit de crédit</label>
+                        <select class="form-input">
+                            <option>Sélectionner un produit</option>
+                            <option>Crédit Immobilier</option>
+                            <option>Crédit Auto</option>
+                            <option>Crédit Personnel</option>
+                            <option>Crédit Professionnel</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">Montant demandé (FCFA)</label>
+                        <input type="number" class="form-input" placeholder="Ex: 5000000">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Durée (mois)</label>
+                        <input type="number" class="form-input" placeholder="Ex: 60">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Objet du financement</label>
+                    <textarea class="form-input" rows="3" placeholder="Décrivez l'objet du financement..."></textarea>
+                </div>
+                
+                <div class="flex gap-4">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Créer le Dossier
+                    </button>
+                    <button type="button" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- Section Rapports -->
+<section class="content-section" id="rapports-section">
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Générer un Rapport</h3>
+            </div>
+            <div class="card-body">
+                <form class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Type de rapport</label>
+                        <select class="form-input">
+                            <option>Rapport d'activité mensuel</option>
+                            <option>Performance par client</option>
+                            <option>Suivi des dossiers</option>
+                            <option>Analyse du portefeuille</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Période</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" class="form-input">
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="fas fa-file-pdf"></i> Générer le Rapport
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Rapports Récents</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
+                        <div>
+                            <div class="font-medium">Rapport Mensuel - Novembre</div>
+                            <div class="text-xs text-muted">Généré le 01/12/2024</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
+                        <div>
+                            <div class="font-medium">Performance Portefeuille Q4</div>
+                            <div class="text-xs text-muted">Généré le 28/11/2024</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+// JavaScript spécifique au dashboard gestionnaire
+function voirDossier(dossierId) {
+    window.location.href = `/dashboard/dossier/${dossierId}/`;
+}
+
+function validerDossier(dossierId) {
+    if (confirm('Êtes-vous sûr de vouloir valider ce dossier ?')) {
+        // Logique de validation
+        console.log('Validation du dossier:', dossierId);
+        // Redirection ou mise à jour de l'interface
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des KPI
+    const kpiValues = document.querySelectorAll('.kpi-value');
+    kpiValues.forEach(value => {
+        const text = value.textContent;
+        const number = parseInt(text);
+        if (!isNaN(number)) {
+            let current = 0;
+            const increment = number / 30;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= number) {
+                    current = number;
+                    clearInterval(timer);
+                }
+                value.textContent = Math.floor(current) + text.replace(number, '');
+            }, 50);
+        }
+    });
+    
+    // Tri des tableaux
+    const headers = document.querySelectorAll('th');
+    headers.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function() {
+            console.log('Tri par:', this.textContent);
+            // Logique de tri à implémenter
+        });
+    });
+});
+{% endblock %}

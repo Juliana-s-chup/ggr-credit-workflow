@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Supprimer #{{ application.id }} - GGR Credit{% endblock %}
+{% block content %}
+  <div class="card p-3">
+    <h1 class="h4">Supprimer le dossier #{{ application.id }}</h1>
+    <p class="mb-3">
+      Titre: <strong>{{ application.title }}</strong><br>
+      Montant: <strong>{{ application.amount }}</strong><br>
+      Statut: <span class="badge text-bg-secondary">{{ application.get_status_display }}</span>
+    </p>
+    <p class="text-danger">Confirmez-vous la suppression ? Cette action est irréversible.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger">Supprimer</button>
+      <a href="/mes-dossiers/" class="btn btn-secondary ms-2">Annuler</a>
+    </form>
+  </div>
+{% endblock %}

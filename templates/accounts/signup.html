@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Inscription - GGR Credit{% endblock %}
+{% block extra_head %}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #E8A51A;         /* Jaune ocre */
+      --primary-light: #cf9317;   /* Jaune un peu plus foncé */
+      --secondary: #D1523F;       /* Rouge terre cuite */
+      --secondary-dark: #ba4837;
+      --background: #F8FAFC;
+      --text: #0B0B14;
+      --text-light: #ffffff;
+      --text-gray: #555;
+      --border: #ddd;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --transition: all 0.3s ease;
+    }
+
+    body { font-family: 'Inter', sans-serif; }
+
+    .signup-header {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: var(--text-light);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .signup-container { display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+    .signup-card { background: #fff; padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow); width: 100%; max-width: 560px; }
+    h2 { color: var(--secondary); font-weight: 700; text-align: center; margin-bottom: 1rem; }
+    .form-intro { text-align: center; color: var(--text-gray); margin-bottom: 1rem; }
+
+    /* Style des inputs si le widget n'a pas la classe form-control */
+    form input[type="text"], form input[type="password"], form input[type="email"] {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
+      background-color: #F9F9F9; transition: var(--transition);
+    }
+    form input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(232,165,26,0.2); background-color: #fff; }
+
+    .btn-primary { background: linear-gradient(to right, var(--primary), var(--primary-light)); border: none; color: var(--text); font-weight: 600; }
+    .btn-primary:hover { background: linear-gradient(to right, var(--primary-light), var(--primary)); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(232,165,26,0.2); }
+  </style>
+{% endblock %}
+{% block content %}
+  <div class="signup-header">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div class="fw-bold">Crédit du Congo</div>
+      <a href="/accounts/login/" class="text-white text-decoration-none">
+        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+      </a>
+    </div>
+  </div>
+
+  <div class="container signup-container">
+    <div class="signup-card">
+      <h2>Créer un compte</h2>
+      <p class="form-intro">Rejoignez Crédit du Congo et bénéficiez de nos services.</p>
+      <form method="post" class="mt-2">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary w-100 mt-2">Créer le compte</button>
+      </form>
+      <p class="text-center mt-3 text-muted small">Après la création, un administrateur doit approuver votre compte avant connexion.</p>
+      <p class="text-center mt-2">Vous avez déjà un compte ? <a href="/accounts/login/" style="color: var(--secondary);">Connectez-vous ici</a></p>
+    </div>
+  </div>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends "suivi_demande/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Dashboard Client{% endblock %}
+{% block dashboard_role %}Espace Client{% endblock %}
+{% block user_role %}Client{% endblock %}
+{% block page_title %}Mon Espace Personnel{% endblock %}
+{% block header_icon %}fas fa-user-circle{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Palette client rouge/or selon mémoire utilisateur */
+:root {
+    --client-rouge: #6a1919;
+    --client-or: #e0c78c;
+}
+.sidebar-banking { background: linear-gradient(180deg, var(--client-rouge) 0%, #5a1515 100%); }
+.nav-item-banking.active { background: var(--client-or); color: var(--client-rouge); }
+.dashboard-title { color: var(--client-rouge); }
+.kpi-card { border-left-color: var(--client-or); }
+</style>
+{% endblock %}
+
+{% block navigation %}
+<a href="#" class="nav-item-banking active" data-section="dashboard">
+    <i class="fas fa-tachometer-alt"></i>
+    <span>Tableau de Bord</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="dossiers">
+    <i class="fas fa-folder"></i>
+    <span>Mes Dossiers</span>
+    <span class="badge badge-info ml-auto">{{ mes_dossiers|length|default:3 }}</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="nouvelle-demande">
+    <i class="fas fa-plus-circle"></i>
+    <span>Nouvelle Demande</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="profil">
+    <i class="fas fa-user-cog"></i>
+    <span>Mon Profil</span>
+</a>
+{% endblock %}
+
+{% block stats_cards %}
+<div class="kpi-card">
+    <div class="kpi-value">{{ mes_dossiers|length|default:3 }}</div>
+    <div class="kpi-label">Mes Dossiers</div>
+</div>
+<div class="kpi-card">
+    <div class="kpi-value">{{ dossiers_approuves|default:1 }}</div>
+    <div class="kpi-label">Approuvés</div>
+</div>
+<div class="kpi-card">
+    <div class="kpi-value">{{ montant_total|default:"2.5M" }}</div>
+    <div class="kpi-label">Montant Total</div>
+</div>
+<div class="kpi-card">
+    <div class="kpi-value">{{ notifications_non_lues|default:2 }}</div>
+    <div class="kpi-label">Notifications</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Dashboard Section -->
+<section class="content-section active" id="dashboard-section">
+    <div class="stats-grid mb-8">
+        <!-- Les KPIs sont déjà définis dans le bloc stats_cards ci-dessus -->
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Dossiers Récents</h3>
+            </div>
+            <div class="card-body">
+                {% for dossier in mes_dossiers|slice:":3" %}
+                <div class="border-l-4 border-client-or bg-yellow-50 p-4 mb-3 rounded">
+                    <div class="font-semibold">{{ dossier.reference }}</div>
+                    <div class="text-sm text-muted">{{ dossier.produit }}</div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="badge badge-{{ dossier.statut|lower }}">{{ dossier.get_statut_display }}</span>
+                        <span class="font-semibold">{{ dossier.montant }} FCFA</span>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-muted">
+                    <i class="fas fa-folder-plus text-3xl mb-4"></i>
+                    <p>Aucun dossier créé</p>
+                    <button class="btn btn-primary mt-4" data-section="nouvelle-demande">
+                        Créer une demande
+                    </button>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Notifications</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-3">
+                    <div class="p-3 bg-blue-50 border-l-4 border-info rounded">
+                        <div class="font-medium">Dossier approuvé</div>
+                        <div class="text-xs text-muted">CR-2024-0156 • Il y a 2h</div>
+                    </div>
+                    <div class="p-3 bg-yellow-50 border-l-4 border-warning rounded">
+                        <div class="font-medium">Documents manquants</div>
+                        <div class="text-xs text-muted">CR-2024-0158 • Hier</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Mes Dossiers Section -->
+<section class="content-section" id="dossiers-section">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Mes Dossiers de Crédit</h3>
+        </div>
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3">Référence</th>
+                            <th class="text-left py-3">Produit</th>
+                            <th class="text-left py-3">Montant</th>
+                            <th class="text-left py-3">Statut</th>
+                            <th class="text-left py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dossier in mes_dossiers %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4">{{ dossier.reference }}</td>
+                            <td class="py-4">{{ dossier.produit }}</td>
+                            <td class="py-4 font-semibold">{{ dossier.montant }} FCFA</td>
+                            <td class="py-4">
+                                <span class="badge badge-{{ dossier.statut|lower }}">
+                                    {{ dossier.get_statut_display }}
+                                </span>
+                            </td>
+                            <td class="py-4">
+                                <button class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-eye"></i> Voir
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="py-12 text-center text-muted">
+                                Aucun dossier trouvé
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Nouvelle Demande Section -->
+<section class="content-section" id="nouvelle-demande-section">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Nouvelle Demande de Crédit</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer">
+                    <div class="card-body text-center">
+                        <i class="fas fa-home text-3xl text-client-or mb-4"></i>
+                        <h4 class="font-semibold mb-2">Crédit Immobilier</h4>
+                        <p class="text-sm text-muted">Financement pour l'achat d'un bien immobilier</p>
+                    </div>
+                </div>
+                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer">
+                    <div class="card-body text-center">
+                        <i class="fas fa-car text-3xl text-client-or mb-4"></i>
+                        <h4 class="font-semibold mb-2">Crédit Auto</h4>
+                        <p class="text-sm text-muted">Financement pour l'achat d'un véhicule</p>
+                    </div>
+                </div>
+                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer">
+                    <div class="card-body text-center">
+                        <i class="fas fa-briefcase text-3xl text-client-or mb-4"></i>
+                        <h4 class="font-semibold mb-2">Crédit Personnel</h4>
+                        <p class="text-sm text-muted">Financement pour vos projets personnels</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Profil Section -->
+<section class="content-section" id="profil-section">
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Informations Personnelles</h3>
+            </div>
+            <div class="card-body">
+                <form class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Nom complet</label>
+                        <input type="text" class="form-input" value="{{ user.get_full_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" value="{{ user.email }}">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Téléphone</label>
+                        <input type="tel" class="form-input" value="{{ user.profile.phone }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        Mettre à jour
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Sécurité</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <button class="btn btn-secondary w-full">
+                        <i class="fas fa-key"></i> Changer le mot de passe
+                    </button>
+                    <button class="btn btn-secondary w-full">
+                        <i class="fas fa-shield-alt"></i> Authentification à deux facteurs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

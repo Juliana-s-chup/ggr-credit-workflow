@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Demande de crédit - Étape 4{% endblock %}
+{% block content %}
+<section class="py-4 border-bottom">
+  <div class="container d-flex justify-content-between align-items-center">
+    <h1 class="h5 mb-0">Demande de crédit</h1>
+    <div class="text-muted small">Étape 4/4 • Documents & Validation</div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 mb-3 mb-lg-0">
+        <div class="list-group">
+          <a class="list-group-item" href="{% url 'demande_step1' %}">1 • Informations personnelles</a>
+          <a class="list-group-item" href="{% url 'demande_step2' %}">2 • Situation financière</a>
+          <a class="list-group-item" href="{% url 'demande_step3' %}">3 • Détails du crédit</a>
+          <div class="list-group-item active">4 • Documents & Validation</div>
+        </div>
+      </div>
+      <div class="col-lg-9">
+        <div class="card mb-3">
+          <div class="card-header">Récapitulatif</div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-md-6">
+                <h6 class="mb-2">Étape 1 • Informations personnelles</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm table-striped align-middle mb-0">
+                    <tbody>
+                      {% if recap1 %}
+                        {% for label, value in recap1 %}
+                        <tr>
+                          <th class="w-50 text-capitalize small">{{ label }}</th>
+                          <td class="small">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                      {% else %}
+                        <tr><td class="text-muted small">Aucune donnée</td></tr>
+                      {% endif %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6 class="mb-2">Étape 2 • Situation financière</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm table-striped align-middle mb-0">
+                    <tbody>
+                      {% if recap2 %}
+                        {% for label, value in recap2 %}
+                        <tr>
+                          <th class="w-50 text-capitalize small">{{ label }}</th>
+                          <td class="small">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                      {% else %}
+                        <tr><td class="text-muted small">Aucune donnée</td></tr>
+                      {% endif %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <h6 class="mb-2">Étape 3 • Détails du crédit</h6>
+                <div class="table-responsive">
+                  <table class="table table-sm table-striped align-middle mb-0">
+                    <tbody>
+                      {% if recap3 %}
+                        {% for label, value in recap3 %}
+                        <tr>
+                          <th class="w-50 text-capitalize small">{{ label }}</th>
+                          <td class="small">{{ value }}</td>
+                        </tr>
+                        {% endfor %}
+                      {% else %}
+                        <tr><td class="text-muted small">Aucune donnée</td></tr>
+                      {% endif %}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">Documents & Validation</div>
+          <div class="card-body">
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row g-3">
+                <div class="col-md-4">
+                  <label class="form-label">Carte d'identité (CNI)</label>
+                  <input class="form-control" type="file" name="cni" accept=".pdf,.jpg,.jpeg,.png" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Fiche de paie</label>
+                  <input class="form-control" type="file" name="fiche_paie" accept=".pdf,.jpg,.jpeg,.png" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Relevé bancaire</label>
+                  <input class="form-control" type="file" name="releve_bancaire" accept=".pdf,.jpg,.jpeg,.png" required />
+                </div>
+              </div>
+              <div class="form-check mt-3">
+                <input class="form-check-input" type="checkbox" name="accepter_conditions" id="accepter_conditions" required />
+                <label for="accepter_conditions" class="form-check-label">Je certifie l'exactitude des informations et j'accepte les conditions générales.</label>
+              </div>
+              <div class="d-flex justify-content-between mt-4">
+                <a class="btn btn-outline-secondary" href="{% url 'demande_step3' %}">Précédent</a>
+                <button type="submit" class="btn btn-primary">Soumettre</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="text-center text-muted small mt-3">
+          © {% now "Y" %} Crédit du Congo. <a href="#">Politique de confidentialité</a> | <a href="#">Conditions générales</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

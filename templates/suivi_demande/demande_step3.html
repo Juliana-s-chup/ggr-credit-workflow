@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}Demande de crédit - Étape 3{% endblock %}
+{% block content %}
+<section class="py-4 border-bottom">
+  <div class="container d-flex justify-content-between align-items-center">
+    <h1 class="h5 mb-0">Demande de crédit</h1>
+    <div class="text-muted small">Étape 3/4 • Détails du crédit</div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 mb-3 mb-lg-0">
+        <div class="list-group">
+          <a class="list-group-item" href="{% url 'demande_step1' %}">1 • Informations personnelles</a>
+          <a class="list-group-item" href="{% url 'demande_step2' %}">2 • Situation financière</a>
+          <div class="list-group-item active">3 • Détails du crédit</div>
+          <div class="list-group-item">4 • Documents & Validation</div>
+        </div>
+      </div>
+      <div class="col-lg-9">
+        <div class="alert alert-info mb-3">
+          <div class="d-flex flex-wrap justify-content-between">
+            <div><strong>Capacité d'endettement max (40%)</strong>: {{ capacite_max|default:0 }} FCFA</div>
+            <div><strong>Mensualité estimée</strong>: {{ echeance_calculee|default:'—' }} FCFA</div>
+          </div>
+        </div>
+        {% if echeance_calculee and capacite_max and echeance_calculee > capacite_max %}
+        <div class="alert alert-warning mb-3" role="alert">
+          La mensualité estimée ({{ echeance_calculee }} FCFA) dépasse votre capacité maximale (40%) de {{ capacite_max }} FCFA.
+          Veuillez réduire le montant souhaité ou la durée, ou ajuster les paramètres.
+        </div>
+        {% endif %}
+        <div class="card">
+          <div class="card-header">Détails du crédit</div>
+          <div class="card-body">
+            <form method="post" novalidate>
+              {% csrf_token %}
+              {% if form.errors %}
+              <div class="alert alert-danger">
+                <div class="fw-semibold mb-1">Veuillez corriger les erreurs ci-dessous.</div>
+                {{ form.non_field_errors }}
+              </div>
+              {% endif %}
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <label class="form-label">Type de crédit</label>
+                  {{ form.nature_pret }}
+                  {% if form.nature_pret.errors %}<div class="text-danger small">{{ form.nature_pret.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Motif du crédit</label>
+                  <input type="text" name="objet" value="{{ form.objet.value|default_if_none:'' }}" class="form-control" />
+                  {% if form.objet.errors %}<div class="text-danger small">{{ form.objet.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Montant souhaité (FCFA)</label>
+                  <input type="number" name="montant_demande" step="0.01" min="0" value="{{ form.montant_demande.value|default_if_none:'' }}" class="form-control" />
+                  {% if form.montant_demande.errors %}<div class="text-danger small">{{ form.montant_demande.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Durée (mois)</label>
+                  {{ form.duree_mois }}
+                  {% if form.duree_mois.errors %}<div class="text-danger small">{{ form.duree_mois.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Taux %</label>
+                  <input type="number" name="taux" step="0.01" min="0" value="{{ form.taux.value|default_if_none:'' }}" class="form-control" />
+                  {% if form.taux.errors %}<div class="text-danger small">{{ form.taux.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Périodicité</label>
+                  {{ form.periodicite }}
+                  {% if form.periodicite.errors %}<div class="text-danger small">{{ form.periodicite.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Date 1re échéance</label>
+                  <input type="date" name="date_premiere_echeance" value="{{ form.date_premiere_echeance.value|default_if_none:'' }}" class="form-control" />
+                  {% if form.date_premiere_echeance.errors %}<div class="text-danger small">{{ form.date_premiere_echeance.errors.0 }}</div>{% endif %}
+                </div>
+                <div class="col-12">
+                  <div class="border rounded p-3 bg-light">
+                    <div class="fw-semibold mb-2">Simulation indicative</div>
+                    <div class="row g-2 small">
+                      <div class="col-md-3">
+                        <div class="text-muted">Montant</div>
+                        <div>{{ form.montant_demande.value|default_if_none:'—' }} {% if form.montant_demande.value %}FCFA{% endif %}</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="text-muted">Durée</div>
+                        <div>{% if form.duree_mois.value %}{{ form.duree_mois.value }} mois{% else %}—{% endif %}</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="text-muted">Taux d'intérêt</div>
+                        <div>{% if form.taux.value %}{{ form.taux.value }}%{% else %}—{% endif %}</div>
+                      </div>
+                      <div class="col-md-3">
+                        <div class="text-muted">Mensualité estimée</div>
+                        <div>{{ echeance_calculee|default:'—' }} {% if echeance_calculee %}FCFA{% endif %}</div>
+                      </div>
+                    </div>
+                    <div class="small text-muted mt-2">Les conditions finales seront confirmées après étude de votre dossier.</div>
+                  </div>
+                </div>
+              </div>
+              <div class="d-flex justify-content-between mt-4">
+                <a class="btn btn-outline-secondary" href="{% url 'demande_step2' %}">Précédent</a>
+                <button type="submit" class="btn btn-primary">Suivant</button>
+              </div>
+            </form>
+          </div>
+        </div>
+        <div class="text-center text-muted small mt-3">
+          © {% now "Y" %} Crédit du Congo. <a href="#">Politique de confidentialité</a> | <a href="#">Conditions générales</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dossier à traiter</title>
+  <style>
+    body { font-family: Arial, sans-serif; color: #333; margin:0; padding:0; }
+    .container { max-width: 640px; margin: 0 auto; padding: 16px; }
+    .header { background:#f5f7fb; padding: 16px; text-align: center; border-bottom: 1px solid #e5e7eb; }
+    .content { padding: 16px; }
+    .btn { display:inline-block; background: #0d6efd; color: #fff !important; padding: 10px 14px; text-decoration: none; border-radius: 4px; }
+    .muted { color: #666; font-size: 12px; }
+    .footer { border-top:1px solid #e5e7eb; background:#fafbfc; padding: 12px 16px; text-align:center; color:#6b7280; font-size:12px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      {% load static %}
+      {% if logo_url %}
+        <img src="{{ logo_url }}" alt="Crédit du Congo" height="40" />
+      {% else %}
+        <img src="{% static 'suivi_demande/img/Credit_Du_Congo.png' %}" alt="Crédit du Congo" height="40" />
+      {% endif %}
+    </div>
+    <div class="content">
+      <h2 style="margin-top:0;">Dossier à traiter: {{ dossier.reference }}</h2>
+      <p>Bonjour,</p>
+      <p>Un dossier est prêt pour action. État actuel côté agent: <strong>{{ etat_agent }}</strong>.</p>
+      <p>Vous pouvez l’ouvrir depuis le lien ci-dessous:</p>
+      <p>
+        <a class="btn" href="{{ lien }}">Ouvrir le dossier</a>
+      </p>
+      <p class="muted">Ceci est un message automatique, merci de ne pas y répondre.</p>
+    </div>
+    <div class="footer">
+      © {% now "Y" %} Crédit du Congo — Service Crédit<br/>
+      <span>Contact: support@creditducongo.cg</span>
+    </div>
+  </div>
+</body>
+</html>

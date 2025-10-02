@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Supprimer le dossier - GGR Credit{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8 col-xl-7">
+    <div class="card border-danger">
+      <div class="card-body">
+        <h1 class="h5 text-danger">Confirmer la suppression</h1>
+        <p>Êtes-vous sûr de vouloir supprimer le dossier <strong>#{{ application.id }} - {{ application.title }}</strong> ? Cette action est irréversible.</p>
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a class="btn btn-outline-secondary" href="{% url 'my_applications' %}">Annuler</a>
+        <form method="post" class="m-0">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Supprimer</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

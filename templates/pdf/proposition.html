@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <style>
+    body { font-family: DejaVu Sans, Arial, sans-serif; font-size: 12px; color: #333; }
+    .header { text-align: center; border-bottom: 2px solid #0d6efd; padding-bottom: 8px; margin-bottom: 12px; }
+    .title { font-size: 18px; font-weight: bold; color: #0d6efd; margin: 0; }
+    .muted { color: #666; font-size: 11px; }
+    .section { margin: 14px 0; }
+    .table { width: 100%; border-collapse: collapse; }
+    .table th, .table td { border: 1px solid #ddd; padding: 6px; }
+    .table th { background: #f5f7fb; text-align: left; }
+    .small { font-size: 11px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    {% if logo_path %}
+      <img src="{{ logo_path }}" alt="Crédit du Congo" height="40" />
+    {% endif %}
+    <p class="title">Proposition de crédit</p>
+    <p class="muted">Référence dossier: {{ dossier.reference }} • Généré le {{ date|date:"d/m/Y H:i" }}</p>
+  </div>
+
+  <div class="section">
+    <h3 class="small">Informations client</h3>
+    <table class="table">
+      <tr><th>Client</th><td>{{ client.get_full_name|default:client.username }}</td></tr>
+      <tr><th>Email</th><td>{{ client.email|default:"—" }}</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3 class="small">Détails du dossier</h3>
+    <table class="table">
+      <tr><th>Produit</th><td>{{ dossier.produit }}</td></tr>
+      <tr><th>Montant (FCFA)</th><td>{{ dossier.montant }}</td></tr>
+      <tr><th>Statut (client)</th><td>{{ dossier.get_statut_client_display }}</td></tr>
+      <tr><th>Statut (agent)</th><td>{{ dossier.get_statut_agent_display }}</td></tr>
+      <tr><th>Date de soumission</th><td>{{ dossier.date_soumission|date:"d/m/Y H:i" }}</td></tr>
+    </table>
+  </div>
+
+  <div class="section">
+    <h3 class="small">Simulation financière</h3>
+    <table class="table">
+      <tr><th>Échéance estimée (FCFA)</th><td>{{ echeance_calculee|default:"—" }}</td></tr>
+      <tr><th>Capacité maximale (40%)</th><td>{{ capacite_max|default:"—" }}</td></tr>
+    </table>
+    <p class="muted">Estimation indicative basée sur les informations fournies. Sous réserve d'étude détaillée.</p>
+  </div>
+
+  <div class="section">
+    <h3 class="small">Pièces jointes</h3>
+    {% if pieces %}
+      <table class="table">
+        <thead>
+          <tr><th>Type</th><th class="small">Date</th><th class="small">Taille (octets)</th></tr>
+        </thead>
+        <tbody>
+          {% for p in pieces %}
+            <tr>
+              <td>{{ p.get_type_piece_display }}</td>
+              <td class="small">{{ p.upload_at|date:"d/m/Y H:i" }}</td>
+              <td class="small">{{ p.taille }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p class="small">Aucune pièce jointe enregistrée.</p>
+    {% endif %}
+  </div>
+
+  <p class="muted">Document généré automatiquement. Ceci n'est pas une offre contractuelle.</p>
+</body>
+</html>

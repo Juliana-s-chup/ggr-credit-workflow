@@ -1,0 +1,104 @@
+<!-- Modal Retour Client -->
+<div class="modal fade" id="retourClientModal" tabindex="-1" aria-labelledby="retourClientModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning text-dark">
+        <h5 class="modal-title" id="retourClientModalLabel">
+          <i class="fas fa-exclamation-triangle me-2"></i>
+          Retourner le dossier au client
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form method="post" id="retourClientForm">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Attention :</strong> Cette action va notifier le client que son dossier nécessite des compléments.
+          </div>
+          
+          <div class="mb-3">
+            <label for="commentaire_retour" class="form-label">
+              <strong>Motif du retour <span class="text-danger">*</span></strong>
+            </label>
+            <textarea 
+              class="form-control" 
+              id="commentaire_retour" 
+              name="commentaire_retour" 
+              rows="4" 
+              placeholder="Expliquez pourquoi le dossier est incomplet (documents manquants, informations à corriger, etc.)"
+              required></textarea>
+            <div class="form-text">
+              Soyez précis pour aider le client à compléter son dossier rapidement.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <h6>Exemples de motifs courants :</h6>
+            <div class="d-flex flex-wrap gap-2">
+              <button type="button" class="btn btn-sm btn-outline-secondary motif-exemple" 
+                      data-motif="Pièce d'identité manquante ou illisible">
+                Pièce d'identité
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary motif-exemple" 
+                      data-motif="Justificatifs de revenus incomplets">
+                Justificatifs revenus
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary motif-exemple" 
+                      data-motif="Informations personnelles à corriger">
+                Infos personnelles
+              </button>
+              <button type="button" class="btn btn-sm btn-outline-secondary motif-exemple" 
+                      data-motif="Documents de garantie manquants">
+                Garanties
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Annuler
+          </button>
+          <button type="submit" class="btn btn-warning">
+            <i class="fas fa-paper-plane me-1"></i> Retourner au client
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Gestion des motifs d'exemple
+  document.querySelectorAll('.motif-exemple').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const motif = this.getAttribute('data-motif');
+      const textarea = document.getElementById('commentaire_retour');
+      const currentValue = textarea.value.trim();
+      
+      if (currentValue) {
+        textarea.value = currentValue + '\n- ' + motif;
+      } else {
+        textarea.value = '- ' + motif;
+      }
+    });
+  });
+
+  // Gestion de la soumission du formulaire
+  document.getElementById('retourClientForm').addEventListener('submit', function(e) {
+    const commentaire = document.getElementById('commentaire_retour').value.trim();
+    if (!commentaire) {
+      e.preventDefault();
+      alert('Veuillez saisir un motif de retour.');
+      return false;
+    }
+    
+    // Confirmation avant envoi
+    if (!confirm('Êtes-vous sûr de vouloir retourner ce dossier au client ?')) {
+      e.preventDefault();
+      return false;
+    }
+  });
+});
+</script>

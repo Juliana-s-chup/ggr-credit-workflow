@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crédit du Congo - Innovation Bancaire</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      /* Palette cyberpunk inspirée mais professionnelle */
+      --primary: #E30613;
+      --primary-glow: #FF4757;
+      --secondary: #FFA000;
+      --accent: #00D8FF;
+      --dark: #0A0A0F;
+      --darker: #050508;
+      --light: #F0F0F5;
+      --surface: #1A1A25;
+      --text: #FFFFFF;
+      --text-secondary: #B8B8CC;
+      
+      /* Effets futuristes */
+      --glow: 0 0 20px rgba(227, 6, 19, 0.3);
+      --glow-accent: 0 0 30px rgba(0, 216, 255, 0.4);
+      --shadow-neon: 0 0 15px rgba(227, 6, 19, 0.5);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: linear-gradient(135deg, var(--darker) 0%, var(--dark) 50%, var(--surface) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* Effet de grille animée en arrière-plan */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        linear-gradient(rgba(10, 10, 15, 0.9) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10, 10, 15, 0.9) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: gridMove 20s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes gridMove {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(50px, 50px); }
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Header holographique */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 1000;
+      background: rgba(10, 10, 15, 0.8);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(227, 6, 19, 0.3);
+      padding: 1rem 0;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-icon {
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--glow);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .logo-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      background: linear-gradient(45deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Navigation cybernétique */
+    .nav-cyber {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: var(--text-secondary);
+      font-weight: 500;
+      padding: 0.75rem 1.5rem;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(227, 6, 19, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .nav-link:hover {
+      color: var(--text);
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+    }
+
+    .nav-link:hover::before {
+      left: 100%;
+    }
+
+    .nav-cta {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: var(--text);
+      padding: 0.75rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: var(--shadow-neon);
+      transition: all 0.3s ease;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(227, 6, 19, 0.6);
+    }
+
+    /* Hero section futuriste */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      position: relative;
+      padding: 120px 0 80px;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 600px;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(227, 6, 19, 0.1);
+      color: var(--primary-glow);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 2rem;
+      border: 1px solid rgba(227, 6, 19, 0.3);
+      box-shadow: var(--glow);
+    }
+
+    .hero-title {
+      font-size: 4rem;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(45deg, var(--text), var(--primary-glow), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 30px rgba(227, 6, 19, 0.3);
+    }
+
+    .hero-description {
+      font-size: 1.3rem;
+      color: var(--text-secondary);
+      margin-bottom: 3rem;
+      line-height: 1.6;
+    }
+
+    /* Boutons holographiques */
+    .btn-cyber {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2.5rem;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(45deg, var(--primary), var(--secondary));
+      color: var(--text);
+      box-shadow: var(--shadow-neon);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 0 40px rgba(227, 6, 19, 0.8);
+    }
+
+    .btn-outline {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: transparent;
+      box-shadow: var(--glow-accent);
+    }
+
+    .btn-outline:hover {
+      background: var(--accent);
+      color: var(--dark);
+      transform: translateY(-3px);
+    }
+
+    /* Carte interactive 3D */
+    .card-hologram {
+      background: rgba(26, 26, 37, 0.6);
+      border: 1px solid rgba(227, 6, 19, 0.3);
+      border-radius: 20px;
+      padding: 3rem;
+      backdrop-filter: blur(10px);
+      box-shadow: var(--glow);
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-hologram::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(227, 6, 19, 0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .card-hologram:hover::before {
+      transform: translateX(100%);
+    }
+
+    .card-hologram:hover {
+      transform: translateY(-10px) rotateX(5deg);
+      box-shadow: 0 20px 40px rgba(227, 6, 19, 0.4);
+    }
+
+    /* Section en grille asymétrique */
+    .grid-cyber {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin: 4rem 0;
+    }
+
+    .feature-cyber {
+      padding: 2.5rem;
+      border-left: 3px solid var(--primary);
+      background: linear-gradient(90deg, rgba(227, 6, 19, 0.05), transparent);
+      transition: all 0.3s ease;
+    }
+
+    .feature-cyber:hover {
+      border-left-color: var(--accent);
+      background: linear-gradient(90deg, rgba(0, 216, 255, 0.1), transparent);
+      transform: translateX(10px);
+    }
+
+    .icon-cyber {
+      width: 60px;
+      height: 60px;
+      background: var(--surface);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(227, 6, 19, 0.3);
+      box-shadow: var(--glow);
+    }
+
+    /* Timeline futuriste */
+    .timeline {
+      position: relative;
+      padding: 4rem 0;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--primary), var(--accent));
+      transform: translateX(-50%);
+    }
+
+    .timeline-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 3rem 0;
+      position: relative;
+    }
+
+    .timeline-item:nth-child(odd) {
+      flex-direction: row-reverse;
+      text-align: right;
+    }
+
+    .timeline-content {
+      flex: 1;
+      padding: 2rem;
+      background: rgba(26, 26, 37, 0.6);
+      border-radius: 15px;
+      border: 1px solid rgba(227, 6, 19, 0.3);
+      box-shadow: var(--glow);
+    }
+
+    .timeline-marker {
+      width: 20px;
+      height: 20px;
+      background: var(--primary);
+      border-radius: 50%;
+      border: 3px solid var(--dark);
+      box-shadow: var(--shadow-neon);
+      z-index: 2;
+    }
+
+    /* Footer cybernétique */
+    footer {
+      background: var(--darker);
+      border-top: 1px solid rgba(227, 6, 19, 0.3);
+      padding: 4rem 0 2rem;
+      margin-top: 4rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 3rem;
+      margin-bottom: 3rem;
+    }
+
+    .footer-section h3 {
+      color: var(--primary-glow);
+      margin-bottom: 1.5rem;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li {
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-links a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--accent);
+      transform: translateX(5px);
+    }
+
+    .social-cyber {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .social-link {
+      width: 40px;
+      height: 40px;
+      background: var(--surface);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(227, 6, 19, 0.3);
+    }
+
+    .social-link:hover {
+      color: var(--primary-glow);
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+      transform: translateY(-2px);
+    }
+
+    /* Animations avancées */
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+
+    .floating {
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes typewriter {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    .typewriter {
+      overflow: hidden;
+      border-right: 3px solid var(--primary);
+      white-space: nowrap;
+      animation: typewriter 3s steps(40) 1s infinite alternate;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2.5rem;
+      }
+      
+      .timeline::before {
+        left: 30px;
+      }
+      
+      .timeline-item {
+        flex-direction: column !important;
+        text-align: left !important;
+        margin-left: 60px;
+      }
+      
+      .timeline-marker {
+        position: absolute;
+        left: -40px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header Cybernétique -->
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <a href="{% url 'home' %}" class="logo">
+          <div class="logo-icon">
+            <i class="fas fa-university"></i>
+          </div>
+          <div class="logo-text">CRÉDIT CONGO</div>
+        </a>
+        
+        <nav class="nav-cyber">
+          <a href="{% url 'home' %}" class="nav-link">ACCUEIL</a>
+          <a href="{% url 'demande_start' %}" class="nav-link">CRÉDIT</a>
+          <a href="{% url 'dashboard' %}" class="nav-link">SUIVI</a>
+          <a href="#contact" class="nav-link">CONTACT</a>
+          <a href="{% url 'login' %}" class="nav-cta">CONNEXION</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section Futuriste -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <span class="hero-badge">
+          <i class="fas fa-bolt"></i>
+          INNOVATION BANCAIRE 2025
+        </span>
+        
+        <h1 class="hero-title">
+          <span class="typewriter">RÉVOLUTION</span><br>
+          DU CRÉDIT DIGITAL
+        </h1>
+        
+        <p class="hero-description">
+          Plongez dans l'avenir de la finance avec notre plateforme cybernétique. 
+          Expérience immersive, décisions instantanées, sécurité quantique.
+        </p>
+        
+        <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+          <a href="{% url 'demande_start' %}" class="btn-cyber btn-primary">
+            <i class="fas fa-rocket"></i>
+            DÉMARRER LA SIMULATION
+          </a>
+          <a href="{% url 'dashboard' %}" class="btn-cyber btn-outline">
+            <i class="fas fa-terminal"></i>
+            ACCÉDER AU SYSTÈME
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section Features Cybernétiques -->
+  <section class="container">
+    <div class="card-hologram floating">
+      <div class="grid-cyber">
+        <div class="feature-cyber">
+          <div class="icon-cyber">
+            <i class="fas fa-microchip"></i>
+          </div>
+          <h3>INTELLIGENCE ARTIFICIELLE</h3>
+          <p>Notre IA analyse votre dossier en nanosecondes avec une précision quantique.</p>
+        </div>
+        
+        <div class="feature-cyber">
+          <div class="icon-cyber">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+          <h3>SÉCURITÉ QUANTIQUE</h3>
+          <p>Protection cryptographique inviolable basée sur les principes de la mécanique quantique.</p>
+        </div>
+        
+        <div class="feature-cyber">
+          <div class="icon-cyber">
+            <i class="fas fa-bolt"></i>
+          </div>
+          <h3>VITESSE LUMIÈRE</h3>
+          <p>Traitement de dossier à la vitesse de la lumière grâce à notre réseau quantique.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Timeline Futuriste -->
+  <section class="container">
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h3>PHASE 1: INITIALISATION</h3>
+          <p>Scan de votre profil financier par notre système neural</p>
+        </div>
+        <div class="timeline-marker"></div>
+        <div style="flex: 1"></div>
+      </div>
+      
+      <div class="timeline-item">
+        <div style="flex: 1"></div>
+        <div class="timeline-marker"></div>
+        <div class="timeline-content">
+          <h3>PHASE 2: ANALYSE QUANTIQUE</h3>
+          <p>Évaluation multidimensionnelle de votre solvabilité</p>
+        </div>
+      </div>
+      
+      <div class="timeline-item">
+        <div class="timeline-content">
+          <h3>PHASE 3: DÉCISION IMMÉDIATE</h3>
+          <p>Résultat instantané avec projection financière holistique</p>
+        </div>
+        <div class="timeline-marker"></div>
+        <div style="flex: 1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Holographique -->
+  <section class="container" style="margin: 6rem 0;">
+    <div class="card-hologram" style="text-align: center; padding: 4rem;">
+      <h2 style="font-size: 2.5rem; margin-bottom: 1rem; background: linear-gradient(45deg, var(--accent), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+        PRÊT POUR L'AVENIR ?
+      </h2>
+      <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">
+        Rejoignez la révolution bancaire aujourd'hui
+      </p>
+      <a href="{% url 'demande_start' %}" class="btn-cyber btn-primary" style="font-size: 1.1rem;">
+        <i class="fas fa-play"></i>
+        INITIER LA SÉQUENCE
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer Cybernétique -->
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-section">
+          <h3>RÉSEAU BANCAIRE</h3>
+          <p>Système financier le plus avancé d'Afrique Centrale</p>
+          <div class="social-cyber">
+            <a href="#" class="social-link"><i class="fab fa-galactic-republic"></i></a>
+            <a href="#" class="social-link"><i class="fab fa-jedi-order"></i></a>
+            <a href="#" class="social-link"><i class="fas fa-satellite"></i></a>
+          </div>
+        </div>
+        
+        <div class="footer-section">
+          <h3>SYSTÈMES</h3>
+          <ul class="footer-links">
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Crédit Neural</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Portail Quantique</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Interface Holographique</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h3>RESSOURCES</h3>
+          <ul class="footer-links">
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Documentation API</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> White Paper</a></li>
+            <li><a href="#"><i class="fas fa-chevron-right"></i> Support Technique</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h3>CONTACT QUANTIQUE</h3>
+          <ul class="footer-links">
+            <li><a href="#"><i class="fas fa-transporter"></i> Téléportation: +242 QNT-UM</a></li>
+            <li><a href="#"><i class="fas fa-hologram"></i> Hologramme: contact@quantum.cg</a></li>
+            <li><a href="#"><i class="fas fa-satellite-dish"></i> Réseau Stellar</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div style="text-align: center; padding-top: 2rem; border-top: 1px solid rgba(227, 6, 19, 0.3); color: var(--text-secondary);">
+        <p>© 2025 CRÉDIT CONGO QUANTUM SYSTEM | SYSTÈME BANCAIRE DE PROCHAINE GÉNÉRATION</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Effets cybernétiques avancés
+    document.addEventListener('mousemove', (e) => {
+      const cards = document.querySelectorAll('.card-hologram');
+      cards.forEach(card => {
+        const rect = card.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        card.style.setProperty('--mouse-x', `${x}px`);
+        card.style.setProperty('--mouse-y', `${y}px`);
+      });
+    });
+
+    // Animation de typing pour le titre
+    const typewriter = document.querySelector('.typewriter');
+    let text = 'RÉVOLUTION';
+    let index = 0;
+
+    function type() {
+      if (index < text.length) {
+        typewriter.textContent += text.charAt(index);
+        index++;
+        setTimeout(type, 100);
+      }
+    }
+
+    // Démarrer l'animation après le chargement
+    window.addEventListener('load', () => {
+      typewriter.textContent = '';
+      setTimeout(type, 1000);
+    });
+
+    // Effet de parallaxe sur le scroll
+    window.addEventListener('scroll', () => {
+      const scrolled = window.pageYOffset;
+      const parallax = document.querySelector('.hero');
+      parallax.style.transform = `translateY(${scrolled * 0.5}px)`;
+    });
+
+    // Sons d'interaction cybernétiques
+    const links = document.querySelectorAll('a, button');
+    links.forEach(link => {
+      link.addEventListener('mouseenter', () => {
+        // Simulation d'un son cybernétique (pourrait être remplacé par un vrai son)
+        link.style.animation = 'pulse 0.3s ease';
+      });
+    });
+  </script>
+</body>
+</html>

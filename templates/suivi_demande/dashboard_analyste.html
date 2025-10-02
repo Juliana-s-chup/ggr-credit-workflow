@@ -1,0 +1,465 @@
+{% extends "suivi_demande/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Dashboard Analyste Crédit{% endblock %}
+
+{% block dashboard_role %}Analyste Crédit{% endblock %}
+
+{% block user_role %}Analyste Crédit{% endblock %}
+
+{% block page_title %}Analyse des Risques{% endblock %}
+
+{% block header_icon %}fas fa-chart-line{% endblock %}
+
+{% block navigation %}
+<a href="#" class="nav-item-banking active" data-section="dashboard">
+    <i class="fas fa-tachometer-alt"></i>
+    <span>Tableau de Bord</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="dossiers">
+    <i class="fas fa-folder-open"></i>
+    <span>Dossiers à Analyser</span>
+    <span class="badge badge-warning ml-auto">{{ dossiers_en_attente|length|default:5 }}</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="analyses">
+    <i class="fas fa-microscope"></i>
+    <span>Mes Analyses</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="rapports">
+    <i class="fas fa-file-alt"></i>
+    <span>Rapports</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="outils">
+    <i class="fas fa-calculator"></i>
+    <span>Outils d'Analyse</span>
+</a>
+{% endblock %}
+
+{% block stats_cards %}
+<div class="kpi-card">
+    <div class="kpi-value">{{ dossiers_en_attente|length|default:12 }}</div>
+    <div class="kpi-label">Dossiers en Attente</div>
+    <div class="text-xs text-warning mt-2">
+        <i class="fas fa-clock"></i> Priorité haute: 3
+    </div>
+</div>
+
+<div class="kpi-card">
+    <div class="kpi-value">{{ analyses_completees|default:47 }}</div>
+    <div class="kpi-label">Analyses Complétées</div>
+    <div class="text-xs text-success mt-2">
+        <i class="fas fa-arrow-up"></i> +15% ce mois
+    </div>
+</div>
+
+<div class="kpi-card">
+    <div class="kpi-value">{{ taux_approbation|default:73 }}%</div>
+    <div class="kpi-label">Taux d'Approbation</div>
+    <div class="text-xs text-info mt-2">
+        <i class="fas fa-chart-line"></i> Moyenne secteur: 68%
+    </div>
+</div>
+
+<div class="kpi-card">
+    <div class="kpi-value">{{ delai_moyen|default:2.4 }}j</div>
+    <div class="kpi-label">Délai Moyen</div>
+    <div class="text-xs text-success mt-2">
+        <i class="fas fa-stopwatch"></i> Objectif: 3j
+    </div>
+</div>
+{% endblock %}
+
+{% block content %}
+<!-- Section Dashboard -->
+<section class="content-section active" id="dashboard-section">
+    <div class="stats-grid">
+        {% block stats_cards %}{% endblock %}
+    </div>
+    
+    <div class="grid md:grid-cols-2 gap-6 mb-8">
+        <!-- Dossiers Prioritaires -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    Dossiers Prioritaires
+                </h3>
+            </div>
+            <div class="card-body">
+                {% for dossier in dossiers_prioritaires|slice:":5" %}
+                <div class="flex items-center justify-between p-4 border-l-4 border-warning bg-yellow-50 rounded mb-3">
+                    <div>
+                        <div class="font-semibold text-primary">{{ dossier.reference }}</div>
+                        <div class="text-sm text-muted">{{ dossier.client.get_full_name }}</div>
+                        <div class="text-xs text-warning">
+                            <i class="fas fa-clock"></i> 
+                            Échéance: {{ dossier.date_echeance|default:"2 jours" }}
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2">
+                        <span class="badge badge-warning">{{ dossier.montant|floatformat:0 }} FCFA</span>
+                        <button class="btn btn-primary btn-sm">
+                            <i class="fas fa-eye"></i> Analyser
+                        </button>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-8 text-muted">
+                    <i class="fas fa-check-circle text-success text-3xl mb-4"></i>
+                    <p>Aucun dossier prioritaire en attente</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Activité Récente -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <i class="fas fa-history text-info"></i>
+                    Activité Récente
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3">
+                        <div class="w-2 h-2 bg-success rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium">Analyse approuvée</div>
+                            <div class="text-xs text-muted">Dossier CR-2024-0156 • Il y a 2h</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-2 h-2 bg-warning rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium">Demande d'informations</div>
+                            <div class="text-xs text-muted">Dossier CR-2024-0158 • Il y a 4h</div>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-3">
+                        <div class="w-2 h-2 bg-error rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <div class="text-sm font-medium">Analyse rejetée</div>
+                            <div class="text-xs text-muted">Dossier CR-2024-0154 • Hier</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graphiques et Métriques -->
+    <div class="grid lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-lg font-semibold">Évolution des Analyses</h3>
+                </div>
+                <div class="card-body">
+                    <div class="h-64 flex items-center justify-center bg-gray-50 rounded">
+                        <div class="text-center text-muted">
+                            <i class="fas fa-chart-area text-4xl mb-4"></i>
+                            <p>Graphique d'évolution des analyses</p>
+                            <p class="text-xs">(Intégration Chart.js à prévoir)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Répartition par Risque</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Risque Faible</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-20 h-2 bg-gray-200 rounded">
+                                <div class="w-3/4 h-full bg-success rounded"></div>
+                            </div>
+                            <span class="text-xs font-medium">65%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Risque Moyen</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-20 h-2 bg-gray-200 rounded">
+                                <div class="w-1/4 h-full bg-warning rounded"></div>
+                            </div>
+                            <span class="text-xs font-medium">25%</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Risque Élevé</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-20 h-2 bg-gray-200 rounded">
+                                <div class="w-1/12 h-full bg-error rounded"></div>
+                            </div>
+                            <span class="text-xs font-medium">10%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Dossiers -->
+<section class="content-section" id="dossiers-section">
+    <div class="card">
+        <div class="card-header">
+            <div class="flex justify-between items-center">
+                <h3 class="text-lg font-semibold">Dossiers à Analyser</h3>
+                <div class="flex gap-2">
+                    <select class="form-input text-sm">
+                        <option>Tous les statuts</option>
+                        <option>Nouveau</option>
+                        <option>En cours</option>
+                        <option>Prioritaire</option>
+                    </select>
+                    <button class="btn btn-secondary btn-sm">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b border-gray-200">
+                            <th class="text-left py-3 px-4 font-semibold">Référence</th>
+                            <th class="text-left py-3 px-4 font-semibold">Client</th>
+                            <th class="text-left py-3 px-4 font-semibold">Montant</th>
+                            <th class="text-left py-3 px-4 font-semibold">Produit</th>
+                            <th class="text-left py-3 px-4 font-semibold">Priorité</th>
+                            <th class="text-left py-3 px-4 font-semibold">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dossier in dossiers_a_analyser %}
+                        <tr class="border-b border-gray-100 hover:bg-gray-50">
+                            <td class="py-4 px-4">
+                                <span class="font-medium text-primary">{{ dossier.reference }}</span>
+                                <div class="text-xs text-muted">{{ dossier.date_soumission|date:"d/m/Y" }}</div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="font-medium">{{ dossier.client.get_full_name }}</div>
+                                <div class="text-xs text-muted">{{ dossier.client.email }}</div>
+                            </td>
+                            <td class="py-4 px-4">
+                                <span class="font-semibold">{{ dossier.montant|floatformat:0 }} FCFA</span>
+                            </td>
+                            <td class="py-4 px-4">{{ dossier.produit }}</td>
+                            <td class="py-4 px-4">
+                                <span class="badge {% if dossier.priorite == 'HAUTE' %}badge-error{% elif dossier.priorite == 'MOYENNE' %}badge-warning{% else %}badge-info{% endif %}">
+                                    {{ dossier.get_priorite_display|default:"Normale" }}
+                                </span>
+                            </td>
+                            <td class="py-4 px-4">
+                                <div class="flex gap-2">
+                                    <button class="btn btn-primary btn-sm">
+                                        <i class="fas fa-microscope"></i> Analyser
+                                    </button>
+                                    <button class="btn btn-secondary btn-sm">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="py-12 text-center text-muted">
+                                <i class="fas fa-inbox text-4xl mb-4"></i>
+                                <p>Aucun dossier à analyser</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Analyses -->
+<section class="content-section" id="analyses-section">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Mes Analyses Récentes</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid gap-4">
+                {% for analyse in mes_analyses|slice:":10" %}
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-3">
+                        <div>
+                            <h4 class="font-semibold text-primary">{{ analyse.dossier.reference }}</h4>
+                            <p class="text-sm text-muted">{{ analyse.dossier.client.get_full_name }}</p>
+                        </div>
+                        <span class="status-banking status-{{ analyse.statut|lower }}">
+                            {{ analyse.get_statut_display }}
+                        </span>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <span class="text-muted">Score de risque:</span>
+                            <span class="font-semibold ml-2">{{ analyse.score_risque|default:"En cours" }}</span>
+                        </div>
+                        <div>
+                            <span class="text-muted">Recommandation:</span>
+                            <span class="font-semibold ml-2">{{ analyse.recommandation|default:"Pending" }}</span>
+                        </div>
+                        <div>
+                            <span class="text-muted">Date:</span>
+                            <span class="font-semibold ml-2">{{ analyse.date_analyse|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-12 text-muted">
+                    <i class="fas fa-microscope text-4xl mb-4"></i>
+                    <p>Aucune analyse récente</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Rapports -->
+<section class="content-section" id="rapports-section">
+    <div class="grid md:grid-cols-2 gap-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Générer un Rapport</h3>
+            </div>
+            <div class="card-body">
+                <form class="space-y-4">
+                    <div class="form-group">
+                        <label class="form-label">Type de rapport</label>
+                        <select class="form-input">
+                            <option>Rapport mensuel</option>
+                            <option>Analyse par secteur</option>
+                            <option>Performance analyste</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Période</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" class="form-input">
+                            <input type="date" class="form-input">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full">
+                        <i class="fas fa-file-pdf"></i> Générer le Rapport
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Rapports Récents</h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
+                        <div>
+                            <div class="font-medium">Rapport Mensuel - Novembre</div>
+                            <div class="text-xs text-muted">Généré le 01/12/2024</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
+                        <div>
+                            <div class="font-medium">Analyse Sectorielle Q4</div>
+                            <div class="text-xs text-muted">Généré le 28/11/2024</div>
+                        </div>
+                        <button class="btn btn-secondary btn-sm">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Outils -->
+<section class="content-section" id="outils-section">
+    <div class="grid md:grid-cols-3 gap-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Calculateur de Risque</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">Outil d'évaluation rapide du risque crédit</p>
+                <button class="btn btn-primary w-full">
+                    <i class="fas fa-calculator"></i> Ouvrir l'outil
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Base de Données Secteur</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">Données de référence par secteur d'activité</p>
+                <button class="btn btn-primary w-full">
+                    <i class="fas fa-database"></i> Consulter
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h3 class="text-lg font-semibold">Modèles d'Analyse</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted mb-4">Templates et guides d'analyse</p>
+                <button class="btn btn-primary w-full">
+                    <i class="fas fa-file-alt"></i> Accéder
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+// JavaScript spécifique au dashboard analyste
+document.addEventListener('DOMContentLoaded', function() {
+    // Animation des métriques
+    const kpiValues = document.querySelectorAll('.kpi-value');
+    kpiValues.forEach(value => {
+        const finalValue = parseInt(value.textContent);
+        let currentValue = 0;
+        const increment = finalValue / 50;
+        
+        const timer = setInterval(() => {
+            currentValue += increment;
+            if (currentValue >= finalValue) {
+                currentValue = finalValue;
+                clearInterval(timer);
+            }
+            value.textContent = Math.floor(currentValue) + (value.textContent.includes('%') ? '%' : value.textContent.includes('j') ? 'j' : '');
+        }, 20);
+    });
+    
+    // Tri des tableaux
+    const tableHeaders = document.querySelectorAll('th');
+    tableHeaders.forEach(header => {
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', function() {
+            // Logique de tri à implémenter
+            console.log('Tri par:', this.textContent);
+        });
+    });
+});
+{% endblock %}
