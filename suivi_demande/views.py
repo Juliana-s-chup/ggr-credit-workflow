@@ -144,7 +144,13 @@ def dashboard(request):
     if role == UserRoles.CLIENT:
         debug_info['template_to_use'] = 'dashboard_client.html'
         dossiers = DossierCredit.objects.filter(client=request.user).order_by("-date_soumission")
-        return render(request, "suivi_demande/dashboard_client.html", {"dossiers": dossiers, "debug_info": debug_info})
+        context = {
+            "mes_dossiers": dossiers,
+            # Optionally keep 'dossiers' for backwards compatibility
+            "dossiers": dossiers,
+            "debug_info": debug_info,
+        }
+        return render(request, "suivi_demande/dashboard_client.html", context)
 
     elif role == UserRoles.GESTIONNAIRE:
         # Dossiers dans le scope gestionnaire

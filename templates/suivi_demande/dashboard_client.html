@@ -100,11 +100,11 @@
             </div>
             <div class="card-body">
                 <div class="space-y-3">
-                    <div class="p-3 bg-blue-50 border-l-4 border-info rounded">
+                    <div class="p-3 bg-blue-50 border-l-4 border-info rounded" data-open="notif-modal" data-title="Dossier approuvé" data-ref="CR-2024-0156" data-time="Il y a 2h" data-content="Votre dossier a été approuvé. Un gestionnaire vous contactera.">
                         <div class="font-medium">Dossier approuvé</div>
                         <div class="text-xs text-muted">CR-2024-0156 • Il y a 2h</div>
                     </div>
-                    <div class="p-3 bg-yellow-50 border-l-4 border-warning rounded">
+                    <div class="p-3 bg-yellow-50 border-l-4 border-warning rounded" data-open="notif-modal" data-title="Documents manquants" data-ref="CR-2024-0158" data-time="Hier" data-content="Veuillez compléter votre dossier avec les pièces requises.">
                         <div class="font-medium">Documents manquants</div>
                         <div class="text-xs text-muted">CR-2024-0158 • Hier</div>
                     </div>
@@ -242,4 +242,52 @@
         </div>
     </div>
 </section>
+
+<!-- Notification Modal -->
+<div id="notif-modal" class="modal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 50;">
+    <div class="card" style="max-width: 560px; margin: 10vh auto; box-shadow: var(--shadow-lg)">
+        <div class="card-header flex justify-between items-center">
+            <h3 class="text-lg font-semibold" id="notif-modal-title">Notification</h3>
+            <button class="btn btn-secondary btn-sm" data-close="notif-modal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="card-body">
+            <div class="text-sm text-muted mb-2" id="notif-modal-meta"></div>
+            <div id="notif-modal-content"></div>
+        </div>
+        <div class="card-footer flex justify-end gap-2">
+            <button class="btn btn-secondary" data-close="notif-modal">Fermer</button>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+// Modal notifications simple
+(function(){
+  const notifModal = document.getElementById('notif-modal');
+  const title = document.getElementById('notif-modal-title');
+  const meta = document.getElementById('notif-modal-meta');
+  const content = document.getElementById('notif-modal-content');
+
+  document.addEventListener('click', function(e){
+    const openEl = e.target.closest('[data-open="notif-modal"]');
+    if (openEl) {
+      const t = openEl.getAttribute('data-title') || 'Notification';
+      const ref = openEl.getAttribute('data-ref') || '';
+      const time = openEl.getAttribute('data-time') || '';
+      const body = openEl.getAttribute('data-content') || '';
+      title.textContent = t;
+      meta.textContent = ref && time ? `${ref} • ${time}` : (ref || time);
+      content.textContent = body;
+      notifModal.style.display = 'block';
+      return;
+    }
+    const closeEl = e.target.closest('[data-close="notif-modal"]');
+    if (closeEl || (e.target === notifModal)) {
+      notifModal.style.display = 'none';
+      return;
+    }
+  });
+})();
+{% endblock %}
+
 {% endblock %}

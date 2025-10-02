@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*$py.class
+
+# Virtualenv
+venv/
+.env/
+.venv/
+.python-version
+
+# Django
+local_settings.py
+*.sqlite3
+media/
+staticfiles/
+
+# Logs
+*.log
+logs/
+
+# Unit test / coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache/
+.pytest_cache/
+.junit/
+
+# IDEs / Editors
+.vscode/
+.idea/
+*.iml
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environments / secrets
+.env
+.env.*
+*.env
+*.env.*
+
+# Node (if any frontend assets are added later)
+node_modules/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Static collection artifacts (whitenoise)
+staticfiles.json
