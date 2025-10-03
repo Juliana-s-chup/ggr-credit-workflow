@@ -1,0 +1,76 @@
+{% extends "suivi_demande/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Dashboard BOE{% endblock %}
+{% block dashboard_role %}Back Office Engagement{% endblock %}
+{% block user_role %}BOE{% endblock %}
+{% block page_title %}Libération des Fonds{% endblock %}
+{% block header_icon %}fas fa-money-check-alt{% endblock %}
+
+{% block navigation %}
+<a href="#" class="nav-item-banking active" data-section="dashboard">
+    <i class="fas fa-tachometer-alt"></i>
+    <span>Tableau de Bord</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="dossiers">
+    <i class="fas fa-folder-open"></i>
+    <span>Dossiers à traiter</span>
+</a>
+{% endblock %}
+
+{% block stats_cards %}
+<div class="kpi-card">
+    <div class="kpi-value">{{ dossiers|length|default:0 }}</div>
+    <div class="kpi-label">En attente de libération</div>
+</div>
+<div class="kpi-card">
+    <div class="kpi-value">{{ fonds_liberes_today|default:0 }}</div>
+    <div class="kpi-label">Libérés aujourd'hui</div>
+</div>
+{% endblock %}
+
+{% block content %}
+<section class="content-section active" id="dashboard-section">
+    <div class="stats-grid mb-8"></div>
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Dossiers en attente de libération</h3>
+        </div>
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3">Référence</th>
+                            <th class="text-left py-3">Client</th>
+                            <th class="text-left py-3">Montant</th>
+                            <th class="text-left py-3">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dossier in dossiers %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4">{{ dossier.reference }}</td>
+                            <td class="py-4">{{ dossier.client.get_full_name|default:dossier.client.username }}</td>
+                            <td class="py-4 font-semibold">{{ dossier.montant }} FCFA</td>
+                            <td class="py-4">
+                                <form method="post" action="{% url 'transition_dossier' dossier.pk 'liberer_fonds' %}">
+                                    {% csrf_token %}
+                                    <button class="btn btn-primary btn-sm">
+                                        <i class="fas fa-check"></i> Libérer les fonds
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="py-12 text-center text-muted">Aucun dossier en attente</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

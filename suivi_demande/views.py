@@ -14,6 +14,7 @@ from decimal import Decimal
 from io import BytesIO
 from xhtml2pdf import pisa
 from django.http import HttpResponse
+from django.db.models import Sum
 
 from .forms import CreditApplicationForm, SignupForm
 from .forms_demande import DemandeStep1Form, DemandeStep2Form
@@ -144,10 +145,14 @@ def dashboard(request):
     if role == UserRoles.CLIENT:
         debug_info['template_to_use'] = 'dashboard_client.html'
         dossiers = DossierCredit.objects.filter(client=request.user).order_by("-date_soumission")
+        dossiers_approuves = dossiers.filter(statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS).count()
+        montant_total = dossiers.aggregate(total=Sum('montant'))['total'] or 0
         context = {
             "mes_dossiers": dossiers,
-            # Optionally keep 'dossiers' for backwards compatibility
+            # compat
             "dossiers": dossiers,
+            "dossiers_approuves": dossiers_approuves,
+            "montant_total": montant_total,
             "debug_info": debug_info,
         }
         return render(request, "suivi_demande/dashboard_client.html", context)
@@ -215,18 +220,54 @@ def dashboard(request):
             "variation_semaine": variation_semaine,
         }
 
+        # Fournir des variables attendues par le template (dynamiques)
+        dossiers_en_cours = DossierCredit.objects.filter(
+            statut_agent__in=[
+                DossierStatutAgent.NOUVEAU,
+                DossierStatutAgent.TRANSMIS_RESP_GEST,
+                DossierStatutAgent.TRANSMIS_ANALYSTE,
+                DossierStatutAgent.EN_COURS_ANALYSE,
+            ]
+        ).order_by("-date_soumission")
+
+        from datetime import date
+        today_date = timezone.now().date()
+        dossiers_ce_mois = DossierCredit.objects.filter(
+            date_soumission__year=today_date.year,
+            date_soumission__month=today_date.month,
+        ).count()
+
+        approuves = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS).count()
+        refuses = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.REFUSE).count()
+        total_decides = approuves + refuses
+        taux_validation = round((approuves / total_decides) * 100, 1) if total_decides else 0
+
+        portefeuille_total = DossierCredit.objects.aggregate(total=Sum('montant'))['total'] or 0
+
+        dossiers_urgents = list(dossiers_pending[:5])
+        mes_clients = []  # À brancher plus tard si relation de portefeuille
+
         debug_info['template_to_use'] = 'dashboard_gestionnaire.html'
-        return render(
-            request,
-            "suivi_demande/dashboard_gestionnaire.html",
-            {"dossiers_pending": dossiers_pending, "recents": recents, "kpi": kpi, "debug_info": debug_info},
-        )
+        ctx = {
+            "dossiers_pending": dossiers_pending,
+            "recents": recents,
+            "kpi": kpi,
+            "dossiers": dossiers_en_cours,
+            "dossiers_en_cours": dossiers_en_cours,
+            "dossiers_urgents": dossiers_urgents,
+            "dossiers_ce_mois": dossiers_ce_mois,
+            "taux_validation": taux_validation,
+            "portefeuille_total": portefeuille_total,
+            "mes_clients": mes_clients,
+            "debug_info": debug_info,
+        }
+        return render(request, "suivi_demande/dashboard_gestionnaire.html", ctx)
 
     elif role == UserRoles.ANALYSTE:
         dossiers = DossierCredit.objects.filter(
             statut_agent__in=[DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]
         ).order_by("-date_soumission")
-        return render(request, "suivi_demande/dashboard_analyste_pro.html", {"dossiers": dossiers})
+        return render(request, "suivi_demande/dashboard_analyste.html", {"dossiers": dossiers})
 
     elif role == UserRoles.RESPONSABLE_GGR:
         dossiers = DossierCredit.objects.filter(

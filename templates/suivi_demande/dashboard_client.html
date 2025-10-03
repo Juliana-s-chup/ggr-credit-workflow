@@ -18,6 +18,20 @@
 .nav-item-banking.active { background: var(--client-or); color: var(--client-rouge); }
 .dashboard-title { color: var(--client-rouge); }
 .kpi-card { border-left-color: var(--client-or); }
+
+/* Styles pour la modal */
+.notif-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 50;
+}
+.notif-modal-content {
+    max-width: 560px;
+    margin: 10vh auto;
+    box-shadow: var(--shadow-lg);
+}
 </style>
 {% endblock %}
 
@@ -29,7 +43,7 @@
 <a href="#" class="nav-item-banking" data-section="dossiers">
     <i class="fas fa-folder"></i>
     <span>Mes Dossiers</span>
-    <span class="badge badge-info ml-auto">{{ mes_dossiers|length|default:3 }}</span>
+    <span class="badge badge-info ml-auto">3</span>
 </a>
 <a href="#" class="nav-item-banking" data-section="nouvelle-demande">
     <i class="fas fa-plus-circle"></i>
@@ -43,19 +57,19 @@
 
 {% block stats_cards %}
 <div class="kpi-card">
-    <div class="kpi-value">{{ mes_dossiers|length|default:3 }}</div>
+    <div class="kpi-value">3</div>
     <div class="kpi-label">Mes Dossiers</div>
 </div>
 <div class="kpi-card">
-    <div class="kpi-value">{{ dossiers_approuves|default:1 }}</div>
+    <div class="kpi-value">1</div>
     <div class="kpi-label">Approuvés</div>
 </div>
 <div class="kpi-card">
-    <div class="kpi-value">{{ montant_total|default:"2.5M" }}</div>
+    <div class="kpi-value">15 000 000 FCFA</div>
     <div class="kpi-label">Montant Total</div>
 </div>
 <div class="kpi-card">
-    <div class="kpi-value">{{ notifications_non_lues|default:2 }}</div>
+    <div class="kpi-value">2</div>
     <div class="kpi-label">Notifications</div>
 </div>
 {% endblock %}
@@ -73,24 +87,35 @@
                 <h3 class="text-lg font-semibold">Dossiers Récents</h3>
             </div>
             <div class="card-body">
-                {% for dossier in mes_dossiers|slice:":3" %}
+                <!-- Dossier 1 -->
                 <div class="border-l-4 border-client-or bg-yellow-50 p-4 mb-3 rounded">
-                    <div class="font-semibold">{{ dossier.reference }}</div>
-                    <div class="text-sm text-muted">{{ dossier.produit }}</div>
+                    <div class="font-semibold">CRD-2024-001</div>
+                    <div class="text-sm text-muted">Crédit Immobilier</div>
                     <div class="flex justify-between items-center mt-2">
-                        <span class="badge badge-{{ dossier.statut|lower }}">{{ dossier.get_statut_display }}</span>
-                        <span class="font-semibold">{{ dossier.montant }} FCFA</span>
+                        <span class="badge badge-en-cours">En cours</span>
+                        <span class="font-semibold">10 000 000 FCFA</span>
                     </div>
                 </div>
-                {% empty %}
-                <div class="text-center py-8 text-muted">
-                    <i class="fas fa-folder-plus text-3xl mb-4"></i>
-                    <p>Aucun dossier créé</p>
-                    <button class="btn btn-primary mt-4" data-section="nouvelle-demande">
-                        Créer une demande
-                    </button>
+                
+                <!-- Dossier 2 -->
+                <div class="border-l-4 border-client-or bg-yellow-50 p-4 mb-3 rounded">
+                    <div class="font-semibold">CRD-2024-002</div>
+                    <div class="text-sm text-muted">Crédit Auto</div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="badge badge-approuve">Approuvé</span>
+                        <span class="font-semibold">5 000 000 FCFA</span>
+                    </div>
                 </div>
-                {% endfor %}
+                
+                <!-- Dossier 3 -->
+                <div class="border-l-4 border-client-or bg-yellow-50 p-4 mb-3 rounded">
+                    <div class="font-semibold">CRD-2024-003</div>
+                    <div class="text-sm text-muted">Crédit Personnel</div>
+                    <div class="flex justify-between items-center mt-2">
+                        <span class="badge badge-en-attente">En attente</span>
+                        <span class="font-semibold">2 500 000 FCFA</span>
+                    </div>
+                </div>
             </div>
         </div>
         
@@ -100,13 +125,26 @@
             </div>
             <div class="card-body">
                 <div class="space-y-3">
-                    <div class="p-3 bg-blue-50 border-l-4 border-info rounded" data-open="notif-modal" data-title="Dossier approuvé" data-ref="CR-2024-0156" data-time="Il y a 2h" data-content="Votre dossier a été approuvé. Un gestionnaire vous contactera.">
-                        <div class="font-medium">Dossier approuvé</div>
-                        <div class="text-xs text-muted">CR-2024-0156 • Il y a 2h</div>
+                    <!-- Notification 1 -->
+                    <div class="p-3 bg-blue-50 border-info border-l-4 rounded" 
+                         data-open="notif-modal" 
+                         data-title="Mise à jour de dossier" 
+                         data-ref="CRD-2024-001" 
+                         data-time="Il y a 2 heures" 
+                         data-content="Votre dossier de crédit immobilier a été mis à jour. Un nouvel document est requis pour poursuivre le traitement.">
+                        <div class="font-medium">Mise à jour de dossier</div>
+                        <div class="text-xs text-muted">Il y a 2 heures</div>
                     </div>
-                    <div class="p-3 bg-yellow-50 border-l-4 border-warning rounded" data-open="notif-modal" data-title="Documents manquants" data-ref="CR-2024-0158" data-time="Hier" data-content="Veuillez compléter votre dossier avec les pièces requises.">
-                        <div class="font-medium">Documents manquants</div>
-                        <div class="text-xs text-muted">CR-2024-0158 • Hier</div>
+                    
+                    <!-- Notification 2 -->
+                    <div class="p-3 bg-yellow-50 border-warning border-l-4 rounded" 
+                         data-open="notif-modal" 
+                         data-title="Dossier approuvé" 
+                         data-ref="CRD-2024-002" 
+                         data-time="Il y a 1 jour" 
+                         data-content="Félicitations ! Votre demande de crédit auto a été approuvée. Vous recevrez les fonds sous 48h.">
+                        <div class="font-medium">Dossier approuvé</div>
+                        <div class="text-xs text-muted">Il y a 1 jour</div>
                     </div>
                 </div>
             </div>
@@ -129,33 +167,53 @@
                             <th class="text-left py-3">Produit</th>
                             <th class="text-left py-3">Montant</th>
                             <th class="text-left py-3">Statut</th>
+                            <th class="text-left py-3">Date</th>
                             <th class="text-left py-3">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for dossier in mes_dossiers %}
                         <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4">{{ dossier.reference }}</td>
-                            <td class="py-4">{{ dossier.produit }}</td>
-                            <td class="py-4 font-semibold">{{ dossier.montant }} FCFA</td>
+                            <td class="py-4">CRD-2024-001</td>
+                            <td class="py-4">Crédit Immobilier</td>
+                            <td class="py-4 font-semibold">10 000 000 FCFA</td>
                             <td class="py-4">
-                                <span class="badge badge-{{ dossier.statut|lower }}">
-                                    {{ dossier.get_statut_display }}
-                                </span>
+                                <span class="badge badge-en-cours">En cours</span>
                             </td>
+                            <td class="py-4">15/10/2024</td>
                             <td class="py-4">
                                 <button class="btn btn-secondary btn-sm">
                                     <i class="fas fa-eye"></i> Voir
                                 </button>
                             </td>
                         </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="py-12 text-center text-muted">
-                                Aucun dossier trouvé
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4">CRD-2024-002</td>
+                            <td class="py-4">Crédit Auto</td>
+                            <td class="py-4 font-semibold">5 000 000 FCFA</td>
+                            <td class="py-4">
+                                <span class="badge badge-approuve">Approuvé</span>
+                            </td>
+                            <td class="py-4">10/10/2024</td>
+                            <td class="py-4">
+                                <button class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-eye"></i> Voir
+                                </button>
                             </td>
                         </tr>
-                        {% endfor %}
+                        <tr class="border-b hover:bg-gray-50">
+                            <td class="py-4">CRD-2024-003</td>
+                            <td class="py-4">Crédit Personnel</td>
+                            <td class="py-4 font-semibold">2 500 000 FCFA</td>
+                            <td class="py-4">
+                                <span class="badge badge-en-attente">En attente</span>
+                            </td>
+                            <td class="py-4">05/10/2024</td>
+                            <td class="py-4">
+                                <button class="btn btn-secondary btn-sm">
+                                    <i class="fas fa-eye"></i> Voir
+                                </button>
+                            </td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -171,25 +229,28 @@
         </div>
         <div class="card-body">
             <div class="grid md:grid-cols-3 gap-6">
-                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer">
+                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer transition-all duration-300">
                     <div class="card-body text-center">
                         <i class="fas fa-home text-3xl text-client-or mb-4"></i>
                         <h4 class="font-semibold mb-2">Crédit Immobilier</h4>
-                        <p class="text-sm text-muted">Financement pour l'achat d'un bien immobilier</p>
+                        <p class="text-sm text-muted mb-4">Financement pour l'achat d'un bien immobilier</p>
+                        <button class="btn btn-primary btn-sm">Choisir</button>
                     </div>
                 </div>
-                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer">
+                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer transition-all duration-300">
                     <div class="card-body text-center">
                         <i class="fas fa-car text-3xl text-client-or mb-4"></i>
                         <h4 class="font-semibold mb-2">Crédit Auto</h4>
-                        <p class="text-sm text-muted">Financement pour l'achat d'un véhicule</p>
+                        <p class="text-sm text-muted mb-4">Financement pour l'achat d'un véhicule</p>
+                        <button class="btn btn-primary btn-sm">Choisir</button>
                     </div>
                 </div>
-                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer">
+                <div class="card border-2 border-dashed border-gray-300 hover:border-client-or cursor-pointer transition-all duration-300">
                     <div class="card-body text-center">
                         <i class="fas fa-briefcase text-3xl text-client-or mb-4"></i>
                         <h4 class="font-semibold mb-2">Crédit Personnel</h4>
-                        <p class="text-sm text-muted">Financement pour vos projets personnels</p>
+                        <p class="text-sm text-muted mb-4">Financement pour vos projets personnels</p>
+                        <button class="btn btn-primary btn-sm">Choisir</button>
                     </div>
                 </div>
             </div>
@@ -208,15 +269,19 @@
                 <form class="space-y-4">
                     <div class="form-group">
                         <label class="form-label">Nom complet</label>
-                        <input type="text" class="form-input" value="{{ user.get_full_name }}">
+                        <input type="text" class="form-input" value="Jean Dupont">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input type="email" class="form-input" value="{{ user.email }}">
+                        <input type="email" class="form-input" value="jean.dupont@email.com">
                     </div>
                     <div class="form-group">
                         <label class="form-label">Téléphone</label>
-                        <input type="tel" class="form-input" value="{{ user.profile.phone }}">
+                        <input type="tel" class="form-input" value="+33 6 12 34 56 78">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Adresse</label>
+                        <input type="text" class="form-input" value="123 Avenue de la République, 75001 Paris">
                     </div>
                     <button type="submit" class="btn btn-primary">
                         Mettre à jour
@@ -232,11 +297,19 @@
             <div class="card-body">
                 <div class="space-y-4">
                     <button class="btn btn-secondary w-full">
-                        <i class="fas fa-key"></i> Changer le mot de passe
+                        <i class="fas fa-key mr-2"></i> Changer le mot de passe
                     </button>
                     <button class="btn btn-secondary w-full">
-                        <i class="fas fa-shield-alt"></i> Authentification à deux facteurs
+                        <i class="fas fa-shield-alt mr-2"></i> Authentification à deux facteurs
                     </button>
+                    <button class="btn btn-secondary w-full">
+                        <i class="fas fa-bell mr-2"></i> Préférences de notifications
+                    </button>
+                </div>
+                
+                <div class="mt-6 p-4 bg-gray-50 rounded">
+                    <h4 class="font-semibold mb-2">Dernière connexion</h4>
+                    <p class="text-sm text-muted">Aujourd'hui à 14:30 depuis Paris, France</p>
                 </div>
             </div>
         </div>
@@ -244,24 +317,27 @@
 </section>
 
 <!-- Notification Modal -->
-<div id="notif-modal" class="modal" style="display:none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 50;">
-    <div class="card" style="max-width: 560px; margin: 10vh auto; box-shadow: var(--shadow-lg)">
-        <div class="card-header flex justify-between items-center">
-            <h3 class="text-lg font-semibold" id="notif-modal-title">Notification</h3>
-            <button class="btn btn-secondary btn-sm" data-close="notif-modal"><i class="fas fa-times"></i></button>
-        </div>
-        <div class="card-body">
-            <div class="text-sm text-muted mb-2" id="notif-modal-meta"></div>
-            <div id="notif-modal-content"></div>
-        </div>
-        <div class="card-footer flex justify-end gap-2">
-            <button class="btn btn-secondary" data-close="notif-modal">Fermer</button>
+<div id="notif-modal" class="notif-modal">
+    <div class="notif-modal-content">
+        <div class="card">
+            <div class="card-header flex justify-between items-center">
+                <h3 class="text-lg font-semibold" id="notif-modal-title">Notification</h3>
+                <button class="btn btn-secondary btn-sm" data-close="notif-modal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="card-body">
+                <div class="text-sm text-muted mb-2" id="notif-modal-meta"></div>
+                <div id="notif-modal-content" class="prose max-w-none"></div>
+            </div>
+            <div class="card-footer flex justify-end gap-2">
+                <button class="btn btn-secondary" data-close="notif-modal">Fermer</button>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
 {% block extra_js %}
-// Modal notifications simple
+// Modal notifications (navigation & script wrapper gérés dans le template de base)
 (function(){
   const notifModal = document.getElementById('notif-modal');
   const title = document.getElementById('notif-modal-title');
@@ -288,6 +364,4 @@
     }
   });
 })();
-{% endblock %}
-
 {% endblock %}
