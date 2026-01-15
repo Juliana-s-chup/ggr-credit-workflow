@@ -7,9 +7,9 @@
   <div class="col-12">
     <div class="card">
       <div class="card-body d-flex flex-wrap gap-2">
-        <a class="btn btn-sm btn-outline-primary" href="{% url 'dossier_proposition_pdf' dossier.pk %}" target="_blank">Télécharger la proposition (PDF)</a>
+        <a class="btn btn-sm btn-outline-primary" href="#" onclick="alert('Fonctionnalité en développement'); return false;">Télécharger la proposition (PDF)</a>
         {% if can_tx_transmettre_analyste %}
-          <form method="post" action="{% url 'transition_dossier' dossier.pk 'transmettre_analyste' %}">
+          <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'transmettre_analyste' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-primary">Transmettre à l'analyste</button>
           </form>
@@ -20,31 +20,30 @@
           </button>
         {% endif %}
         {% if can_tx_transmettre_ggr %}
-          <form method="post" action="{% url 'transition_dossier' dossier.pk 'transmettre_ggr' %}">
+          <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'transmettre_ggr' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-primary">Transmettre GGR</button>
           </form>
         {% endif %}
         {% if can_tx_retour_gestionnaire %}
-          <form method="post" action="{% url 'transition_dossier' dossier.pk 'retour_gestionnaire' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-outline-secondary">Retour gestionnaire</button>
-          </form>
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#retourGestionnaireModal" data-dossier-id="{{ dossier.pk }}">
+            Retour gestionnaire
+          </button>
         {% endif %}
         {% if can_tx_approuver %}
-          <form method="post" action="{% url 'transition_dossier' dossier.pk 'approuver' %}">
+          <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'approuver' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-primary">Approuver</button>
           </form>
         {% endif %}
         {% if can_tx_refuser %}
-          <form method="post" action="{% url 'transition_dossier' dossier.pk 'refuser' %}">
+          <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'refuser' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-outline-danger">Refuser</button>
           </form>
         {% endif %}
         {% if can_tx_liberer_fonds %}
-          <form method="post" action="{% url 'transition_dossier' dossier.pk 'liberer_fonds' %}">
+          <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'liberer_fonds' %}">
             {% csrf_token %}
             <button type="submit" class="btn btn-sm btn-primary">Libérer les fonds</button>
           </form>
@@ -52,8 +51,150 @@
         {% if not can_tx_transmettre_analyste and not can_tx_transmettre_ggr and not can_tx_retour_gestionnaire and not can_tx_approuver and not can_tx_refuser and not can_tx_liberer_fonds %}
           <span class="text-muted">Aucune action disponible à ce stade.</span>
         {% endif %}
+
+        {% comment %}
+        Archivage: visible pour SUPER_ADMIN, RESPONSABLE_GGR, GESTIONNAIRE
+        TODO: Activer quand les vues archive_dossier et unarchive_dossier seront implémentées
+        {% if request.user.profile.role in 'SUPER_ADMIN RESPONSABLE_GGR GESTIONNAIRE' %}
+          {% if dossier.is_archived %}
+            <form method="post" action="{% url 'pro:unarchive_dossier' dossier.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-secondary">Désarchiver</button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'pro:archive_dossier' dossier.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-secondary">Archiver</button>
+            </form>
+          {% endif %}
+        {% endif %}
+        {% endcomment %}
       </div>
     </div>
+  </div>
+  <div class="col-12">
+    {% with cv=dossier.canevas %}
+    {% if cv %}
+    <div class="card shadow-sm">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Récapitulatif de la demande</h5>
+        <button class="btn btn-light btn-sm" onclick="window.print()">
+          <i class="fas fa-print me-1"></i>Imprimer
+        </button>
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+          <div class="col-lg-4">
+            <div class="border-start border-primary border-3 ps-3">
+              <h6 class="text-primary mb-3"><i class="fas fa-building me-2"></i>En-tête</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-6">Agence</dt><dd class="col-sm-6">{{ cv.agence }}</dd>
+              <dt class="col-sm-6">Code agence</dt><dd class="col-sm-6">{{ cv.code_agence }}</dd>
+              <dt class="col-sm-6">Nom exploitant</dt><dd class="col-sm-6">{{ cv.nom_exploitant }}</dd>
+              <dt class="col-sm-6">Matricule</dt><dd class="col-sm-6">{{ cv.matricule_exploitant }}</dd>
+              <dt class="col-sm-6">Date</dt><dd class="col-sm-6">{{ cv.date_proposition|date:"d/m/Y" }}</dd>
+            </dl>
+            </div>
+          </div>
+          <div class="col-lg-8">
+            <div class="border-start border-info border-3 ps-3">
+              <h6 class="text-info mb-3"><i class="fas fa-user me-2"></i>Étape 1 • Informations personnelles</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-5">Nom & prénom</dt><dd class="col-sm-7">{{ cv.nom_prenom }}</dd>
+              <dt class="col-sm-5">Naissance</dt><dd class="col-sm-7">{{ cv.date_naissance|date:"d/m/Y" }}</dd>
+              <dt class="col-sm-5">Nationalité</dt><dd class="col-sm-7">{{ cv.nationalite }}</dd>
+              <dt class="col-sm-5">Adresse</dt><dd class="col-sm-7">{{ cv.adresse_exacte }}</dd>
+              <dt class="col-sm-5">Téléphone</dt><dd class="col-sm-7">{{ cv.numero_telephone }}</dd>
+              <dt class="col-sm-5">Tél. travail</dt><dd class="col-sm-7">{{ cv.telephone_travail }}</dd>
+              <dt class="col-sm-5">Tél. domicile</dt><dd class="col-sm-7">{{ cv.telephone_domicile }}</dd>
+              <dt class="col-sm-5">Radical (client)</dt><dd class="col-sm-7">{{ cv.radical }}</dd>
+              <dt class="col-sm-5">Emploi occupé</dt><dd class="col-sm-7">{{ cv.emploi_occupe }}</dd>
+              <dt class="col-sm-5">Statut d'emploi</dt><dd class="col-sm-7">{{ cv.get_statut_emploi_display }}</dd>
+              <dt class="col-sm-5">Ancienneté emploi</dt><dd class="col-sm-7">{{ cv.anciennete_emploi }}</dd>
+              <dt class="col-sm-5">Type de contrat</dt><dd class="col-sm-7">{{ cv.get_type_contrat_display }}</dd>
+              <dt class="col-sm-5">Nom employeur</dt><dd class="col-sm-7">{{ cv.nom_employeur }}</dd>
+              <dt class="col-sm-5">Lieu d'emploi</dt><dd class="col-sm-7">{{ cv.lieu_emploi }}</dd>
+              <dt class="col-sm-5">Situation</dt><dd class="col-sm-7">{{ cv.get_situation_famille_display }}</dd>
+              <dt class="col-sm-5">Régime matrimonial</dt><dd class="col-sm-7">{{ cv.get_regime_matrimonial_display }}</dd>
+              <dt class="col-sm-5">Personnes à charge</dt><dd class="col-sm-7">{{ cv.nombre_personnes_charge }}</dd>
+              <dt class="col-sm-5">Logement</dt><dd class="col-sm-7">{{ cv.get_statut_logement_display }}</dd>
+              <dt class="col-sm-5">N° TF</dt><dd class="col-sm-7">{{ cv.numero_tf }}</dd>
+              <dt class="col-sm-5">Précision logement</dt><dd class="col-sm-7">{{ cv.logement_autres_precision }}</dd>
+              <dt class="col-sm-5">Salaire conjoint</dt><dd class="col-sm-7">{{ cv.salaire_conjoint }}</dd>
+              <dt class="col-sm-5">Emploi conjoint</dt><dd class="col-sm-7">{{ cv.emploi_conjoint }}</dd>
+              <dt class="col-sm-5">Employeur client banque</dt><dd class="col-sm-7">{{ cv.employeur_client_banque|yesno:"Oui,Non" }}</dd>
+              <dt class="col-sm-5">Radical employeur</dt><dd class="col-sm-7">{{ cv.radical_employeur }}</dd>
+              <dt class="col-sm-5">Participation enquêtes</dt><dd class="col-sm-7">{{ cv.participation_enquetes }}</dd>
+            </dl>
+            <h6 class="mt-4 mb-3 text-muted"><i class="fas fa-credit-card me-2"></i>Prêt en cours</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-6">Nature</dt><dd class="col-sm-6">{{ cv.get_nature_pret_cours_display }}</dd>
+              <dt class="col-sm-6">Montant origine</dt><dd class="col-sm-6">{{ cv.montant_origine_fcfa }}</dd>
+              <dt class="col-sm-6">Dernière échéance</dt><dd class="col-sm-6">{{ cv.date_derniere_echeance|date:"d/m/Y" }}</dd>
+              <dt class="col-sm-6">Montant échéance</dt><dd class="col-sm-6">{{ cv.montant_echeance_fcfa }}</dd>
+              <dt class="col-sm-6">K restant dû</dt><dd class="col-sm-6">{{ cv.k_restant_du_fcfa }}</dd>
+            </dl>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="border-start border-success border-3 ps-3">
+              <h6 class="text-success mb-3"><i class="fas fa-wallet me-2"></i>Étape 2 • Situation financière</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-6">Salaire net moyen</dt><dd class="col-sm-6"><strong>{{ cv.salaire_net_moyen_fcfa|floatformat:0 }} FCFA</strong></dd>
+              <dt class="col-sm-6">Échéances relevées</dt><dd class="col-sm-6">{{ cv.echeances_prets_relevees|floatformat:0 }} FCFA</dd>
+              <dt class="col-sm-6">Total échéances en cours</dt><dd class="col-sm-6">{{ cv.total_echeances_credits_cours|floatformat:0 }} FCFA</dd>
+              <dt class="col-sm-6">Avant endettement</dt><dd class="col-sm-6">{{ cv.salaire_net_avant_endettement_fcfa|floatformat:0 }} FCFA</dd>
+              <dt class="col-sm-6">Capacité brute (40%)</dt><dd class="col-sm-6"><span class="badge bg-success">{{ cv.capacite_endettement_brute_fcfa|floatformat:0 }} FCFA</span></dd>
+              <dt class="col-sm-6">Capacité nette</dt><dd class="col-sm-6"><span class="badge bg-info">{{ cv.capacite_endettement_nette_fcfa|floatformat:0 }} FCFA</span></dd>
+            </dl>
+            </div>
+          </div>
+          <div class="col-lg-8">
+            <div class="border-start border-warning border-3 ps-3">
+              <h6 class="text-warning mb-3"><i class="fas fa-hand-holding-usd me-2"></i>Étape 3 • Détails du crédit</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-6">Nature du crédit</dt><dd class="col-sm-6">{{ cv.get_nature_pret_display }}</dd>
+              <dt class="col-sm-6">Motif du crédit</dt><dd class="col-sm-6">{{ cv.motif_credit }}</dd>
+              <dt class="col-sm-6">Montant demandé</dt><dd class="col-sm-6"><strong class="text-primary">{{ cv.demande_montant_fcfa|floatformat:0 }} FCFA</strong></dd>
+              <dt class="col-sm-6">Durée (mois)</dt><dd class="col-sm-6">{{ cv.demande_duree_mois }}</dd>
+              <dt class="col-sm-6">Taux (%)</dt><dd class="col-sm-6">{{ cv.demande_taux_pourcent }}</dd>
+              <dt class="col-sm-6">Périodicité</dt><dd class="col-sm-6">{{ cv.get_demande_periodicite_display }}</dd>
+              <dt class="col-sm-6">1re échéance</dt><dd class="col-sm-6">{{ cv.demande_date_1ere_echeance|date:"d/m/Y" }}</dd>
+              <dt class="col-sm-6">Échéance estimée</dt><dd class="col-sm-6">{{ cv.demande_montant_echeance_fcfa|floatformat:0 }} FCFA</dd>
+            </dl>
+            {% if cv.proposition_montant_fcfa %}
+            <h6 class="mt-4 mb-3 text-muted"><i class="fas fa-handshake me-2"></i>Proposition</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-6">Montant proposé</dt><dd class="col-sm-6"><strong class="text-success">{{ cv.proposition_montant_fcfa|floatformat:0 }} FCFA</strong></dd>
+              <dt class="col-sm-6">Durée (mois)</dt><dd class="col-sm-6">{{ cv.proposition_duree_mois }}</dd>
+              <dt class="col-sm-6">Taux (%)</dt><dd class="col-sm-6">{{ cv.proposition_taux_pourcent }}</dd>
+              <dt class="col-sm-6">Périodicité</dt><dd class="col-sm-6">{{ cv.get_proposition_periodicite_display }}</dd>
+              <dt class="col-sm-6">1re échéance</dt><dd class="col-sm-6">{{ cv.proposition_date_1ere_echeance|date:"d/m/Y" }}</dd>
+              <dt class="col-sm-6">Échéance estimée</dt><dd class="col-sm-6">{{ cv.proposition_montant_echeance_fcfa|floatformat:0 }} FCFA</dd>
+            </dl>
+            {% endif %}
+            </div>
+          </div>
+          
+          <div class="col-12">
+            <div class="border-start border-danger border-3 ps-3 mt-3">
+              <h6 class="text-danger mb-3"><i class="fas fa-file-check me-2"></i>Étape 4 • Documents & validation</h6>
+            <dl class="row mb-0">
+              <dt class="col-sm-3">CNI fournie</dt><dd class="col-sm-3">{% if cv.doc_cni_ok %}<span class="badge bg-success"><i class="fas fa-check"></i> Oui</span>{% else %}<span class="badge bg-secondary"><i class="fas fa-times"></i> Non</span>{% endif %}</dd>
+              <dt class="col-sm-3">Fiche de paie</dt><dd class="col-sm-3">{% if cv.doc_fiche_paie_ok %}<span class="badge bg-success"><i class="fas fa-check"></i> Oui</span>{% else %}<span class="badge bg-secondary"><i class="fas fa-times"></i> Non</span>{% endif %}</dd>
+              <dt class="col-sm-3">Relevé bancaire</dt><dd class="col-sm-3">{% if cv.doc_releve_ok %}<span class="badge bg-success"><i class="fas fa-check"></i> Oui</span>{% else %}<span class="badge bg-secondary"><i class="fas fa-times"></i> Non</span>{% endif %}</dd>
+              <dt class="col-sm-3">Billet à ordre</dt><dd class="col-sm-3">{% if cv.doc_billet_ordre_ok %}<span class="badge bg-success"><i class="fas fa-check"></i> Oui</span>{% else %}<span class="badge bg-secondary"><i class="fas fa-times"></i> Non</span>{% endif %}</dd>
+              <dt class="col-sm-3">Attestation employeur</dt><dd class="col-sm-3">{% if cv.doc_attestation_employeur_ok %}<span class="badge bg-success"><i class="fas fa-check"></i> Oui</span>{% else %}<span class="badge bg-secondary"><i class="fas fa-times"></i> Non</span>{% endif %}</dd>
+              <dt class="col-sm-3">Attestation domiciliation</dt><dd class="col-sm-3">{% if cv.doc_attestation_domiciliation_ok %}<span class="badge bg-success"><i class="fas fa-check"></i> Oui</span>{% else %}<span class="badge bg-secondary"><i class="fas fa-times"></i> Non</span>{% endif %}</dd>
+              <dt class="col-sm-3">Assurance décès-invalidité</dt><dd class="col-sm-3">{% if cv.doc_assurance_deces_invalidite_ok %}<span class="badge bg-success"><i class="fas fa-check"></i> Oui</span>{% else %}<span class="badge bg-secondary"><i class="fas fa-times"></i> Non</span>{% endif %}</dd>
+              <dt class="col-sm-6">Consentement</dt><dd class="col-sm-6">{% if cv.validation_consentement %}<span class="badge bg-success"><i class="fas fa-check"></i> Accepté</span>{% else %}<span class="badge bg-warning"><i class="fas fa-clock"></i> En attente</span>{% endif %}</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    {% endwith %}
   </div>
   <div class="col-lg-6">
     <div class="card h-100">
@@ -63,8 +204,10 @@
           <dt class="col-sm-4">Client</dt><dd class="col-sm-8">{{ dossier.client.username }}</dd>
           <dt class="col-sm-4">Produit</dt><dd class="col-sm-8">{{ dossier.produit }}</dd>
           <dt class="col-sm-4">Montant</dt><dd class="col-sm-8">{{ dossier.montant }}</dd>
+          {% if role != 'CLIENT' %}
           <dt class="col-sm-4">Statut (agent)</dt><dd class="col-sm-8"><span class="badge text-bg-secondary">{{ dossier.get_statut_agent_display }}</span></dd>
-          <dt class="col-sm-4">Statut (client)</dt><dd class="col-sm-8"><span class="badge text-bg-secondary">{{ dossier.get_statut_client_display }}</span></dd>
+          {% endif %}
+          <dt class="col-sm-4">Statut{% if role == 'CLIENT' %} du dossier{% else %} (client){% endif %}</dt><dd class="col-sm-8"><span class="badge text-bg-secondary">{{ dossier.get_statut_client_display }}</span></dd>
           <dt class="col-sm-4">Soumission</dt><dd class="col-sm-8">{{ dossier.date_soumission|date:"d/m/Y H:i" }}</dd>
           <dt class="col-sm-4">Dernière MAJ</dt><dd class="col-sm-8">{{ dossier.date_maj|date:"d/m/Y H:i" }}</dd>
         </dl>
@@ -107,12 +250,17 @@
                 <option value="CNI">Carte Nationale d'Identité</option>
                 <option value="FICHE_PAIE">Fiche de paie</option>
                 <option value="RELEVE_BANCAIRE">Relevé bancaire</option>
+                <option value="BILLET_ORDRE">Billet à ordre</option>
+                <option value="ATTESTATION_EMPLOYEUR">Attestation de l'employeur</option>
+                <option value="ATTESTATION_DOMICILIATION">Attestation de domiciliation irrévocable</option>
+                <option value="ASSURANCE_DECES_INVALIDITE">Assurance décès-invalidité</option>
               </select>
             </div>
             <div class="col-sm-3">
               <button type="submit" class="btn btn-primary w-100">Téléverser</button>
             </div>
           </form>
+
         {% endif %}
       </div>
     </div>
@@ -147,6 +295,7 @@
     </div>
   </div>
 
+  {% if role != 'CLIENT' %}
   <div class="col-lg-6">
     <div class="card h-100">
       <div class="card-header">Historique</div>
@@ -166,11 +315,12 @@
             {% endfor %}
           </ul>
         {% else %}
-          <p class="text-muted mb-0">Aucun historique pour l’instant.</p>
+          <p class="text-muted mb-0">Aucun historique pour l'instant.</p>
         {% endif %}
       </div>
     </div>
   </div>
+  {% endif %}
 </div>
 
 <!-- Inclure le modal de retour client -->
@@ -185,7 +335,23 @@
     modal.addEventListener('show.bs.modal', function(event) {
       const button = event.relatedTarget;
       const dossierId = button.getAttribute('data-dossier-id');
-      form.action = "{% url 'transition_dossier' 0 'retour_client' %}".replace('0', dossierId);
+      form.action = "{% url 'pro:transition_dossier' 0 'retour_client' %}".replace('0', dossierId);
+    });
+  });
+  </script>
+{% endif %}
+
+{% if can_tx_retour_gestionnaire %}
+  {% include "suivi_demande/modal_retour_gestionnaire.html" %}
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('retourGestionnaireModal');
+    const form = document.getElementById('retourGestionnaireForm');
+    
+    modal.addEventListener('show.bs.modal', function(event) {
+      const button = event.relatedTarget;
+      const dossierId = button.getAttribute('data-dossier-id');
+      form.action = "{% url 'pro:transition_dossier' 0 'retour_gestionnaire' %}".replace('0', dossierId);
     });
   });
   </script>

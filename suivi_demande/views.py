@@ -1,26 +1,39 @@
-# core/views.py
-from django.contrib import messages
-from django.contrib.auth import get_user_model
-from django.contrib.auth import login as auth_login
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
-from django.conf import settings
-from django.utils import timezone
-from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404, redirect, render
-from django.template.loader import render_to_string
-from django.templatetags.static import static
+"""
+Views pour l'application suivi_demande.
+Gère les demandes de crédit, le workflow et les dashboards.
+"""
+# Imports Django standard
+from datetime import date, datetime
 from decimal import Decimal
 from io import BytesIO
-from xhtml2pdf import pisa
-from django.http import HttpResponse
-from django.db.models import Sum
+import statistics
+import traceback
 
-from .forms import CreditApplicationForm, SignupForm
+# Imports Django
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model, login as auth_login
+from django.contrib.auth.decorators import login_required
+from django.contrib.staticfiles import finders
+from django.core.mail import send_mail
+from django.db.models import Q, Sum, Count, Avg
+from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
+from django.templatetags.static import static
+from django.utils import timezone
+from django.utils.dateparse import parse_date
+from django.views.decorators.http import require_POST
+
+# Imports xhtml2pdf
+from xhtml2pdf import pisa
+
+# Imports locaux
+from .decorators import transition_allowed
+from .forms import SignupForm
 from .forms_demande import DemandeStep1Form, DemandeStep2Form
 from .forms_demande_extra import DemandeStep3Form, DemandeStep4Form
 from .models import (
-    CreditApplication,
     DossierCredit,
     DossierStatutAgent,
     DossierStatutClient,
@@ -30,99 +43,138 @@ from .models import (
     UserProfile,
     Commentaire,
     PieceJointe,
+    CanevasProposition,
 )
 from .permissions import can_upload_piece, get_transition_flags
-from .decorators import transition_allowed
-from django.contrib.auth import get_user_model
-from django.templatetags.static import static
-from django.http import JsonResponse
+from .utils import get_current_namespace
+
+# Nouveaux imports - Service Layer et Utilitaires
+from .services.dossier_service import DossierService
+from .user_utils import get_user_role, user_has_role, is_professional_user
+from .validators import validate_file_upload, sanitize_filename
 
 User = get_user_model()
 
 
-def home(request):
-    return render(request, "home.html")
+def serialize_form_data(data):
+    """Convertit les objets Decimal, date et datetime en strings pour la sérialisation JSON."""
+    serialized = {}
+    for key, value in data.items():
+        if isinstance(value, Decimal):
+            serialized[key] = str(value)
+        elif isinstance(value, datetime):
+            serialized[key] = value.isoformat()
+        elif isinstance(value, date):
+            serialized[key] = value.isoformat()
+        elif isinstance(value, float):
+            serialized[key] = str(value)
+        else:
+            serialized[key] = value
+    return serialized
+
+
+@login_required
+def test_dossiers_list(request):
+    """Vue de test pour afficher TOUS les dossiers en base"""
+    all_dossiers = DossierCredit.objects.all().order_by('-date_soumission')
+    total_dossiers = all_dossiers.count()
+    
+    # Statistiques par statut
+    statuts_stats = DossierCredit.objects.values('statut_agent').annotate(
+        count=Count('id')
+    ).order_by('-count')
+    
+    context = {
+        'all_dossiers': all_dossiers,
+        'total_dossiers': total_dossiers,
+        'statuts_stats': statuts_stats,
+    }
+    return render(request, 'suivi_demande/test_dossiers.html', context)
 
 
 @login_required
 def my_applications(request):
-    # Afficher les dossiers créés via le wizard de demande
-    dossiers = DossierCredit.objects.filter(client=request.user).order_by("-date_soumission")
+    """Afficher les dossiers du client avec pagination."""
+    from django.core.paginator import Paginator
+    from .constants import ITEMS_PER_PAGE
+    
+    dossiers_list = DossierCredit.objects.filter(
+        client=request.user
+    ).select_related('acteur_courant').order_by("-date_soumission")
+    
+    paginator = Paginator(dossiers_list, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    dossiers = paginator.get_page(page_number)
+    
     return render(request, "suivi_demande/my_applications.html", {"dossiers": dossiers})
 
 
 @login_required
 def create_application(request):
-    if request.method == "POST":
-        form = CreditApplicationForm(request.POST)
-        if form.is_valid():
-            app = form.save(commit=False)
-            app.client = request.user
-            app.status = "DRAFT"
-            app.save()
-            messages.success(request, "Dossier crÃ©Ã© avec succÃ¨s.")
-            return redirect("my_applications")
-    else:
-        form = CreditApplicationForm()
-    return render(request, "suivi_demande/create_application.html", {"form": form})
-
-
-@login_required
-def edit_application(request, pk):
-    app = get_object_or_404(CreditApplication, pk=pk, client=request.user)
-    if request.method == "POST":
-        form = CreditApplicationForm(request.POST, instance=app)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Dossier modifiÃ© avec succÃ¨s.")
-            return redirect("my_applications")
-    else:
-        form = CreditApplicationForm(instance=app)
-    return render(request, "suivi_demande/edit_application.html", {"form": form, "application": app})
-
-
-@login_required
-def delete_application(request, pk):
-    app = get_object_or_404(CreditApplication, pk=pk, client=request.user)
-    if request.method == "POST":
-        app.delete()
-        messages.success(request, "Dossier supprimÃ© avec succÃ¨s.")
-        return redirect("my_applications")
-    return render(request, "suivi_demande/confirm_delete.html", {"application": app})
+    return render(request, "suivi_demande/nouveau_dossier.html")
 
 
 def signup(request):
+    portal = (request.GET.get('as') or request.POST.get('as') or 'client').lower()
+    portal = 'pro' if portal in ['pro', 'professionnel', 'prof'] else 'client'
 
     if request.method == "POST":
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
+            try:
+                profile = getattr(user, 'profile', None)
+                if profile is None:
+                    profile = UserProfile.objects.create(
+                        user=user,
+                        full_name=user.get_full_name() or user.username,
+                        phone='', address='',
+                        role=UserRoles.CLIENT
+                    )
+                # Affectation du rôle selon le portail d'origine
+                if portal == 'pro':
+                    selected_role = form.cleaned_data.get('role')
+                    allowed_roles = {r for r, _ in UserRoles.choices if r != UserRoles.CLIENT}
+                    if selected_role in allowed_roles:
+                        profile.role = selected_role
+                    else:
+                        profile.role = UserRoles.GESTIONNAIRE
+                else:
+                    profile.role = UserRoles.CLIENT
+                profile.save(update_fields=['role'])
+            except Exception:
+                pass
+
             messages.success(
                 request,
-                "Votre compte a Ã©tÃ© crÃ©Ã©. Il sera activÃ© aprÃ¨s approbation par un administrateur.",
+                "Votre compte a été créé. Il sera activé après approbation par un administrateur.",
             )
             return redirect("login")
     else:
         form = SignupForm()
-    return render(request, "accounts/signup.html", {"form": form})
+    return render(request, "accounts/signup.html", {"form": form, "portal": portal})
 
 
 @login_required
 def pending_approval(request):
 
     if request.user.is_active:
-        return redirect("dashboard")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:dashboard")
     return render(request, "accounts/pending_approval.html")
 
 
 @login_required
 def dashboard(request):
-    # Dashboard par rôle basé sur DossierCredit.
-    profile = getattr(request.user, "profile", None)
-    role = getattr(profile, "role", UserRoles.CLIENT)
+    """
+    Dashboard principal avec optimisations Service Layer.
+    Utilise get_user_role() et DossierService pour les performances.
+    """
+    # Utiliser user_utils pour récupérer le rôle (plus robuste)
+    role = get_user_role(request.user)
     
     # Si pas de profil, créer un profil CLIENT par défaut
-    if profile is None:
+    if role is None:
         profile, created = UserProfile.objects.get_or_create(
             user=request.user,
             defaults={
@@ -137,153 +189,274 @@ def dashboard(request):
     # Debug visible dans l'interface
     debug_info = {
         'user': request.user.username,
-        'profile_exists': profile is not None,
+        'profile_exists': hasattr(request.user, 'profile'),
         'role': role,
         'template_to_use': None
     }
 
     if role == UserRoles.CLIENT:
         debug_info['template_to_use'] = 'dashboard_client.html'
-        dossiers = DossierCredit.objects.filter(client=request.user).order_by("-date_soumission")
-        dossiers_approuves = dossiers.filter(statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS).count()
-        montant_total = dossiers.aggregate(total=Sum('montant'))['total'] or 0
+        
+        # ✅ OPTIMISÉ: Utiliser le Service Layer avec pagination
+        page = DossierService.get_dossiers_for_user(
+            user=request.user,
+            page=request.GET.get('page', 1),
+            per_page=50  # Charger plus pour séparer en cours/traités
+        )
+        
+        # Séparer en cours et traités (en mémoire, pas de nouvelle query)
+        all_dossiers = list(page.object_list)
+        dossiers_en_cours = [
+            d for d in all_dossiers 
+            if d.statut_agent not in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ]
+        dossiers_traites = [
+            d for d in all_dossiers
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ][:20]
+        
+        # ✅ OPTIMISÉ: Statistiques via Service Layer (1 query au lieu de 3)
+        stats = DossierService.get_statistics_for_role(request.user)
+        
+        # Historique des actions (déjà optimisé avec select_related)
+        historique_actions = JournalAction.objects.filter(
+            dossier__client=request.user
+        ).select_related('dossier', 'acteur').order_by("-timestamp")[:20]
+        
         context = {
-            "mes_dossiers": dossiers,
-            # compat
-            "dossiers": dossiers,
-            "dossiers_approuves": dossiers_approuves,
-            "montant_total": montant_total,
+            "mes_dossiers": all_dossiers,  # Tous les dossiers
+            "dossiers": dossiers_en_cours,  # En cours
+            "dossiers_en_cours": dossiers_en_cours,
+            "dossiers_traites": dossiers_traites,  # Terminés
+            "historique_actions": historique_actions,
+            "dossiers_approuves": stats['approuves'],  # ✅ Depuis stats
+            "montant_total": stats['montant_total'],  # ✅ Depuis stats
+            "historique_dossiers": dossiers_traites,  # compat
             "debug_info": debug_info,
+            "page": page,  # Pour pagination future
         }
         return render(request, "suivi_demande/dashboard_client.html", context)
 
     elif role == UserRoles.GESTIONNAIRE:
-        # Dossiers dans le scope gestionnaire
-        # En attente: Nouveaux ou RetournÃ©s vers le gestionnaire
-        dossiers_pending = DossierCredit.objects.filter(
-            statut_agent__in=[
-                DossierStatutAgent.NOUVEAU,
-                DossierStatutAgent.TRANSMIS_RESP_GEST
-            ]
-        ).order_by("-date_soumission")
-
-        # Dossiers rÃ©cents (les 5 derniers)
-        recents = DossierCredit.objects.all().order_by("-date_soumission")[:5]
-
-        # KPI simples
+        # ✅ OPTIMISÉ: Utiliser Service Layer
+        page = DossierService.get_dossiers_for_user(
+            user=request.user,
+            page=request.GET.get('page', 1),
+            per_page=50
+        )
+        
+        # ✅ OPTIMISÉ: Statistiques en 1 query
+        stats = DossierService.get_statistics_for_role(request.user)
+        
+        # Séparer dossiers en cours et traités (en mémoire)
+        all_dossiers = list(page.object_list)
+        dossiers_en_cours = [
+            d for d in all_dossiers
+            if d.statut_agent not in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ]
+        dossiers_traites = [
+            d for d in all_dossiers
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ][:20]
+        
+        # Dossiers en attente (nouveaux + retournés)
+        dossiers_pending = [
+            d for d in dossiers_en_cours
+            if d.statut_agent in [DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]
+        ]
+        
+        # Dossiers récents (10 premiers)
+        recents = all_dossiers[:10]
+        
+        # KPI détaillés (pour compatibilité template)
         today = timezone.now().date()
-
-        nouveaux_qs = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.NOUVEAU)
-        nouveaux_total = nouveaux_qs.count()
-        nouveaux_today = nouveaux_qs.filter(date_soumission__date=today).count()
-
-        complets_qs = DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]
-        )
-        complets_total = complets_qs.count()
-        complets_today = complets_qs.filter(date_soumission__date=today).count()
-
-        retournes_qs = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.TRANSMIS_RESP_GEST)
-        retournes_total = retournes_qs.count()
-        retournes_today = retournes_qs.filter(date_soumission__date=today).count()
-
-        en_attente_qs = DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.EN_COURS_VALIDATION_GGR, DossierStatutAgent.EN_ATTENTE_DECISION_DG]
-        )
-        en_attente_total = en_attente_qs.count()
-        en_attente_today = en_attente_qs.filter(date_soumission__date=today).count()
-
-        try:
-            import statistics
-            delais = []
-            now = timezone.now()
-            for d in DossierCredit.objects.order_by("-date_soumission")[:20]:
-                if d.date_soumission:
-                    delta = now - d.date_soumission
-                    delais.append(delta.total_seconds() / 86400.0)
-            delai_moyen_jours = round(statistics.mean(delais), 1) if delais else "â€”"
-            variation_semaine = 0  # placeholder
-        except Exception:
-            delai_moyen_jours = "â€”"
-            variation_semaine = 0
-
+        nouveaux_total = sum(1 for d in all_dossiers if d.statut_agent == DossierStatutAgent.NOUVEAU)
+        complets_total = sum(1 for d in all_dossiers if d.statut_agent in [
+            DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE
+        ])
+        retournes_total = sum(1 for d in all_dossiers if d.statut_agent == DossierStatutAgent.TRANSMIS_RESP_GEST)
+        
         kpi = {
             "nouveaux_total": nouveaux_total,
-            "nouveaux_today": nouveaux_today,
+            "nouveaux_today": 0,  # Nécessiterait une query supplémentaire
             "complets_total": complets_total,
-            "complets_today": complets_today,
+            "complets_today": 0,
             "retournes_total": retournes_total,
-            "retournes_today": retournes_today,
-            "en_attente_total": en_attente_total,
-            "en_attente_today": en_attente_today,
-            "delai_moyen_jours": delai_moyen_jours,
-            "variation_semaine": variation_semaine,
+            "retournes_today": 0,
+            "en_attente_total": stats['en_cours'],
+            "en_attente_today": 0,
+            "delai_moyen_jours": "—",
+            "variation_semaine": 0,
         }
-
-        # Fournir des variables attendues par le template (dynamiques)
-        dossiers_en_cours = DossierCredit.objects.filter(
-            statut_agent__in=[
-                DossierStatutAgent.NOUVEAU,
-                DossierStatutAgent.TRANSMIS_RESP_GEST,
-                DossierStatutAgent.TRANSMIS_ANALYSTE,
-                DossierStatutAgent.EN_COURS_ANALYSE,
-            ]
-        ).order_by("-date_soumission")
-
-        from datetime import date
-        today_date = timezone.now().date()
-        dossiers_ce_mois = DossierCredit.objects.filter(
-            date_soumission__year=today_date.year,
-            date_soumission__month=today_date.month,
-        ).count()
-
-        approuves = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS).count()
-        refuses = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.REFUSE).count()
-        total_decides = approuves + refuses
-        taux_validation = round((approuves / total_decides) * 100, 1) if total_decides else 0
-
-        portefeuille_total = DossierCredit.objects.aggregate(total=Sum('montant'))['total'] or 0
-
-        dossiers_urgents = list(dossiers_pending[:5])
-        mes_clients = []  # À brancher plus tard si relation de portefeuille
-
+        
+        # Historique actions (optimisé)
+        historique_actions = JournalAction.objects.select_related(
+            'dossier', 'acteur'
+        ).order_by("-timestamp")[:20]
+        
+        # Taux de validation
+        total_decides = stats['approuves'] + stats['refuses']
+        taux_validation = round((stats['approuves'] / total_decides) * 100, 1) if total_decides else 0
+        
         debug_info['template_to_use'] = 'dashboard_gestionnaire.html'
+        debug_info['total_dossiers_base'] = stats['total']
+        debug_info['dossiers_affiches'] = len(dossiers_en_cours)
+        
         ctx = {
             "dossiers_pending": dossiers_pending,
             "recents": recents,
             "kpi": kpi,
             "dossiers": dossiers_en_cours,
             "dossiers_en_cours": dossiers_en_cours,
-            "dossiers_urgents": dossiers_urgents,
-            "dossiers_ce_mois": dossiers_ce_mois,
+            "dossiers_traites": dossiers_traites,
+            "historique_actions": historique_actions,
+            "dossiers_urgents": dossiers_pending[:5],
+            "dossiers_ce_mois": stats['total'],  # Approximation
             "taux_validation": taux_validation,
-            "portefeuille_total": portefeuille_total,
-            "mes_clients": mes_clients,
+            "portefeuille_total": stats['montant_total'],
+            "mes_clients": [],
+            "mes_dossiers_crees": recents[:20],
             "debug_info": debug_info,
+            "page": page,
         }
         return render(request, "suivi_demande/dashboard_gestionnaire.html", ctx)
 
     elif role == UserRoles.ANALYSTE:
-        dossiers = DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]
-        ).order_by("-date_soumission")
-        return render(request, "suivi_demande/dashboard_analyste.html", {"dossiers": dossiers})
+        # ✅ OPTIMISÉ: Service Layer filtre automatiquement par rôle
+        page = DossierService.get_dossiers_for_user(
+            user=request.user,
+            page=request.GET.get('page', 1),
+            per_page=30
+        )
+        
+        dossiers = list(page.object_list)
+        dossiers_en_attente = [d for d in dossiers if d.statut_agent == DossierStatutAgent.TRANSMIS_ANALYSTE]
+        dossiers_prioritaires = dossiers[:5]
+        
+        # ✅ OPTIMISÉ: Stats via Service Layer
+        stats = DossierService.get_statistics_for_role(request.user)
+        
+        # Dossiers traités (séparés)
+        dossiers_traites = [
+            d for d in dossiers
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ][:20]
+        
+        # Historique (optimisé)
+        historique_actions = JournalAction.objects.select_related(
+            'dossier', 'acteur'
+        ).order_by("-timestamp")[:20]
+        
+        context = {
+            "dossiers": dossiers,
+            "dossiers_en_attente": dossiers_en_attente,
+            "dossiers_a_analyser": dossiers,
+            "dossiers_prioritaires": dossiers_prioritaires,
+            "dossiers_traites": dossiers_traites,
+            "historique_actions": historique_actions,
+            "total_dossiers": stats['total'],
+            "dossiers_ce_mois": stats['total'],
+            "page": page,
+        }
+        return render(request, "suivi_demande/dashboard_analyste.html", context)
 
     elif role == UserRoles.RESPONSABLE_GGR:
-        dossiers = DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.EN_COURS_VALIDATION_GGR, DossierStatutAgent.EN_ATTENTE_DECISION_DG]
-        ).order_by("-date_soumission")
-        return render(request, "suivi_demande/dashboard_responsable_ggr_pro.html", {"dossiers": dossiers})
+        # ✅ OPTIMISÉ: Service Layer filtre automatiquement
+        page = DossierService.get_dossiers_for_user(
+            user=request.user,
+            page=request.GET.get('page', 1),
+            per_page=30
+        )
+        
+        dossiers = list(page.object_list)
+        dossiers_traites = [
+            d for d in dossiers
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ][:20]
+        
+        # Historique (optimisé)
+        historique_actions = JournalAction.objects.select_related(
+            'dossier', 'acteur'
+        ).order_by("-timestamp")[:20]
+        
+        return render(request, "suivi_demande/dashboard_responsable_ggr_pro.html", {
+            "dossiers": dossiers,
+            "dossiers_traites": dossiers_traites,
+            "historique_actions": historique_actions,
+            "page": page,
+        })
 
     elif role == UserRoles.BOE:
-        dossiers = DossierCredit.objects.filter(
-            statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
-        ).order_by("-date_soumission")
-        return render(request, "suivi_demande/dashboard_boe.html", {"dossiers": dossiers})
+        # ✅ OPTIMISÉ: Service Layer filtre automatiquement (APPROUVE_ATTENTE_FONDS)
+        page = DossierService.get_dossiers_for_user(
+            user=request.user,
+            page=request.GET.get('page', 1),
+            per_page=30
+        )
+        
+        dossiers = list(page.object_list)
+        
+        # ✅ OPTIMISÉ: Stats via Service Layer
+        stats = DossierService.get_statistics_for_role(request.user)
+        
+        # Dossiers traités
+        dossiers_traites = [
+            d for d in dossiers
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ][:20]
+        
+        # Historique (optimisé)
+        historique_actions = JournalAction.objects.select_related(
+            'dossier', 'acteur'
+        ).order_by("-timestamp")[:20]
+        
+        context = {
+            "dossiers": dossiers,
+            "dossiers_traites": dossiers_traites,
+            "historique_actions": historique_actions,
+            "fonds_liberes_today": 0,  # Nécessiterait query supplémentaire
+            "total_dossiers": stats['total'],
+            "page": page,
+        }
+        return render(request, "suivi_demande/dashboard_boe.html", context)
 
     else:
-        dossiers = DossierCredit.objects.all().order_by("-date_soumission")[:100]
-        return render(request, "suivi_demande/dashboard_super_admin.html", {"dossiers": dossiers})
+        # Dashboard Super Admin - Gestion des utilisateurs uniquement
+        from django.contrib.admin.models import LogEntry
+        
+        # Tous les utilisateurs
+        all_users = User.objects.select_related('profile').all().order_by('-date_joined')
+        
+        # Statistiques
+        stats_total_users = all_users.count()
+        stats_users_active = all_users.filter(is_active=True).count()
+        stats_users_inactive = all_users.filter(is_active=False).count()
+        
+        # Statistiques par rôle
+        stats_roles = {}
+        for role_value, role_label in UserRoles.choices:
+            count = UserProfile.objects.filter(role=role_value).count()
+            stats_roles[role_label] = count
+        
+        # Historique des actions sur les utilisateurs (créations, modifications, désactivations)
+        # Utiliser LogEntry de Django Admin pour tracer les actions
+        historique_utilisateurs = LogEntry.objects.select_related('user', 'content_type').filter(
+            content_type__model__in=['user', 'userprofile']
+        ).order_by('-action_time')[:50]
+        
+        # Utilisateurs récemment créés
+        users_recent = all_users[:10]
+        
+        context = {
+            "all_users": all_users,
+            "users_recent": users_recent,
+            "stats_total_users": stats_total_users,
+            "stats_users_active": stats_users_active,
+            "stats_users_inactive": stats_users_inactive,
+            "stats_roles": stats_roles,
+            "historique_utilisateurs": historique_utilisateurs,
+        }
+        return render(request, "suivi_demande/dashboard_super_admin.html", context)
 
 
 
@@ -295,7 +468,8 @@ def transition_dossier(request, pk, action: str):
     """Effectue une transition d'état sur un dossier en fonction du rôle et de l'action."""
     if request.method != "POST":
         messages.error(request, "Méthode non autorisée.")
-        return redirect("dashboard")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:dashboard")
 
     dossier = get_object_or_404(DossierCredit, pk=pk)
     profile = getattr(request.user, "profile", None)
@@ -340,7 +514,8 @@ def transition_dossier(request, pk, action: str):
             if dossier.statut_agent in [DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]:
                 if not commentaire_retour:
                     messages.error(request, "Un commentaire expliquant pourquoi le dossier est incomplet est requis.")
-                    return redirect("dossier_detail", pk=dossier.pk)
+                    namespace = get_current_namespace(request)
+                    return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
                 vers_statut = DossierStatutAgent.NOUVEAU  # Reste nouveau mais avec commentaire
                 nouveau_statut_client = DossierStatutClient.SE_RAPPROCHER_GEST
                 action_log = "RETOUR_CLIENT"
@@ -393,7 +568,8 @@ def transition_dossier(request, pk, action: str):
 
     if not allowed:
         messages.error(request, "Action non autorisée pour votre rôle ou l'état actuel du dossier.")
-        return redirect("dashboard")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:dashboard")
 
     ancien_statut_client = dossier.statut_client
     dossier.statut_agent = vers_statut
@@ -426,20 +602,133 @@ def transition_dossier(request, pk, action: str):
     try:
         # Personnaliser le message selon l'action
         if action == "retour_client":
-            message_notification = f"Votre dossier nécessite des compléments. Motif: {commentaire_retour}"
-            titre_notification = f"Dossier {dossier.reference} - Compléments requis"
+            message_notification = (
+                f"🔔 Nouveau message • Dossier {dossier.reference}\n"
+                f"Votre dossier nécessite des compléments. Motif: {commentaire_retour}"
+            )
+            titre_notification = f"🔔 Dossier {dossier.reference} • Compléments requis"
         else:
-            message_notification = f"Nouveau statut: {dossier.get_statut_client_display()}."
-            titre_notification = f"Votre dossier {dossier.reference} a été mis à jour"
+            message_notification = (
+                f"🔔 Mise à jour • Dossier {dossier.reference}\n"
+                f"Statut côté client: {dossier.get_statut_client_display()}"
+            )
+            titre_notification = f"🔔 Dossier {dossier.reference} • Mise à jour"
         
-        # Créer la notification
+        # Créer la notification pour le client
         notification = Notification.objects.create(
             utilisateur_cible=dossier.client,
-            type="DOSSIER_MAJ",
+            type="NOUVEAU_MESSAGE",
             titre=titre_notification,
             message=message_notification,
             canal="INTERNE",
         )
+        
+        # Fonction pour notifier un groupe d'utilisateurs
+        def notifier_utilisateurs(role_cible, titre, message_template):
+            """Notifie tous les utilisateurs d'un rôle donné"""
+            utilisateurs = User.objects.filter(
+                profile__role=role_cible,
+                is_active=True
+            )
+            
+            count = 0
+            for user in utilisateurs:
+                Notification.objects.create(
+                    utilisateur_cible=user,
+                    type="NOUVEAU_MESSAGE",
+                    titre=titre,
+                    message=message_template.format(
+                        user_name=user.get_full_name() or user.username,
+                        dossier_ref=dossier.reference,
+                        client_name=dossier.client.get_full_name() or dossier.client.username,
+                        montant=dossier.montant,
+                        produit=dossier.produit,
+                        expediteur=request.user.get_full_name() or request.user.username
+                    ),
+                    canal="INTERNE",
+                )
+                
+                # Envoyer un email si possible
+                if user.email:
+                    try:
+                        send_mail(
+                            subject=f"[Crédit du Congo] {titre}",
+                            message=message_template.format(
+                                user_name=user.get_full_name() or user.username,
+                                dossier_ref=dossier.reference,
+                                client_name=dossier.client.get_full_name() or dossier.client.username,
+                                montant=dossier.montant,
+                                produit=dossier.produit,
+                                expediteur=request.user.get_full_name() or request.user.username
+                            ),
+                            from_email=settings.DEFAULT_FROM_EMAIL,
+                            recipient_list=[user.email],
+                            fail_silently=True,
+                        )
+                        print(f"✓ Email envoyé à {user.username} ({user.email})")
+                        count += 1
+                    except Exception as e:
+                        print(f"✗ Erreur envoi email à {user.username}: {e}")
+            
+            if count > 0:
+                messages.success(request, f"✓ {count} utilisateur(s) notifié(s) de l'arrivée du dossier.")
+            return count
+        
+        # Notifier selon l'action
+        if action == "transmettre_analyste":
+            notifier_utilisateurs(
+                UserRoles.ANALYSTE,
+                f"🔔 Nouveau dossier à analyser • {dossier.reference}",
+                (
+                    "🔔 Nouveau message\n"
+                    "Référence: {dossier_ref}\n"
+                    "Client: {client_name}\n"
+                    "Montant: {montant} FCFA\n"
+                    "Produit: {produit}\n"
+                    "Transmis par: {expediteur}"
+                )
+            )
+        
+        elif action == "transmettre_ggr":
+            notifier_utilisateurs(
+                UserRoles.RESPONSABLE_GGR,
+                f"🔔 Dossier à valider • {dossier.reference}",
+                (
+                    "🔔 Nouveau message\n"
+                    "Référence: {dossier_ref}\n"
+                    "Client: {client_name}\n"
+                    "Montant: {montant} FCFA\n"
+                    "Produit: {produit}\n"
+                    "Transmis par: {expediteur}"
+                )
+            )
+        
+        elif action == "approuver":
+            notifier_utilisateurs(
+                UserRoles.BOE,
+                f"🔔 Dossier approuvé • {dossier.reference}",
+                (
+                    "🔔 Nouveau message\n"
+                    "Référence: {dossier_ref}\n"
+                    "Client: {client_name}\n"
+                    "Montant: {montant} FCFA\n"
+                    "Produit: {produit}\n"
+                    "Approuvé par: {expediteur}"
+                )
+            )
+        
+        elif action == "retour_gestionnaire":
+            notifier_utilisateurs(
+                UserRoles.GESTIONNAIRE,
+                f"🔔 Dossier retourné • {dossier.reference}",
+                (
+                    "🔔 Nouveau message\n"
+                    "Référence: {dossier_ref}\n"
+                    "Client: {client_name}\n"
+                    "Montant: {montant} FCFA\n"
+                    "Retourné par: {expediteur}"
+                )
+            )
         
         # Log pour debug
         print(f"? Notification créée: ID={notification.id}, Client={dossier.client.username}, Action={action}")
@@ -467,9 +756,6 @@ def transition_dossier(request, pk, action: str):
             html_message = None
             if action == "retour_client":
                 try:
-                    from django.template.loader import render_to_string
-                    from django.contrib.staticfiles import finders
-                    
                     # URL du logo
                     logo_url = request.build_absolute_uri(static('suivi_demande/img/Credit_Du_Congo.png'))
                     site_url = request.build_absolute_uri('/')
@@ -508,7 +794,8 @@ def transition_dossier(request, pk, action: str):
     else:
         messages.success(request, "Transition effectuée avec succès.")
     
-    return redirect("dossier_detail", pk=dossier.pk)
+    namespace = get_current_namespace(request)
+    return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
 @login_required
 def dossier_detail(request, pk):
@@ -517,12 +804,24 @@ def dossier_detail(request, pk):
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", UserRoles.CLIENT)
 
-    # AccÃ¨s: le client ne peut voir que ses propres dossiers; les autres rÃ´les peuvent consulter.
+    # Accès: le client ne peut voir que ses propres dossiers; les autres rôles peuvent consulter.
     if role == UserRoles.CLIENT and dossier.client_id != request.user.id:
-        messages.error(request, "AccÃ¨s refusÃ© au dossier demandÃ©.")
-        return redirect("dashboard")
+        messages.error(request, "Accès refusé au dossier demandé.")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:dashboard")
 
-    # Permissions centralisÃ©es
+    # Marquer les notifications liées au dossier comme lues (sans champ FK: match sur la référence)
+    try:
+        Notification.objects.filter(
+            utilisateur_cible=request.user,
+            lu=False,
+        ).filter(
+            Q(titre__icontains=dossier.reference) | Q(message__icontains=dossier.reference)
+        ).update(lu=True)
+    except Exception:
+        pass
+
+    # Permissions centralisées
     can_upload = can_upload_piece(dossier, request.user)
     _flags = get_transition_flags(dossier, request.user)
     can_tx_transmettre_analyste = _flags["can_tx_transmettre_analyste"]
@@ -543,31 +842,36 @@ def dossier_detail(request, pk):
                     message=msg,
                     cible_role=None,
                 )
-                messages.success(request, "Commentaire ajoutÃ©.")
-            return redirect("dossier_detail", pk=dossier.pk)
+                messages.success(request, "Commentaire ajouté.")
+            namespace = get_current_namespace(request)
+            return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
         elif action == "upload_piece":
             if not can_upload:
-                messages.error(request, "Vous ne pouvez pas dÃ©poser de piÃ¨ce Ã  ce stade.")
-                return redirect("dossier_detail", pk=dossier.pk)
+                messages.error(request, "Vous ne pouvez pas déposer de pièce à ce stade.")
+                namespace = get_current_namespace(request)
+                return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
             f = request.FILES.get("fichier")
             type_piece = request.POST.get("type_piece") or "AUTRE"
             if not f:
-                messages.error(request, "Aucun fichier sÃ©lectionnÃ©.")
-                return redirect("dossier_detail", pk=dossier.pk)
+                messages.error(request, "Aucun fichier sélectionné.")
+                namespace = get_current_namespace(request)
+                return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
             # Validation taille
             file_size = getattr(f, "size", 0) or 0
             if file_size > getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024):
                 max_mb = round(getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024) / (1024 * 1024), 2)
-                messages.error(request, f"Fichier trop volumineux. Taille maximale autorisÃ©e: {max_mb} Mo.")
-                return redirect("dossier_detail", pk=dossier.pk)
+                messages.error(request, f"Fichier trop volumineux. Taille maximale autorisée: {max_mb} Mo.")
+                namespace = get_current_namespace(request)
+                return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
             # Validation extension
             filename = getattr(f, "name", "")
             ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
             allowed_exts = getattr(settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"})
             if ext not in allowed_exts:
-                messages.error(request, f"Extension de fichier non autorisÃ©e ({ext}). AutorisÃ©es: {', '.join(sorted(allowed_exts))}.")
-                return redirect("dossier_detail", pk=dossier.pk)
+                messages.error(request, f"Extension de fichier non autorisée ({ext}). Autorisées: {', '.join(sorted(allowed_exts))}.")
+                namespace = get_current_namespace(request)
+                return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
             # Taille et type de base (MVP). On pourrait filtrer extensions ici.
             pj = PieceJointe.objects.create(
                 dossier=dossier,
@@ -576,8 +880,9 @@ def dossier_detail(request, pk):
                 taille=getattr(f, "size", 0) or 0,
                 upload_by=request.user,
             )
-            messages.success(request, "PiÃ¨ce jointe tÃ©lÃ©chargÃ©e.")
-            return redirect("dossier_detail", pk=dossier.pk)
+            messages.success(request, "Pièce jointe téléchargée.")
+            namespace = get_current_namespace(request)
+            return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
     pieces = PieceJointe.objects.filter(dossier=dossier).order_by("-upload_at")
     commentaires = Commentaire.objects.filter(dossier=dossier).order_by("-created_at")
@@ -613,7 +918,8 @@ def notifications_mark_all_read(request):
     if request.method == "POST":
         Notification.objects.filter(utilisateur_cible=request.user, lu=False).update(lu=True)
         messages.success(request, "Toutes vos notifications ont Ã©tÃ© marquÃ©es comme lues.")
-    return redirect("notifications_list")
+    namespace = get_current_namespace(request)
+    return redirect(f"{namespace}:notifications_list")
 
 
 @login_required
@@ -625,8 +931,13 @@ def notifications_mark_read(request, pk: int):
             notif.lu = True
             notif.save(update_fields=["lu"])
         # Redirige vers la page prÃ©cÃ©dente si fournie
-        return redirect(request.POST.get("next") or "notifications_list")
-    return redirect("notifications_list")
+        namespace = get_current_namespace(request)
+        next_url = request.POST.get("next")
+        if next_url:
+            return redirect(next_url)
+        return redirect(f"{namespace}:notifications_list")
+    namespace = get_current_namespace(request)
+    return redirect(f"{namespace}:notifications_list")
 
 
 # --- Demande de crÃ©dit: Wizard ---
@@ -669,12 +980,14 @@ def demande_start(request):
         request.session.modified = True
         
         # Rediriger vers la page de vérification
-        return redirect("demande_verification")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:demande_verification")
     else:
         # Profil incomplet, aller au formulaire classique
         request.session["profile_prefilled"] = False
         request.session.modified = True
-        return redirect("demande_step1")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:demande_step1")
 
 
 @login_required
@@ -687,7 +1000,8 @@ def demande_verification(request):
     
     if not step1_data:
         # Pas de données pré-remplies, rediriger vers le début
-        return redirect("demande_start")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:demande_start")
     
     if request.method == "POST":
         action = request.POST.get("action")
@@ -695,11 +1009,13 @@ def demande_verification(request):
         if action == "confirm":
             # Utilisateur confirme les données, passer à l'étape 2
             messages.success(request, "Informations confirmées. Passons aux détails du crédit.")
-            return redirect("demande_step2")
+            namespace = get_current_namespace(request)
+            return redirect(f"{namespace}:demande_step2")
             
         elif action == "modify":
             # Utilisateur veut modifier, aller au formulaire complet
-            return redirect("demande_step1")
+            namespace = get_current_namespace(request)
+            return redirect(f"{namespace}:demande_step1")
             
         elif action == "update_profile":
             # Mettre à jour le profil avec les nouvelles données si modifiées
@@ -709,13 +1025,12 @@ def demande_verification(request):
                 cleaned = form.cleaned_data.copy()
                 dn = cleaned.get('date_naissance')
                 try:
-                    from datetime import date, datetime
                     if isinstance(dn, (date, datetime)):
                         cleaned['date_naissance'] = dn.isoformat()
                 except Exception:
                     pass
                 
-                data["step1"] = cleaned
+                data["step1"] = serialize_form_data(cleaned)
                 request.session["demande_wizard"] = data
                 request.session.modified = True
                 
@@ -723,13 +1038,13 @@ def demande_verification(request):
                 if request.POST.get("update_user_profile"):
                     user_profile = getattr(request.user, 'profile', None)
                     if user_profile:
-                        user_profile.telephone = cleaned.get('telephone', user_profile.telephone)
-                        user_profile.adresse = cleaned.get('adresse', user_profile.adresse)
-                        user_profile.ville = cleaned.get('ville', getattr(user_profile, 'ville', ''))
+                        user_profile.telephone = cleaned.get('numero_telephone', user_profile.telephone)
+                        user_profile.adresse = cleaned.get('adresse_exacte', user_profile.adresse)
                         user_profile.save()
                         messages.success(request, "Votre profil a été mis à jour.")
                 
-                return redirect("demande_step2")
+                namespace = get_current_namespace(request)
+                return redirect(f"{namespace}:demande_step2")
     
     # Préparer le formulaire avec les données pré-remplies
     form = DemandeStep1Form(initial=step1_data)
@@ -753,14 +1068,13 @@ def demande_step1(request):
     if not initial and not request.session.get("profile_prefilled", False):
         user_profile = getattr(request.user, 'profile', None)
         if user_profile:
+            full_name = (user_profile.full_name or '').strip() if hasattr(user_profile, 'full_name') else ''
+            if not full_name:
+                full_name = (request.user.get_full_name() or f"{request.user.last_name} {request.user.first_name}").strip()
             initial = {
-                'nom': request.user.last_name or '',
-                'prenom': request.user.first_name or '',
-                'email': request.user.email or '',
-                'telephone': getattr(user_profile, 'telephone', ''),
-                'adresse': getattr(user_profile, 'adresse', ''),
-                'ville': getattr(user_profile, 'ville', ''),
-                'cni': getattr(user_profile, 'cni', ''),
+                'nom_prenom': full_name,
+                'numero_telephone': getattr(user_profile, 'telephone', ''),
+                'adresse_exacte': getattr(user_profile, 'adresse', ''),
             }
             request.session["profile_prefilled"] = True
             request.session.modified = True
@@ -770,16 +1084,16 @@ def demande_step1(request):
             cleaned = form.cleaned_data.copy()
             dn = cleaned.get('date_naissance')
             try:
-                from datetime import date, datetime
                 if isinstance(dn, (date, datetime)):
                     cleaned['date_naissance'] = dn.isoformat()
             except Exception:
                 pass
-            data["step1"] = cleaned
+            data["step1"] = serialize_form_data(cleaned)
             request.session["demande_wizard"] = data
             request.session.modified = True
             messages.success(request, "Ã‰tape 1 enregistrÃ©e.")
-            return redirect("demande_step2")
+            namespace = get_current_namespace(request)
+            return redirect(f"{namespace}:demande_step2")
     else:
         form = DemandeStep1Form(initial=initial)
     ctx = {
@@ -798,11 +1112,12 @@ def demande_step2(request):
     if request.method == "POST":
         form = DemandeStep2Form(request.POST)
         if form.is_valid():
-            data["step2"] = form.cleaned_data
+            data["step2"] = serialize_form_data(form.cleaned_data)
             request.session["demande_wizard"] = data
             request.session.modified = True
             messages.success(request, "Ã‰tape 2 enregistrÃ©e.")
-            return redirect("demande_step3")
+            namespace = get_current_namespace(request)
+            return redirect(f"{namespace}:demande_step3")
     else:
         form = DemandeStep2Form(initial=initial)
     ctx = {
@@ -835,18 +1150,14 @@ def demande_step3(request):
 
     def capacite_40(step2dict):
         try:
-            salaire = float(step2dict.get("salaire_net_moyen", 0) or 0)
-            autres = float(step2dict.get("autres_revenus", 0) or 0)
-            charges = float(step2dict.get("charges_mensuelles", 0) or 0)
-            # Nouveaux champs: si has_credits == 'OUI', prendre les mensualitÃ©s totales
-            credits = 0.0
-            try:
-                if step2dict.get('has_credits') == 'OUI':
-                    credits = float(step2dict.get('mensualites_totales', 0) or 0)
-            except Exception:
-                credits = 0.0
-            dispo = max(0.0, salaire + autres - charges - credits)
-            return round(dispo * 0.40, 2)
+            salaire = float(step2dict.get("salaire_net_moyen_fcfa", 0) or 0)
+            # Total des échéances connues en cours
+            credits = float(step2dict.get("total_echeances_credits_cours", 0) or 0)
+            # Capacité brute 40% du salaire
+            brute = max(0.0, salaire * 0.40)
+            # Capacité dispo après crédits en cours
+            nette = max(0.0, brute - credits)
+            return round(nette, 2)
         except Exception:
             return 0.0
 
@@ -857,38 +1168,25 @@ def demande_step3(request):
         form = DemandeStep3Form(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            echeance_calculee = annuite_mensuelle(cd["montant_demande"], cd["taux"], cd["duree_mois"])
+            echeance_calculee = annuite_mensuelle(cd["demande_montant_fcfa"], cd["demande_taux_pourcent"], cd["demande_duree_mois"])
             if echeance_calculee > capacite_max:
                 messages.error(
                     request,
-                    f"L'Ã©chÃ©ance estimÃ©e ({echeance_calculee:,.0f} FCFA) dÃ©passe la capacitÃ© maximale (40%) de {capacite_max:,.0f} FCFA.",
+                    f"L'échéance estimée ({echeance_calculee:,.0f} FCFA) dépasse la capacité maximale (40%) de {capacite_max:,.0f} FCFA.",
                 )
             else:
                 cd["echeance_calculee"] = echeance_calculee
-                data["step3"] = cd
+                data["step3"] = serialize_form_data(cd)
                 request.session["demande_wizard"] = data
                 request.session.modified = True
-                messages.success(request, "Ã‰tape 3 enregistrÃ©e.")
-                return redirect("demande_step4")
+                messages.success(request, "Étape 3 enregistrée.")
+                namespace = get_current_namespace(request)
+                return redirect(f"{namespace}:demande_step4")
     else:
         form = DemandeStep3Form(initial=initial)
-        if initial.get("montant_demande") and initial.get("taux") and initial.get("duree_mois"):
-            echeance_calculee = annuite_mensuelle(initial.get("montant_demande"), initial.get("taux"), initial.get("duree_mois"))
+        if initial.get("demande_montant_fcfa") and initial.get("demande_taux_pourcent") and initial.get("demande_duree_mois"):
+            echeance_calculee = annuite_mensuelle(initial.get("demande_montant_fcfa"), initial.get("demande_taux_pourcent"), initial.get("demande_duree_mois"))
 
-    ctx = {
-        "form": form,
-        "step": 3,
-        "total_steps": 4,
-        "echeance_calculee": echeance_calculee,
-        "capacite_max": capacite_max,
-    }
-    return render(request, "suivi_demande/demande_step3.html", ctx)
-
-
-@login_required
-def demande_step4(request):
-    data = request.session.get("demande_wizard", {})
-    # Build human-readable recaps
     def map_items(step_dict: dict, labels: dict):
         items = []
         # preserve label ordering first
@@ -903,65 +1201,144 @@ def demande_step4(request):
         return items
 
     labels1 = {
-        "nom": "Nom",
-        "prenom": "PrÃ©nom",
+        "nom_prenom": "Nom et prénom",
         "date_naissance": "Date de naissance",
-        "lieu_naissance": "Lieu de naissance",
-        "nationalite": "NationalitÃ©",
-        "situation_familiale": "Situation familiale",
-        "nb_personnes_charge": "Personnes Ã  charge",
-        "adresse": "Adresse",
-        "ville": "Ville",
-        "pays": "Pays",
-        "telephone": "TÃ©lÃ©phone",
-        "email": "Email",
+        "nationalite": "Nationalité",
+        "adresse_exacte": "Adresse exacte",
+        "numero_telephone": "Téléphone",
+        "emploi_occupe": "Emploi occupé",
+        "statut_emploi": "Statut d'emploi",
+        "anciennete_emploi": "Ancienneté emploi",
+        "type_contrat": "Type de contrat",
+        "nom_employeur": "Nom employeur",
+        "lieu_emploi": "Lieu d'emploi",
+        "employeur_client_banque": "Employeur client banque",
+        "radical_employeur": "Radical employeur",
+        "situation_famille": "Situation familiale",
+        "nombre_personnes_charge": "Personnes à charge",
+        "regime_matrimonial": "Régime matrimonial",
+        "participation_enquetes": "Participation aux enquêtes",
+        "salaire_conjoint": "Salaire conjoint (FCFA)",
+        "emploi_conjoint": "Emploi conjoint",
+        "statut_logement": "Statut logement",
+        "numero_tf": "Numéro TF",
+        "radical": "Radical (client)",
+        "date_ouverture_compte": "Date ouverture compte",
+        "date_domiciliation_salaire": "Date domiciliation salaire",
     }
     labels2 = {
-        "statut_emploi": "Situation professionnelle",
-        "employeur_nom": "Nom de l'employeur",
-        "poste_occupe": "Poste occupÃ©",
-        "anciennete": "AnciennetÃ©",
-        "salaire_net_moyen": "Revenu mensuel net (FCFA)",
-        "autres_revenus": "Autres revenus mensuels (FCFA)",
-        "charges_mensuelles": "DÃ©penses mensuelles (FCFA)",
-        "has_credits": "CrÃ©dits en cours",
-        "montant_total_credits": "Montant total des crÃ©dits (FCFA)",
-        "mensualites_totales": "MensualitÃ©s totales (FCFA)",
+        "salaire_net_moyen_fcfa": "Salaire net moyen (FCFA)",
+        "echeances_prets_relevees": "Échéances prêts relevées (FCFA)",
+        "total_echeances_credits_cours": "Total échéances crédits en cours (FCFA)",
+        "salaire_net_avant_endettement_fcfa": "Salaire net avant endettement (FCFA)",
+        "capacite_endettement_brute_fcfa": "Capacité d'endettement brute (FCFA)",
+        "capacite_endettement_nette_fcfa": "Capacité d'endettement nette (FCFA)",
     }
 
     labels3 = {
-        "nature_pret": "Nature du prÃªt",
-        "objet": "Objet du prÃªt",
-        "montant_demande": "Montant (FCFA)",
-        "duree_mois": "DurÃ©e (mois)",
-        "taux": "Taux %",
-        "periodicite": "PÃ©riodicitÃ©",
-        "date_premiere_echeance": "Date 1re Ã©chÃ©ance",
-        "echeance_calculee": "Ã‰chÃ©ance estimÃ©e (FCFA)",
+        "objet_pret": "Objet du prêt",
+        "demande_montant_fcfa": "Montant (FCFA)",
+        "demande_duree_mois": "Durée (mois)",
+        "demande_taux_pourcent": "Taux %",
+        "demande_periodicite": "Périodicité",
+        "demande_date_1ere_echeance": "Date 1re échéance",
+        "demande_montant_echeance_fcfa": "Montant échéance (FCFA)",
+        "echeance_calculee": "Échéance estimée (FCFA)",
     }
 
     recap1 = map_items(data.get("step1", {}), labels1)
     recap2 = map_items(data.get("step2", {}), labels2)
     recap3 = map_items(data.get("step3", {}), labels3)
     initial = data.get("step4", {})
+
+    ctx = {
+        "form": form,
+        "step": 3,
+        "total_steps": 4,
+        "echeance_calculee": echeance_calculee,
+        "capacite_max": capacite_max,
+    }
+    return render(request, "suivi_demande/demande_step3.html", ctx)
+def demande_step4(request):
+    data = request.session.get("demande_wizard", {})
+    # Build human-readable recaps (ensure available in all render paths)
+    def map_items(step_dict: dict, labels: dict):
+        items = []
+        for k, lbl in labels.items():
+            if k in step_dict:
+                items.append((lbl, step_dict.get(k)))
+        for k, v in step_dict.items():
+            if k not in labels:
+                lbl = k.replace("_", " ")
+                items.append((lbl, v))
+        return items
+
+    labels1 = {
+        "nom_prenom": "Nom et prénom",
+        "date_naissance": "Date de naissance",
+        "nationalite": "Nationalité",
+        "adresse_exacte": "Adresse exacte",
+        "numero_telephone": "Téléphone",
+        "telephone_travail": "Téléphone travail",
+        "telephone_domicile": "Téléphone domicile",
+        "emploi_occupe": "Emploi occupé",
+        "statut_emploi": "Statut d'emploi",
+        "anciennete_emploi": "Ancienneté emploi",
+        "type_contrat": "Type de contrat",
+        "nom_employeur": "Nom employeur",
+        "lieu_emploi": "Lieu d'emploi",
+        "employeur_client_banque": "Employeur client banque",
+        "radical_employeur": "Radical employeur",
+        "situation_famille": "Situation familiale",
+        "nombre_personnes_charge": "Personnes à charge",
+        "regime_matrimonial": "Régime matrimonial",
+        "salaire_conjoint": "Salaire conjoint (FCFA)",
+        "emploi_conjoint": "Emploi conjoint",
+        "statut_logement": "Statut logement",
+        "numero_tf": "Numéro TF",
+        "logement_autres_precision": "Précision (logement)",
+        "radical": "Radical (client)",
+        "date_ouverture_compte": "Date ouverture compte",
+        "date_domiciliation_salaire": "Date domiciliation salaire",
+    }
+    labels2 = {
+        "salaire_net_moyen_fcfa": "Salaire net moyen (FCFA)",
+        "echeances_prets_relevees": "Échéances prêts relevées (FCFA)",
+        "total_echeances_credits_cours": "Total échéances crédits en cours (FCFA)",
+        "salaire_net_avant_endettement_fcfa": "Salaire net avant endettement (FCFA)",
+        "capacite_endettement_brute_fcfa": "Capacité d'endettement brute (FCFA)",
+        "capacite_endettement_nette_fcfa": "Capacité d'endettement nette (FCFA)",
+    }
+
+    labels3 = {
+        "nature_pret": "Type de crédit",
+        "motif_credit": "Motif du crédit",
+        "demande_montant_fcfa": "Montant (FCFA)",
+        "demande_duree_mois": "Durée (mois)",
+        "demande_taux_pourcent": "Taux %",
+        "demande_periodicite": "Périodicité",
+        "demande_date_1ere_echeance": "Date 1re échéance",
+        "demande_montant_echeance_fcfa": "Montant échéance (FCFA)",
+        "echeance_calculee": "Échéance estimée (FCFA)",
+    }
+
+    recap1 = map_items(data.get("step1", {}), labels1)
+    recap2 = map_items(data.get("step2", {}), labels2)
+    recap3 = map_items(data.get("step3", {}), labels3)
+    initial = data.get("step4", {})
+
     if request.method == "POST":
         form = DemandeStep4Form(request.POST)
         if form.is_valid():
-            data["step4"] = form.cleaned_data
-            # Valider la prÃ©sence des fichiers requis
+            cd = form.cleaned_data
+            # Étape 4: toutes les pièces sont obligatoires
             cni = request.FILES.get("cni")
             fiche = request.FILES.get("fiche_paie")
             releve = request.FILES.get("releve_bancaire")
-            missing = []
-            if not cni:
-                missing.append("Carte d'identitÃ© (CNI)")
-            if not fiche:
-                missing.append("Fiche de paie")
-            if not releve:
-                missing.append("RelevÃ© bancaire")
-            if missing:
-                messages.error(request, "Veuillez joindre les documents obligatoires: " + ", ".join(missing) + ".")
-                return render(request, "suivi_demande/demande_step4.html", {"form": form, "step": 4, "total_steps": 4, "recap": data, "recap1": recap1, "recap2": recap2, "recap3": recap3})
+            billet_ordre_f = request.FILES.get("billet_ordre")
+            attestation_emp_f = request.FILES.get("attestation_employeur")
+            attestation_dom_f = request.FILES.get("attestation_domiciliation")
+            assurance_f = request.FILES.get("assurance_deces_invalidite")
 
             # Validation fichiers
             def validate_file(f):
@@ -973,29 +1350,60 @@ def demande_step4(request):
                 ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
                 allowed = getattr(settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"})
                 if ext not in allowed:
-                    return f"Extension non autorisÃ©e ({ext}). AutorisÃ©es: {', '.join(sorted(allowed))}."
+                    return f"Extension non autorisée ({ext}). Autorisées: {', '.join(sorted(allowed))}."
                 return None
 
-            for label, f in [("CNI", cni), ("Fiche de paie", fiche), ("RelevÃ© bancaire", releve)]:
+            # Exiger la présence de toutes les pièces
+            missing = []
+            required_files = [
+                ("Carte d'identité (CNI)", cni),
+                ("Fiche de paie", fiche),
+                ("Relevé bancaire", releve),
+                ("Billet à ordre", billet_ordre_f),
+                ("Attestation de l'employeur", attestation_emp_f),
+                ("Attestation de domiciliation irrévocable", attestation_dom_f),
+                ("Assurance décès-invalidité", assurance_f),
+            ]
+            for label, f in required_files:
+                if not f:
+                    missing.append(label)
+            if missing:
+                messages.error(request, "Veuillez joindre: " + ", ".join(missing) + ".")
+                return render(request, "suivi_demande/demande_step4.html", {"form": form, "step": 4, "total_steps": 4, "recap": data, "recap1": recap1, "recap2": recap2, "recap3": recap3})
+
+            # Valider tous les fichiers
+            for label, f in required_files:
                 err = validate_file(f)
                 if err:
                     messages.error(request, f"{label}: {err}")
                     return render(request, "suivi_demande/demande_step4.html", {"form": form, "step": 4, "total_steps": 4, "recap": data, "recap1": recap1, "recap2": recap2, "recap3": recap3})
 
-            # CrÃ©er le dossier Ã  partir du wizard (MVP)
+            # Créer le dossier à partir du wizard (MVP)
             step3 = data.get("step3", {})
-            montant = step3.get("montant_demande") or 0
+            montant = step3.get("demande_montant_fcfa") or 0
+
             try:
                 montant = Decimal(str(montant))
             except Exception:
                 montant = Decimal("0")
 
-            # GÃ©nÃ©rer une rÃ©fÃ©rence simple (unique)
+            # Générer une référence simple (unique)
             ref = f"DOS-{timezone.now().strftime('%Y%m%d%H%M%S')}-{request.user.id}"
-            produit = step3.get("nature_pret") or "CrÃ©dit"
+            produit = "Crédit"
+
+            # Déterminer l'utilisateur client à assigner au dossier
+            client_user = request.user
+            try:
+                step1_data = data.get("step1", {})
+                allow_follow = bool(step1_data.get("permettre_suivi_client"))
+                client_user_id = step1_data.get("client_user_id")
+                if allow_follow and client_user_id:
+                    client_user = User.objects.get(pk=int(client_user_id))
+            except Exception:
+                client_user = request.user
 
             dossier = DossierCredit.objects.create(
-                client=request.user,
+                client=client_user,
                 reference=ref,
                 produit=produit,
                 montant=montant,
@@ -1003,6 +1411,91 @@ def demande_step4(request):
                 statut_client=DossierStatutClient.EN_ATTENTE,
                 acteur_courant=request.user,
             )
+
+            # Mettre à jour l'état du wizard et le consentement (Étape 4)
+            try:
+                dossier.wizard_current_step = 4
+                dossier.wizard_completed = True
+                dossier.consent_accepted = bool(cd.get("accepter_conditions", False))
+                dossier.consent_accepted_at = timezone.now() if dossier.consent_accepted else None
+                dossier.save(update_fields=[
+                    "wizard_current_step",
+                    "wizard_completed",
+                    "consent_accepted",
+                    "consent_accepted_at",
+                ])
+            except Exception:
+                pass
+
+            # Persister le canevas avec les données des étapes 1 à 3
+            step1 = data.get("step1", {})
+            step2 = data.get("step2", {})
+            step3 = data.get("step3", {})
+            try:
+                # Normaliser les dates issues des steps (si chaînes)
+                def _d(v):
+                    if not v:
+                        return None
+                    if hasattr(v, 'year'):
+                        return v
+                    return parse_date(str(v))
+                CanevasProposition.objects.create(
+                    dossier=dossier,
+                    # En-tête par défaut gardé (agence, code, etc.)
+                    nom_prenom=step1.get("nom_prenom", ""),
+                    date_naissance=_d(step1.get("date_naissance", None)),
+                    nationalite=step1.get("nationalite", "CONGOLAISE"),
+                    adresse_exacte=step1.get("adresse_exacte", ""),
+                    numero_telephone=step1.get("numero_telephone", ""),
+                    telephone_travail=step1.get("telephone_travail", ""),
+                    telephone_domicile=step1.get("telephone_domicile", ""),
+                    radical=step1.get("radical", ""),
+                    date_ouverture_compte=_d(step1.get("date_ouverture_compte", None)),
+                    date_domiciliation_salaire=_d(step1.get("date_domiciliation_salaire", None)),
+                    emploi_occupe=step1.get("emploi_occupe", ""),
+                    statut_emploi=step1.get("statut_emploi", "PRIVE"),
+                    anciennete_emploi=step1.get("anciennete_emploi", ""),
+                    type_contrat=step1.get("type_contrat", "CDI"),
+                    nom_employeur=step1.get("nom_employeur", ""),
+                    lieu_emploi=step1.get("lieu_emploi", ""),
+                    employeur_client_banque=bool(step1.get("employeur_client_banque", False)),
+                    radical_employeur=step1.get("radical_employeur", ""),
+                    situation_famille=step1.get("situation_famille", "MARIE"),
+                    nombre_personnes_charge=int(step1.get("nombre_personnes_charge", 0) or 0),
+                    regime_matrimonial=step1.get("regime_matrimonial", ""),
+                    participation_enquetes=step1.get("participation_enquetes", ""),
+                    salaire_conjoint=step1.get("salaire_conjoint", 0) or 0,
+                    emploi_conjoint=step1.get("emploi_conjoint", ""),
+                    statut_logement=step1.get("statut_logement", ""),
+                    numero_tf=step1.get("numero_tf", ""),
+                    logement_autres_precision=step1.get("logement_autres_precision", ""),
+                    # Nature du prêt en cours
+                    nature_pret_cours=step1.get("nature_pret_cours", "NOKI") or "NOKI",
+                    montant_origine_fcfa=step1.get("montant_origine_fcfa", 0) or 0,
+                    date_derniere_echeance=_d(step1.get("date_derniere_echeance", None)),
+                    montant_echeance_fcfa=step1.get("montant_echeance_fcfa", 0) or 0,
+                    k_restant_du_fcfa=step1.get("k_restant_du_fcfa", 0) or 0,
+                    # Section 2
+                    salaire_net_moyen_fcfa=step2.get("salaire_net_moyen_fcfa", 0) or 0,
+                    echeances_prets_relevees=step2.get("echeances_prets_relevees", 0) or 0,
+                    total_echeances_credits_cours=step2.get("total_echeances_credits_cours", 0) or 0,
+                    salaire_net_avant_endettement_fcfa=step2.get("salaire_net_avant_endettement_fcfa", 0) or 0,
+                    capacite_endettement_brute_fcfa=step2.get("capacite_endettement_brute_fcfa", 0) or 0,
+                    capacite_endettement_nette_fcfa=step2.get("capacite_endettement_nette_fcfa", 0) or 0,
+                    # Section 3
+                    nature_pret=step3.get("nature_pret", "PRET") or "PRET",
+                    motif_credit=step3.get("motif_credit", ""),
+                    demande_montant_fcfa=step3.get("demande_montant_fcfa", 0) or 0,
+                    demande_duree_mois=int(step3.get("demande_duree_mois", 0) or 0),
+                    demande_taux_pourcent=step3.get("demande_taux_pourcent", 0) or 0,
+                    demande_periodicite=step3.get("demande_periodicite", "M"),
+                    demande_montant_echeance_fcfa=step3.get("demande_montant_echeance_fcfa", 0) or 0,
+                    demande_date_1ere_echeance=_d(step3.get("demande_date_1ere_echeance", None)),
+                )
+            except Exception as e:
+                print(f"[ERROR] Sauvegarde CanevasProposition échouée: {e}")
+                print(traceback.format_exc())
+                messages.warning(request, f"Le récapitulatif du dossier n'a pas pu être créé. Erreur: {e}")
 
             # Journal crÃ©ation
             JournalAction.objects.create(
@@ -1017,6 +1510,7 @@ def demande_step4(request):
 
             # Enregistrer les piÃ¨ces jointes
             try:
+                # Enregistrer toutes les pièces obligatoires
                 PieceJointe.objects.create(
                     dossier=dossier,
                     fichier=cni,
@@ -1038,8 +1532,36 @@ def demande_step4(request):
                     taille=getattr(releve, "size", 0) or 0,
                     upload_by=request.user,
                 )
+                PieceJointe.objects.create(
+                    dossier=dossier,
+                    fichier=billet_ordre_f,
+                    type_piece="BILLET_ORDRE",
+                    taille=getattr(billet_ordre_f, "size", 0) or 0,
+                    upload_by=request.user,
+                )
+                PieceJointe.objects.create(
+                    dossier=dossier,
+                    fichier=attestation_emp_f,
+                    type_piece="ATTESTATION_EMPLOYEUR",
+                    taille=getattr(attestation_emp_f, "size", 0) or 0,
+                    upload_by=request.user,
+                )
+                PieceJointe.objects.create(
+                    dossier=dossier,
+                    fichier=attestation_dom_f,
+                    type_piece="ATTESTATION_DOMICILIATION",
+                    taille=getattr(attestation_dom_f, "size", 0) or 0,
+                    upload_by=request.user,
+                )
+                PieceJointe.objects.create(
+                    dossier=dossier,
+                    fichier=assurance_f,
+                    type_piece="ASSURANCE_DECES_INVALIDITE",
+                    taille=getattr(assurance_f, "size", 0) or 0,
+                    upload_by=request.user,
+                )
             except Exception:
-                messages.warning(request, "PiÃ¨ces jointes non enregistrÃ©es, vous pourrez les ajouter depuis le dossier.")
+                messages.warning(request, "Pièces jointes non enregistrées, vous pourrez les ajouter depuis le dossier.")
 
             # Notification client
             try:
@@ -1086,8 +1608,9 @@ def demande_step4(request):
                 pass
             request.session.modified = True
 
-            messages.success(request, "Demande sou mise avec succÃ¨s.")
-            return redirect("dossier_detail", pk=dossier.pk)
+            messages.success(request, "Demande soumise avec succès. Vous pouvez maintenant transmettre le dossier à l'analyste.")
+            namespace = get_current_namespace(request)
+            return redirect(f"{namespace}:transmettre_analyste_page", pk=dossier.pk)
     else:
         form = DemandeStep4Form(initial=initial)
     ctx = {
@@ -1095,8 +1618,20 @@ def demande_step4(request):
         "step": 4,
         "total_steps": 4,
         "recap": data,
+        "recap1": recap1,
+        "recap2": recap2,
+        "recap3": recap3,
     }
     return render(request, "suivi_demande/demande_step4.html", ctx)
+
+
+@login_required
+def transmettre_analyste_page(request, pk: int):
+    dossier = get_object_or_404(DossierCredit, pk=pk)
+    ctx = {
+        "dossier": dossier,
+    }
+    return render(request, "suivi_demande/transmettre_analyste.html", ctx)
 
 
 # === Vues d'administration ===
@@ -1110,7 +1645,8 @@ def admin_users(request):
     # Seuls les SUPER_ADMIN peuvent accéder
     if role != UserRoles.SUPER_ADMIN:
         messages.error(request, "Accès refusé. Droits administrateur requis.")
-        return redirect("dashboard")
+        namespace = get_current_namespace(request)
+        return redirect(f"{namespace}:dashboard")
     
     # Récupérer tous les utilisateurs avec leurs profils
     users_data = []
@@ -1288,173 +1824,3 @@ def test_notification_api(request):
     }
     
     return JsonResponse(data)
-
-
-@login_required
-def test_retour_simple(request):
-    """Page de test simplifiée pour le retour client"""
-    
-    # Récupérer les dossiers éligibles
-    dossiers = DossierCredit.objects.filter(
-        statut_agent__in=['NOUVEAU', 'TRANSMIS_RESP_GEST']
-    ).order_by('-date_soumission')[:10]
-    
-    # Récupérer les notifications récentes
-    notifications = Notification.objects.all().order_by('-created_at')[:10]
-    
-    context = {
-        'dossiers': dossiers,
-        'notifications': notifications,
-    }
-    
-    return render(request, 'core/test_retour_simple.html', context)
-
-
-@login_required
-def debug_direct(request):
-    """Page de debug ultra-simple pour identifier le problème exact"""
-    
-    debug_messages = []
-    
-    if request.method == 'POST':
-        action = request.POST.get('action')
-        
-        if action == 'test_notification':
-            # Test simple de création de notification
-            try:
-                notification = Notification.objects.create(
-                    utilisateur_cible=request.user,
-                    type="DEBUG_TEST",
-                    titre="Test Debug Direct",
-                    message="Cette notification a été créée depuis la page de debug direct.",
-                    canal="INTERNE"
-                )
-                debug_messages.append(f"? Notification créée avec succès ! ID: {notification.id}")
-                messages.success(request, f"? Notification créée ! ID: {notification.id}")
-            except Exception as e:
-                debug_messages.append(f"? Erreur création notification: {e}")
-                messages.error(request, f"? Erreur: {e}")
-        
-        elif action == 'test_retour':
-            # Test de retour client direct
-            dossier_id = request.POST.get('dossier_id')
-            commentaire_retour = request.POST.get('commentaire_retour', 'Test direct')
-            
-            try:
-                dossier = DossierCredit.objects.get(pk=dossier_id)
-                debug_messages.append(f"?? Dossier trouvé: {dossier.reference}")
-                
-                # Vérifier le rôle
-                profile = getattr(request.user, 'profile', None)
-                role = getattr(profile, 'role', None)
-                debug_messages.append(f"?? Rôle utilisateur: {role}")
-                
-                if role != UserRoles.GESTIONNAIRE:
-                    debug_messages.append(f"? PROBLÈME: Rôle {role} != GESTIONNAIRE")
-                    messages.error(request, f"? Votre rôle ({role}) n'est pas GESTIONNAIRE")
-                else:
-                    # Créer la notification directement
-                    notification = Notification.objects.create(
-                        utilisateur_cible=dossier.client,
-                        type="RETOUR_TEST",
-                        titre=f"Test Retour Dossier {dossier.reference}",
-                        message=f"Test de retour: {commentaire_retour}",
-                        canal="INTERNE"
-                    )
-                    debug_messages.append(f"? Notification créée pour {dossier.client.username} ! ID: {notification.id}")
-                    messages.success(request, f"? Notification créée pour {dossier.client.username} !")
-                    
-                    # Créer l'entrée dans le journal
-                    JournalAction.objects.create(
-                        dossier=dossier,
-                        action="RETOUR_CLIENT_TEST",
-                        de_statut=dossier.statut_agent,
-                        vers_statut=dossier.statut_agent,
-                        acteur=request.user,
-                        commentaire_systeme=f"Test direct: {commentaire_retour}",
-                    )
-                    debug_messages.append(f"? Journal d'action créé")
-                    
-            except DossierCredit.DoesNotExist:
-                debug_messages.append(f"? Dossier {dossier_id} introuvable")
-                messages.error(request, f"? Dossier introuvable")
-            except Exception as e:
-                debug_messages.append(f"? Erreur test retour: {e}")
-                messages.error(request, f"? Erreur: {e}")
-    
-    # Récupérer les données pour affichage
-    dossiers = DossierCredit.objects.all().order_by('-date_soumission')[:5]
-    notifications = Notification.objects.all().order_by('-created_at')[:10]
-    
-    context = {
-        'dossiers': dossiers,
-        'notifications': notifications,
-        'debug_messages': debug_messages,
-    }
-    
-    return render(request, 'core/debug_direct.html', context)
-
-
-@login_required
-def force_retour_client(request, pk):
-    """Vue de test qui force le retour client sans validation"""
-    
-    if request.method != 'POST':
-        messages.error(request, "Méthode non autorisée")
-        return redirect('dashboard')
-    
-    try:
-        dossier = DossierCredit.objects.get(pk=pk)
-        commentaire = request.POST.get('commentaire_retour', 'Test forcé sans validation')
-        
-        # Message de debug
-        messages.info(request, f"?? FORCE TEST: Tentative de retour pour {dossier.reference}")
-        
-        # Créer la notification directement SANS validation
-        notification = Notification.objects.create(
-            utilisateur_cible=dossier.client,
-            type="RETOUR_FORCE",
-            titre=f"[TEST FORCÉ] Dossier {dossier.reference} - Compléments requis",
-            message=f"Votre dossier nécessite des compléments. Motif: {commentaire}",
-            canal="INTERNE"
-        )
-        
-        # Créer l'entrée journal
-        JournalAction.objects.create(
-            dossier=dossier,
-            action="RETOUR_CLIENT_FORCE",
-            de_statut=dossier.statut_agent,
-            vers_statut=dossier.statut_agent,  # Pas de changement de statut
-            acteur=request.user,
-            commentaire_systeme=f"Test forcé: {commentaire}",
-        )
-        
-        messages.success(request, f"? SUCCÈS! Notification créée (ID: {notification.id}) pour {dossier.client.username}")
-        messages.info(request, f"?? Le client {dossier.client.username} devrait voir cette notification")
-        
-        # Essayer d'envoyer un email simple
-        if dossier.client.email:
-            try:
-                from django.core.mail import send_mail
-                from django.conf import settings
-                
-                send_mail(
-                    subject=f"[TEST] Dossier {dossier.reference} - Compléments requis",
-                    message=f"Test d'email automatique.\n\nMotif: {commentaire}",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[dossier.client.email],
-                    fail_silently=False,
-                )
-                messages.success(request, f"?? Email envoyé à {dossier.client.email}")
-            except Exception as e:
-                messages.warning(request, f"?? Erreur email: {e}")
-        else:
-            messages.warning(request, f"?? Client {dossier.client.username} n'a pas d'email")
-            
-    except DossierCredit.DoesNotExist:
-        messages.error(request, "Dossier introuvable")
-    except Exception as e:
-        messages.error(request, f"? Erreur: {e}")
-    
-    return redirect('dashboard')
-

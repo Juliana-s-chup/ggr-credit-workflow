@@ -1,0 +1,67 @@
+{# Composant Form Field Réutilisable #}
+<div class="form-group-modern {% if error %}form-group-error{% endif %} {% if required %}form-group-required{% endif %}">
+  
+  <label for="{{ id }}" class="form-label-modern">
+    {{ label }}
+    {% if required %}
+    <span class="form-required" aria-label="Champ obligatoire">*</span>
+    {% endif %}
+  </label>
+  
+  {% if type == 'textarea' %}
+  <textarea id="{{ id }}"
+            name="{{ name }}"
+            class="form-input-modern"
+            {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+            {% if required %}required aria-required="true"{% endif %}
+            {% if disabled %}disabled aria-disabled="true"{% endif %}
+            {% if readonly %}readonly{% endif %}
+            {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+            {% if aria_describedby %}aria-describedby="{{ aria_describedby }}"{% endif %}
+            {% if error %}aria-invalid="true" aria-describedby="{{ id }}-error"{% endif %}
+            rows="{{ rows|default:4 }}">{{ value }}</textarea>
+  
+  {% elif type == 'select' %}
+  <select id="{{ id }}"
+          name="{{ name }}"
+          class="form-input-modern"
+          {% if required %}required aria-required="true"{% endif %}
+          {% if disabled %}disabled aria-disabled="true"{% endif %}
+          {% if error %}aria-invalid="true" aria-describedby="{{ id }}-error"{% endif %}>
+    {% if placeholder %}
+    <option value="">{{ placeholder }}</option>
+    {% endif %}
+    {% for option in options %}
+    <option value="{{ option.value }}" {% if option.value == value %}selected{% endif %}>
+      {{ option.label }}
+    </option>
+    {% endfor %}
+  </select>
+  
+  {% else %}
+  <input type="{{ type|default:'text' }}"
+         id="{{ id }}"
+         name="{{ name }}"
+         class="form-input-modern"
+         {% if placeholder %}placeholder="{{ placeholder }}"{% endif %}
+         {% if value %}value="{{ value }}"{% endif %}
+         {% if required %}required aria-required="true"{% endif %}
+         {% if disabled %}disabled aria-disabled="true"{% endif %}
+         {% if readonly %}readonly{% endif %}
+         {% if min %}min="{{ min }}"{% endif %}
+         {% if max %}max="{{ max }}"{% endif %}
+         {% if step %}step="{{ step }}"{% endif %}
+         {% if pattern %}pattern="{{ pattern }}"{% endif %}
+         {% if maxlength %}maxlength="{{ maxlength }}"{% endif %}
+         {% if autocomplete %}autocomplete="{{ autocomplete }}"{% endif %}
+         {% if error %}aria-invalid="true" aria-describedby="{{ id }}-error"{% endif %}>
+  {% endif %}
+  
+  {% if help %}
+  <span class="form-help" id="{{ id }}-help">{{ help }}</span>
+  {% endif %}
+  
+  {% if error %}
+  <span class="form-error" id="{{ id }}-error" role="alert">{{ error }}</span>
+  {% endif %}
+</div>

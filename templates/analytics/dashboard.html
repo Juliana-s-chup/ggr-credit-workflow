@@ -1,0 +1,296 @@
+{% extends 'base-clean.html' %}
+{% load static %}
+
+{% block title %}Analytics & Reporting - GGR Crédit{% endblock %}
+
+{% block extra_css %}
+<style>
+    .kpi-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    
+    .kpi-card.success {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .kpi-card.warning {
+        background: linear-gradient(135deg, #F0B015 0%, #E65137 100%);
+    }
+    
+    .kpi-card.info {
+        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    }
+    
+    .kpi-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    
+    .kpi-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .chart-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 20px;
+        color: #2c3e50;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="h3 mb-2">📊 Analytics & Reporting</h1>
+            <p class="text-muted">Tableau de bord analytique et statistiques des dossiers de crédit</p>
+        </div>
+    </div>
+    
+    <!-- KPIs -->
+    <div class="row">
+        <div class="col-md-3">
+            <div class="kpi-card">
+                <div class="kpi-label">Total Dossiers</div>
+                <div class="kpi-value">{{ kpis.total_dossiers }}</div>
+                <small>📁 Tous les dossiers</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card warning">
+                <div class="kpi-label">En Cours</div>
+                <div class="kpi-value">{{ kpis.dossiers_en_cours }}</div>
+                <small>⏳ Dossiers actifs</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card success">
+                <div class="kpi-label">Taux Approbation</div>
+                <div class="kpi-value">{{ kpis.taux_approbation }}%</div>
+                <small>✅ Dossiers approuvés</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="kpi-card info">
+                <div class="kpi-label">Ce Mois</div>
+                <div class="kpi-value">{{ kpis.dossiers_ce_mois }}</div>
+                <small>📅 Nouveaux dossiers</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Graphiques -->
+    <div class="row mt-4">
+        <!-- Évolution mensuelle -->
+        <div class="col-lg-8">
+            <div class="chart-container">
+                <div class="chart-title">📈 Évolution Mensuelle des Dossiers</div>
+                <canvas id="chartEvolution" height="80"></canvas>
+            </div>
+        </div>
+        
+        <!-- Répartition par statut -->
+        <div class="col-lg-4">
+            <div class="chart-container">
+                <div class="chart-title">📊 Répartition par Statut</div>
+                <canvas id="chartStatuts" height="160"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Répartition par type -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <div class="chart-title">🏦 Répartition par Type de Crédit</div>
+                <canvas id="chartTypes" height="100"></canvas>
+            </div>
+        </div>
+        
+        <!-- Actions rapides -->
+        <div class="col-lg-6">
+            <div class="chart-container">
+                <div class="chart-title">⚡ Actions Rapides</div>
+                <div class="list-group">
+                    <a href="{% url 'analytics:rapport_statistiques' %}" class="list-group-item list-group-item-action">
+                        📄 Générer Rapport Statistiques
+                    </a>
+                    <a href="{% url 'analytics:predictions_risque' %}" class="list-group-item list-group-item-action">
+                        🤖 Prédictions de Risque ML
+                    </a>
+                    <a href="{% url 'analytics:exporter_excel' %}" class="list-group-item list-group-item-action">
+                        📊 Exporter Excel
+                    </a>
+                    <a href="#" class="list-group-item list-group-item-action" onclick="actualiserKPIs()">
+                        🔄 Actualiser les KPIs
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<!-- Données Django injectées -->
+<script id="graphiques-data" type="application/json">
+{{ graphiques|safe }}
+</script>
+
+<script>
+// Configuration globale Charts.js
+Chart.defaults.font.family = "'Inter', 'Segoe UI', sans-serif";
+Chart.defaults.color = '#6c757d';
+
+// Charger les données depuis le script JSON
+const graphiquesData = JSON.parse(document.getElementById('graphiques-data').textContent);
+
+// Graphique Évolution Mensuelle
+const ctxEvolution = document.getElementById('chartEvolution').getContext('2d');
+new Chart(ctxEvolution, {
+    type: 'line',
+    data: {
+        labels: graphiquesData.evolution_mensuelle.labels,
+        datasets: [{
+            label: 'Nombre de dossiers',
+            data: graphiquesData.evolution_mensuelle.data,
+            borderColor: '#667eea',
+            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            borderWidth: 3,
+            fill: true,
+            tension: 0.4,
+            pointRadius: 5,
+            pointHoverRadius: 7,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: true,
+                position: 'top',
+            },
+            tooltip: {
+                mode: 'index',
+                intersect: false,
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+
+// Graphique Répartition Statuts
+const ctxStatuts = document.getElementById('chartStatuts').getContext('2d');
+new Chart(ctxStatuts, {
+    type: 'doughnut',
+    data: {
+        labels: graphiquesData.repartition_statuts.labels,
+        datasets: [{
+            data: graphiquesData.repartition_statuts.data,
+            backgroundColor: [
+                '#667eea',
+                '#764ba2',
+                '#f093fb',
+                '#4facfe',
+                '#43e97b',
+                '#fa709a',
+            ],
+            borderWidth: 2,
+            borderColor: '#fff',
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            }
+        }
+    }
+});
+
+// Graphique Répartition Types
+const ctxTypes = document.getElementById('chartTypes').getContext('2d');
+new Chart(ctxTypes, {
+    type: 'bar',
+    data: {
+        labels: graphiquesData.repartition_types.labels,
+        datasets: [{
+            label: 'Nombre de dossiers',
+            data: graphiquesData.repartition_types.data,
+            backgroundColor: [
+                'rgba(102, 126, 234, 0.8)',
+                'rgba(118, 75, 162, 0.8)',
+                'rgba(240, 176, 21, 0.8)',
+            ],
+            borderColor: [
+                '#667eea',
+                '#764ba2',
+                '#F0B015',
+            ],
+            borderWidth: 2,
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false,
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: {
+                    precision: 0
+                }
+            }
+        }
+    }
+});
+
+// Fonction d'actualisation des KPIs
+function actualiserKPIs() {
+    fetch('{% url "analytics:api_kpis" %}')
+        .then(response => response.json())
+        .then(data => {
+            console.log('KPIs actualisés:', data);
+            alert('KPIs actualisés avec succès !');
+            location.reload();
+        })
+        .catch(error => {
+            console.error('Erreur:', error);
+            alert('Erreur lors de l\'actualisation');
+        });
+}
+</script>
+{% endblock %}

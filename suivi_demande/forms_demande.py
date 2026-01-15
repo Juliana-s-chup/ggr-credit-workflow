@@ -1,151 +1,119 @@
+"""
+Formulaires pour le wizard de demande de crédit (étapes 1 et 2).
+"""
 from django import forms
 
 
 class DemandeStep1Form(forms.Form):
-    # Informations personnelles
-    nom = forms.CharField(label="Nom", max_length=100)
-    prenom = forms.CharField(label="Prénom", max_length=100)
+    # Section 1: Renseignements sur le demandeur (aligné sur CanevasProposition)
+    nom_prenom = forms.CharField(label="Nom & prénom", max_length=200)
     date_naissance = forms.DateField(label="Date de naissance", widget=forms.DateInput(attrs={"type": "date"}))
-    lieu_naissance = forms.CharField(label="Lieu de naissance", max_length=120)
+    nationalite = forms.CharField(label="Nationalité", max_length=100, initial="CONGOLAISE")
 
-    # Nationalité en saisie libre
-    nationalite = forms.CharField(label="Nationalité", max_length=100)
+    adresse_exacte = forms.CharField(label="Adresse exacte", max_length=255, widget=forms.Textarea(attrs={"rows": 2}))
+    telephone_travail = forms.CharField(label="N° de tél Travail", max_length=30, required=False)
+    telephone_domicile = forms.CharField(label="N° de tél Domicile", max_length=30, required=False)
+    numero_telephone = forms.CharField(label="N° de tél portable", max_length=30)
 
-    SITUATION_FAM = [
-        ("", "Sélectionnez..."),
+    emploi_occupe = forms.CharField(label="Emploi occupé", max_length=200)
+    STATUT_EMPLOI = [("PRIVE", "Privé"), ("PUBLIC", "Public")]
+    statut_emploi = forms.ChoiceField(label="Statut d'emploi", choices=STATUT_EMPLOI)
+    anciennete_emploi = forms.CharField(label="Ancienneté emploi", max_length=100)
+    TYPE_CONTRAT = [("CDI", "CDI"), ("CDD", "CDD"), ("STAGE", "Stage"), ("AUTRE", "Autre")]
+    type_contrat = forms.ChoiceField(label="Type de contrat", widget=forms.RadioSelect, choices=TYPE_CONTRAT)
+
+    nom_employeur = forms.CharField(label="Nom employeur", max_length=200)
+    lieu_emploi = forms.CharField(label="Lieu d'emploi", max_length=200)
+    employeur_client_banque = forms.BooleanField(label="Employeur client de la banque", required=False)
+    radical_employeur = forms.CharField(label="Radical employeur", max_length=50, required=False)
+
+    # Situation familiale (revient à l'étape 1)
+    SITUATION_FAM = [("CELIBATAIRE", "Célibataire"), ("MARIE", "Marié(e)"), ("DIVORCE", "Divorcé(e)"), ("VEUF", "Veuf/Veuve")]
+    situation_famille = forms.ChoiceField(label="Situation de famille", widget=forms.RadioSelect, choices=[
         ("CELIBATAIRE", "Célibataire"),
         ("MARIE", "Marié(e)"),
         ("DIVORCE", "Divorcé(e)"),
         ("VEUF", "Veuf/Veuve"),
-    ]
-    situation_familiale = forms.ChoiceField(label="Situation familiale", choices=SITUATION_FAM)
-    nb_personnes_charge = forms.IntegerField(label="Nombre de personnes à charge", min_value=0, initial=0)
+    ])
+    nombre_personnes_charge = forms.IntegerField(label="Nbr de personnes à charge", min_value=0, initial=0, required=False)
+    regime_matrimonial = forms.ChoiceField(label="Régime matrimonial", required=False, widget=forms.RadioSelect, choices=[
+        ("COMMUNAUTE", "Communauté des biens"),
+        ("SEPARATION", "Séparation des biens"),
+        ("PARTICIPATION", "Participation aux acquêts"),
+        ("AUTRE", "Autres"),
+    ])
 
-    adresse = forms.CharField(label="Adresse", widget=forms.Textarea(attrs={"rows": 2}))
-    ville = forms.CharField(label="Ville", max_length=100)
-    # code_postal supprimé (non nécessaire)
+    # Conjoint & logement
+    salaire_conjoint = forms.DecimalField(label="Salaire conjoint (FCFA)", max_digits=12, decimal_places=2, required=False, initial=0)
+    emploi_conjoint = forms.CharField(label="Emploi conjoint", max_length=200, required=False)
+    statut_logement = forms.ChoiceField(label="Logement / habitation", required=False, choices=[
+        ("LOCATAIRE", "Locataire"),
+        ("PROPRIETAIRE", "Propriétaire"),
+        ("AUTRES", "Autres (à préciser)"),
+    ])
+    numero_tf = forms.CharField(label="Numéro TF", max_length=100, required=False)
+    logement_autres_precision = forms.CharField(label="Préciser (logement)", max_length=200, required=False)
 
-    # Liste des pays du monde (valeur = libellé pays)
-    PAYS_CHOICES = [
-        ("", "Sélectionnez..."),
-        ("Afghanistan", "Afghanistan"), ("Afrique du Sud", "Afrique du Sud"), ("Albanie", "Albanie"),
-        ("Algérie", "Algérie"), ("Allemagne", "Allemagne"), ("Andorre", "Andorre"), ("Angola", "Angola"),
-        ("Antigua-et-Barbuda", "Antigua-et-Barbuda"), ("Arabie saoudite", "Arabie saoudite"), ("Argentine", "Argentine"),
-        ("Arménie", "Arménie"), ("Australie", "Australie"), ("Autriche", "Autriche"), ("Azerbaïdjan", "Azerbaïdjan"),
-        ("Bahamas", "Bahamas"), ("Bahreïn", "Bahreïn"), ("Bangladesh", "Bangladesh"), ("Barbade", "Barbade"),
-        ("Belgique", "Belgique"), ("Belize", "Belize"), ("Bénin", "Bénin"), ("Bhoutan", "Bhoutan"),
-        ("Biélorussie", "Biélorussie"), ("Birmanie", "Birmanie"), ("Bolivie", "Bolivie"), ("Bosnie-Herzégovine", "Bosnie-Herzégovine"),
-        ("Botswana", "Botswana"), ("Brésil", "Brésil"), ("Brunei", "Brunei"), ("Bulgarie", "Bulgarie"),
-        ("Burkina Faso", "Burkina Faso"), ("Burundi", "Burundi"), ("Cambodge", "Cambodge"), ("Cameroun", "Cameroun"),
-        ("Canada", "Canada"), ("Cap-Vert", "Cap-Vert"), ("Centrafrique", "Centrafrique"), ("Chili", "Chili"),
-        ("Chine", "Chine"), ("Chypre", "Chypre"), ("Colombie", "Colombie"), ("Comores", "Comores"),
-        ("Congo", "Congo"), ("République démocratique du Congo", "République démocratique du Congo"),
-        ("Corée du Nord", "Corée du Nord"), ("Corée du Sud", "Corée du Sud"), ("Costa Rica", "Costa Rica"),
-        ("Côte d'Ivoire", "Côte d'Ivoire"), ("Croatie", "Croatie"), ("Cuba", "Cuba"), ("Danemark", "Danemark"),
-        ("Djibouti", "Djibouti"), ("Dominique", "Dominique"), ("Égypte", "Égypte"), ("Émirats arabes unis", "Émirats arabes unis"),
-        ("Équateur", "Équateur"), ("Érythrée", "Érythrée"), ("Espagne", "Espagne"), ("Estonie", "Estonie"),
-        ("Eswatini", "Eswatini"), ("États-Unis", "États-Unis"), ("Éthiopie", "Éthiopie"), ("Fidji", "Fidji"),
-        ("Finlande", "Finlande"), ("France", "France"), ("Gabon", "Gabon"), ("Gambie", "Gambie"),
-        ("Géorgie", "Géorgie"), ("Ghana", "Ghana"), ("Grèce", "Grèce"), ("Grenade", "Grenade"),
-        ("Guatemala", "Guatemala"), ("Guinée", "Guinée"), ("Guinée-Bissau", "Guinée-Bissau"), ("Guinée équatoriale", "Guinée équatoriale"),
-        ("Guyana", "Guyana"), ("Haïti", "Haïti"), ("Honduras", "Honduras"), ("Hongrie", "Hongrie"),
-        ("Inde", "Inde"), ("Indonésie", "Indonésie"), ("Irak", "Irak"), ("Iran", "Iran"),
-        ("Irlande", "Irlande"), ("Islande", "Islande"), ("Israël", "Israël"), ("Italie", "Italie"),
-        ("Jamaïque", "Jamaïque"), ("Japon", "Japon"), ("Jordanie", "Jordanie"), ("Kazakhstan", "Kazakhstan"),
-        ("Kenya", "Kenya"), ("Kirghizistan", "Kirghizistan"), ("Kiribati", "Kiribati"), ("Kosovo", "Kosovo"),
-        ("Koweït", "Koweït"), ("Laos", "Laos"), ("Lesotho", "Lesotho"), ("Lettonie", "Lettonie"),
-        ("Liban", "Liban"), ("Libéria", "Libéria"), ("Libye", "Libye"), ("Liechtenstein", "Liechtenstein"),
-        ("Lituanie", "Lituanie"), ("Luxembourg", "Luxembourg"), ("Macédoine du Nord", "Macédoine du Nord"),
-        ("Madagascar", "Madagascar"), ("Malaisie", "Malaisie"), ("Malawi", "Malawi"), ("Maldives", "Maldives"),
-        ("Mali", "Mali"), ("Malte", "Malte"), ("Maroc", "Maroc"), ("Marshall", "Marshall"),
-        ("Maurice", "Maurice"), ("Mauritanie", "Mauritanie"), ("Mexique", "Mexique"), ("Micronésie", "Micronésie"),
-        ("Moldavie", "Moldavie"), ("Monaco", "Monaco"), ("Mongolie", "Mongolie"), ("Monténégro", "Monténégro"),
-        ("Mozambique", "Mozambique"), ("Namibie", "Namibie"), ("Nauru", "Nauru"), ("Népal", "Népal"),
-        ("Nicaragua", "Nicaragua"), ("Niger", "Niger"), ("Nigéria", "Nigéria"), ("Niue", "Niue"),
-        ("Norvège", "Norvège"), ("Nouvelle-Zélande", "Nouvelle-Zélande"), ("Oman", "Oman"), ("Ouganda", "Ouganda"),
-        ("Ouzbékistan", "Ouzbékistan"), ("Pakistan", "Pakistan"), ("Palaos", "Palaos"), ("Panama", "Panama"),
-        ("Papouasie-Nouvelle-Guinée", "Papouasie-Nouvelle-Guinée"), ("Paraguay", "Paraguay"), ("Pays-Bas", "Pays-Bas"),
-        ("Pérou", "Pérou"), ("Philippines", "Philippines"), ("Pologne", "Pologne"), ("Portugal", "Portugal"),
-        ("Qatar", "Qatar"), ("Roumanie", "Roumanie"), ("Royaume-Uni", "Royaume-Uni"), ("Russie", "Russie"),
-        ("Rwanda", "Rwanda"), ("Saint-Kitts-et-Nevis", "Saint-Kitts-et-Nevis"), ("Sainte-Lucie", "Sainte-Lucie"),
-        ("Saint-Marin", "Saint-Marin"), ("Saint-Vincent-et-les-Grenadines", "Saint-Vincent-et-les-Grenadines"),
-        ("Salomon", "Salomon"), ("Salvador", "Salvador"), ("Samoa", "Samoa"), ("Sao Tomé-et-Principe", "Sao Tomé-et-Principe"),
-        ("Sénégal", "Sénégal"), ("Serbie", "Serbie"), ("Seychelles", "Seychelles"), ("Sierra Leone", "Sierra Leone"),
-        ("Singapour", "Singapour"), ("Slovaquie", "Slovaquie"), ("Slovénie", "Slovénie"), ("Somalie", "Somalie"),
-        ("Soudan", "Soudan"), ("Soudan du Sud", "Soudan du Sud"), ("Sri Lanka", "Sri Lanka"), ("Suède", "Suède"),
-        ("Suisse", "Suisse"), ("Suriname", "Suriname"), ("Syrie", "Syrie"), ("Tadjikistan", "Tadjikistan"),
-        ("Tanzanie", "Tanzanie"), ("Tchad", "Tchad"), ("Tchéquie", "Tchéquie"), ("Thaïlande", "Thaïlande"),
-        ("Timor oriental", "Timor oriental"), ("Togo", "Togo"), ("Tonga", "Tonga"), ("Trinité-et-Tobago", "Trinité-et-Tobago"),
-        ("Tunisie", "Tunisie"), ("Turkménistan", "Turkménistan"), ("Turquie", "Turquie"), ("Tuvalu", "Tuvalu"),
-        ("Ukraine", "Ukraine"), ("Uruguay", "Uruguay"), ("Vanuatu", "Vanuatu"), ("Vatican", "Vatican"),
-        ("Venezuela", "Venezuela"), ("Viêt Nam", "Viêt Nam"), ("Yémen", "Yémen"), ("Zambie", "Zambie"), ("Zimbabwe", "Zimbabwe"),
-    ]
-    pays = forms.ChoiceField(label="Pays", choices=PAYS_CHOICES)
+    # (Portail PRO) Sélection d'un client existant (optionnel)
+    client_identifier = forms.CharField(label="Client (email ou nom d'utilisateur)", required=False)
+    permettre_suivi_client = forms.BooleanField(label="Permettre au client sélectionné de suivre ce dossier", required=False)
 
-    telephone = forms.CharField(label="Téléphone", max_length=30)
-    email = forms.EmailField(label="Email")
+    
 
-    def clean_nationalite(self):
-        val = self.cleaned_data.get("nationalite", "")
-        if isinstance(val, str):
-            val = val.strip()
-            # Capitalisation simple: première lettre de chaque mot en majuscule
-            val = val.title()
-        return val
+    radical = forms.CharField(label="Radical (client)", max_length=50, required=False)
+    date_ouverture_compte = forms.DateField(label="Date d'ouverture de compte", required=False, widget=forms.DateInput(attrs={"type": "date"}))
+    date_domiciliation_salaire = forms.DateField(label="Date de domiciliation de salaire", required=False, widget=forms.DateInput(attrs={"type": "date"}))
 
     def clean(self):
         data = super().clean()
-        # Pré‑sélection pays par défaut si vide
-        pays = data.get("pays")
-        if not pays:
-            data["pays"] = "Congo"
-        # Nettoyage simple téléphone (trim)
-        tel = data.get("telephone")
-        if isinstance(tel, str):
-            data["telephone"] = tel.strip()
+        try:
+            if data.get("situation_famille") == "MARIE" and not data.get("regime_matrimonial"):
+                self.add_error("regime_matrimonial", "Ce champ est requis pour un(e) marié(e).")
+            # Validation optionnelle: client existant via identifiant (username/email)
+            ident = (data.get("client_identifier") or "").strip()
+            if ident:
+                from django.contrib.auth import get_user_model
+                from django.db.models import Q
+                User = get_user_model()
+                user = User.objects.filter(Q(username__iexact=ident) | Q(email__iexact=ident)).first()
+                if not user:
+                    self.add_error("client_identifier", "Aucun utilisateur avec cet identifiant (utilise email ou nom d'utilisateur).")
+                else:
+                    # Normaliser pour la suite du wizard (compatibilité avec la vue Étape 4)
+                    data["client_user_id"] = user.pk
+        except Exception:
+            pass
         return data
 
 
 class DemandeStep2Form(forms.Form):
-    # Situation financière
-    STATUT_PRO = [
-        ("", "Sélectionnez..."),
-        ("SALARIE", "Salarié"),
-        ("INDEPENDANT", "Indépendant"),
-        ("FONCTIONNAIRE", "Fonctionnaire"),
-        ("RETRAITE", "Retraité"),
-        ("SANS_EMPLOI", "Sans emploi"),
-        ("ETUDIANT", "Étudiant"),
-    ]
-    statut_emploi = forms.ChoiceField(label="Situation professionnelle", choices=STATUT_PRO)
+    # Étape 2: Situation financière (capacité d'endettement)
+    salaire_net_moyen_fcfa = forms.DecimalField(label="Salaire net moyen (FCFA)", max_digits=12, decimal_places=2)
+    echeances_prets_relevees = forms.DecimalField(label="Échéances de prêts relevées (FCFA)", max_digits=12, decimal_places=2, initial=0, required=False)
+    total_echeances_credits_cours = forms.DecimalField(label="Total échéances crédits en cours (FCFA)", max_digits=12, decimal_places=2, initial=0, required=False)
 
-    employeur_nom = forms.CharField(label="Nom de l'employeur", max_length=150, required=False)
-    poste_occupe = forms.CharField(label="Poste occupé", max_length=120, required=False)
-
-    ANCIENNETE_CHOICES = [
-        ("", "Sélectionnez..."),
-        ("LT_1", "Moins d'un an"),
-        ("Y1_3", "1 à 3 ans"),
-        ("Y3_5", "3 à 5 ans"),
-        ("GT_5", "Plus de 5 ans"),
-    ]
-    anciennete = forms.ChoiceField(label="Ancienneté", choices=ANCIENNETE_CHOICES, required=False)
-
-    salaire_net_moyen = forms.DecimalField(label="Revenu mensuel net (FCFA)", min_value=0, max_digits=12, decimal_places=2)
-    autres_revenus = forms.DecimalField(label="Autres revenus mensuels (FCFA)", min_value=0, max_digits=12, decimal_places=2, initial=0, required=False,
-                                        help_text="Pensions, loyers, investissements, etc.")
-    charges_mensuelles = forms.DecimalField(label="Dépenses mensuelles (FCFA)", min_value=0, max_digits=12, decimal_places=2, initial=0)
-
-    # Crédits en cours
-    has_credits = forms.ChoiceField(label="Avez-vous des crédits en cours ?", choices=[("NON", "Non"), ("OUI", "Oui")], initial="NON")
-    montant_total_credits = forms.DecimalField(label="Montant total des crédits (FCFA)", min_value=0, max_digits=12, decimal_places=2, required=False)
-    mensualites_totales = forms.DecimalField(label="Mensualités totales (FCFA)", min_value=0, max_digits=12, decimal_places=2, required=False)
+    salaire_net_avant_endettement_fcfa = forms.DecimalField(label="Salaire net avant endettement (FCFA)", max_digits=12, decimal_places=2, required=False)
+    capacite_endettement_brute_fcfa = forms.DecimalField(label="Capacité d'endettement brute (FCFA)", max_digits=12, decimal_places=2, required=False)
+    capacite_endettement_nette_fcfa = forms.DecimalField(label="Capacité d'endettement nette (FCFA)", max_digits=12, decimal_places=2, required=False)
 
     def clean(self):
         data = super().clean()
-        if data.get("has_credits") == "OUI":
-            if data.get("montant_total_credits") in (None, ""):
-                self.add_error("montant_total_credits", "Ce champ est requis si vous avez des crédits en cours.")
-            if data.get("mensualites_totales") in (None, ""):
-                self.add_error("mensualites_totales", "Ce champ est requis si vous avez des crédits en cours.")
+        try:
+            salaire = data.get("salaire_net_moyen_fcfa") or 0
+            total_ech = data.get("total_echeances_credits_cours") or 0
+            # Capacité brute = 40% du salaire net moyen
+            brute = salaire * 0.40
+            # Net = brute - échéances en cours
+            nette = brute - total_ech
+            data["capacite_endettement_brute_fcfa"] = brute
+            data["capacite_endettement_nette_fcfa"] = max(nette, 0)
+            data["salaire_net_avant_endettement_fcfa"] = salaire - total_ech
+        except Exception:
+            pass
         return data
+
+    
+    
+    
+    
+    

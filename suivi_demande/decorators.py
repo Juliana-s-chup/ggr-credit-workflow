@@ -1,14 +1,14 @@
+"""
+Décorateurs pour la gestion des permissions et des transitions.
+"""
 from functools import wraps
 from typing import Iterable
-from django.shortcuts import redirect, get_object_or_404
+
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
+from django.shortcuts import redirect, get_object_or_404
 
-from .models import (
-    DossierCredit,
-    DossierStatutAgent,
-    UserRoles,
-)
+from .models import DossierCredit, DossierStatutAgent, UserRoles
 
 
 def role_required(roles: Iterable[str]):
@@ -23,7 +23,7 @@ def role_required(roles: Iterable[str]):
             if role in roles:
                 return view_func(request, *args, **kwargs)
             messages.error(request, "Accès non autorisé pour votre rôle.")
-            return redirect("dashboard")
+            return redirect("suivi:dashboard")
         return _wrapped
     return decorator
 
@@ -38,7 +38,7 @@ def transition_allowed(view_func):
         action = kwargs.get("action")
         if pk is None or action is None:
             messages.error(request, "Paramètres de transition manquants.")
-            return redirect("dashboard")
+            return redirect("suivi:dashboard")
 
         dossier = get_object_or_404(DossierCredit, pk=pk)
         profile = getattr(request.user, "profile", None)
@@ -86,7 +86,7 @@ def transition_allowed(view_func):
 
         if not allowed:
             messages.error(request, "Action non autorisée pour votre rôle ou l'état du dossier.")
-            return redirect("dashboard")
+            return redirect("suivi:dashboard")
 
         return view_func(request, *args, **kwargs)
 

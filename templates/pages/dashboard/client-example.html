@@ -1,0 +1,76 @@
+{% extends 'base-clean.html' %}
+{% load static %}
+
+{% block title %}Dashboard Client - GGR Crédit{% endblock %}
+
+{% block body_class %}page-dashboard page-dashboard-client{% endblock %}
+
+{% block content %}
+<div class="container">
+  
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="page-title">Bienvenue, {{ user.get_full_name }}</h1>
+    <p class="page-subtitle">Voici un aperçu de vos dossiers de crédit</p>
+  </div>
+  
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+    {% include 'components/_kpi-card.html' with 
+       icon='📊' 
+       value=stats.total 
+       label='Total Dossiers' 
+    %}
+    
+    {% include 'components/_kpi-card.html' with 
+       icon='⏳' 
+       value=stats.en_cours 
+       label='En Cours' 
+    %}
+    
+    {% include 'components/_kpi-card.html' with 
+       icon='✅' 
+       value=stats.approuves 
+       label='Approuvés' 
+    %}
+    
+    {% include 'components/_kpi-card.html' with 
+       icon='💰' 
+       value=stats.montant 
+       label='Montant Total' 
+    %}
+  </div>
+  
+  <!-- Recent Dossiers -->
+  <div class="card">
+    <div class="card-header">
+      <h2 class="card-title">Dossiers Récents</h2>
+      <a href="{% url 'dossiers:list' %}" class="btn-link">Voir tout</a>
+    </div>
+    <div class="card-body">
+      {% if dossiers %}
+      <div class="dossiers-list">
+        {% for dossier in dossiers %}
+        <div class="dossier-item">
+          <div class="dossier-info">
+            <h3 class="dossier-ref">{{ dossier.reference }}</h3>
+            <p class="dossier-produit">{{ dossier.produit }}</p>
+          </div>
+          <div class="dossier-meta">
+            {% include 'components/_badge.html' with 
+               text=dossier.get_statut_display 
+               variant='info' 
+            %}
+            <span class="dossier-montant">{{ dossier.montant|floatformat:0 }} FCFA</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted">Aucun dossier récent.</p>
+      {% endif %}
+    </div>
+  </div>
+  
+</div>
+{% endblock %}

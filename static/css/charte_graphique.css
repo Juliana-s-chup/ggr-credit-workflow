@@ -1,0 +1,754 @@
+/**
+ * CHARTE GRAPHIQUE GGR CREDIT WORKFLOW
+ * Basée sur le logo de l'entreprise
+ */
+
+/* ========================================
+   1. IMPORTATION DES POLICES
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Open+Sans:wght@400;500;600&display=swap');
+
+/* ========================================
+   2. VARIABLES CSS (PALETTE DE COULEURS)
+   ======================================== */
+:root {
+    /* NOUVELLE PALETTE DE COULEURS */
+    --sunset-orange: #fd583d;
+    --selective-yellow: #feb806;
+    --bastille: #161219;
+    --cape-honey: #fee4a8;
+    --espresso: #5b2618;
+    --gray: #8b8989;
+    --terracotta: #e17563;
+    --kumera: #8e6e22;
+    --ronchi: #ebc04f;
+    
+    /* Couleurs principales - Basées sur le logo Attijariwafa Bank */
+    --primary-color: var(--sunset-orange);           /* Jaune-orange vif - logo supérieur */
+    --primary-dark: var(--espresso);            /* Jaune foncé */
+    --secondary-color: var(--terracotta);          /* Rouge-orange profond - logo inférieur */
+    --secondary-dark: var(--kumera);          /* Rouge corail foncé */
+    --accent-color: var(--bastille);             /* Noir profond - forme stylisée */
+    
+    /* Couleurs de fond */
+    --bg-light: var(--cape-honey);                /* Gris très pâle */
+    --bg-dark: var(--bastille);                 /* Fond sombre */
+    --bg-white: #FFFFFF;                /* Blanc pur */
+    
+    /* Couleurs de texte */
+    --text-primary: var(--bastille);            /* Gris anthracite */
+    --text-secondary: var(--gray);          /* Gris doux */
+    --text-muted: #999999;              /* Gris clair */
+    
+    /* Couleurs utilitaires */
+    --border-color: var(--gray);            /* Bordures */
+    --success-color: var(--ronchi);           /* Vert succès */
+    --danger-color: var(--espresso);           /* Rouge danger */
+    --warning-color: var(--kumera);           /* Jaune warning */
+    --info-color: var(--terracotta);              /* Bleu info */
+    
+    /* Hover states */
+    --primary-hover: var(--selective-yellow);
+    --secondary-hover: var(--sunset-orange);
+    
+    /* Ombres */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 4px 10px rgba(0,0,0,0.08);
+    --shadow-lg: 0 8px 20px rgba(0,0,0,0.12);
+    
+    /* Polices */
+    --font-heading: 'Poppins', sans-serif;
+    --font-body: 'Open Sans', sans-serif;
+    
+    /* Espacements */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+    
+    /* Border radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --radius-xl: 16px;
+}
+
+/* ========================================
+   2.b COMPOSANTS BANCAIRES (SIDEBAR/NAV)
+   ======================================== */
+.sidebar-banking {
+    width: 280px;
+    background: var(--accent-color);
+    background: linear-gradient(180deg, var(--accent-color) 0%, #2B2B2B 100%);
+    color: #fff;
+    padding: var(--spacing-lg) var(--spacing-md);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-md);
+}
+
+.nav-banking .nav-item-banking {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #fff;
+    text-decoration: none;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-md);
+    transition: all 0.25s ease;
+    margin-bottom: 0.5rem;
+}
+
+.nav-banking .nav-item-banking:hover {
+    background: rgba(255,255,255,0.08);
+    transform: translateX(4px);
+}
+
+.nav-banking .nav-item-banking.active {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: #1a1a1a;
+    font-weight: 600;
+}
+
+.nav-banking .nav-item-banking .badge {
+    margin-left: auto;
+}
+
+.logo-official {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.ml-auto { margin-left: auto; }
+.mt-auto { margin-top: auto; }
+.mt-8 { margin-top: var(--spacing-lg); }
+.mb-6 { margin-bottom: var(--spacing-md); }
+
+/* ========================================
+   7.b FORM INPUTS (compat dashboard_base)
+   ======================================== */
+.form-input,
+.form-group .form-input,
+select.form-input,
+input.form-input {
+    display: block;
+    width: 100%;
+    font-family: var(--font-body);
+    padding: 10px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background-color: #fff;
+    color: var(--text-primary);
+    transition: all 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(245, 163, 0, 0.12);
+}
+
+.grid { display: grid; }
+.gap-6 { gap: var(--spacing-md); }
+.gap-4 { gap: var(--spacing-sm); }
+.md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.text-muted { color: var(--text-secondary); }
+
+/* ========================================
+   3. TYPOGRAPHIE GLOBALE
+   ======================================== */
+body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    background-color: var(--bg-light);
+    line-height: 1.6;
+    font-size: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--accent-color);
+    font-weight: 600;
+    line-height: 1.3;
+    margin-bottom: var(--spacing-sm);
+}
+
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
+p {
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-primary);
+}
+
+.text-muted {
+    color: var(--text-secondary) !important;
+}
+
+/* ========================================
+   4. BOUTONS
+   ======================================== */
+.btn {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    border: none;
+    border-radius: var(--radius-md);
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-decoration: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: var(--secondary-hover);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-dark {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-dark:hover {
+    background-color: #2B2B2B;
+}
+
+.btn-outline-primary {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 2px solid var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-outline-secondary {
+    background-color: transparent;
+    color: var(--secondary-color);
+    border: 2px solid var(--secondary-color);
+}
+
+.btn-outline-secondary:hover {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-warning {
+    background-color: var(--warning-color);
+    color: var(--accent-color);
+}
+
+.btn-info {
+    background-color: var(--info-color);
+    color: white;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+.btn-lg {
+    padding: 14px 28px;
+    font-size: 1.125rem;
+}
+
+/* ========================================
+   5. CARTES (CARDS)
+   ======================================== */
+.card {
+    background-color: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s ease;
+    margin-bottom: var(--spacing-md);
+}
+
+.card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+}
+
+.card-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 2px solid var(--border-color);
+    margin: calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md)) var(--spacing-md);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+}
+
+.card-header h3,
+.card-header h4,
+.card-header h5 {
+    color: white;
+    margin: 0;
+}
+
+.card-body {
+    padding: var(--spacing-md);
+}
+
+.card-footer {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+    margin: var(--spacing-md) calc(-1 * var(--spacing-md)) calc(-1 * var(--spacing-md));
+    background-color: var(--bg-light);
+    border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* Variantes de cartes */
+.card-primary {
+    border-left: 4px solid var(--primary-color);
+}
+
+.card-secondary {
+    border-left: 4px solid var(--secondary-color);
+}
+
+.card-success {
+    border-left: 4px solid var(--success-color);
+}
+
+.card-danger {
+    border-left: 4px solid var(--danger-color);
+}
+
+/* ========================================
+   6. BADGES
+   ======================================== */
+.badge {
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    color: white;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-heading);
+}
+
+.badge-primary {
+    background-color: var(--primary-color);
+}
+
+.badge-secondary {
+    background-color: var(--secondary-color);
+}
+
+.badge-success {
+    background-color: var(--success-color);
+}
+
+.badge-danger {
+    background-color: var(--danger-color);
+}
+
+.badge-warning {
+    background-color: var(--warning-color);
+    color: var(--accent-color);
+}
+
+.badge-info {
+    background-color: var(--info-color);
+}
+
+.badge-dark {
+    background-color: var(--accent-color);
+}
+
+/* ========================================
+   7. FORMULAIRES
+   ======================================== */
+.form-control,
+.form-select {
+    font-family: var(--font-body);
+    padding: 10px 15px;
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: white;
+    color: var(--text-primary);
+}
+
+.form-control:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(245, 163, 0, 0.1);
+}
+
+.form-label {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.form-check-input {
+    border: 2px solid var(--border-color);
+    border-radius: var(--radius-sm);
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* ========================================
+   8. ALERTES
+   ======================================== */
+.alert {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    border-left: 4px solid;
+    font-family: var(--font-body);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: var(--success-color);
+    color: #155724;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: var(--danger-color);
+    color: #721c24;
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: var(--warning-color);
+    color: #856404;
+}
+
+.alert-info {
+    background-color: #d1ecf1;
+    border-color: var(--info-color);
+    color: #0c5460;
+}
+
+/* ========================================
+   9. TABLEAUX
+   ======================================== */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: white;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.table thead {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+}
+
+.table thead th {
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-family: var(--font-heading);
+    font-weight: 600;
+    text-align: left;
+}
+
+.table tbody td {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.table tbody tr:hover {
+    background-color: var(--bg-light);
+}
+
+/* ========================================
+   10. NAVIGATION / SIDEBAR
+   ======================================== */
+.sidebar {
+    background: linear-gradient(180deg, var(--accent-color) 0%, #2B2B2B 100%);
+    color: white;
+    padding: var(--spacing-md);
+}
+
+.nav-item {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    text-decoration: none;
+}
+
+.nav-item:hover {
+    background-color: rgba(245, 163, 0, 0.1);
+    transform: translateX(5px);
+}
+
+.nav-item.active {
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    font-weight: 600;
+}
+
+/* ========================================
+   11. KPI CARDS (INDICATEURS)
+   ======================================== */
+.kpi-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow-sm);
+    border-left: 4px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.kpi-card:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-3px);
+}
+
+.kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    font-family: var(--font-heading);
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.kpi-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ========================================
+   12. BARRES DE PROGRESSION
+   ======================================== */
+.progress {
+    height: 1.5rem;
+    background-color: var(--bg-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: width 0.6s ease;
+}
+
+/* ========================================
+   13. ICÔNES
+   ======================================== */
+.icon-primary {
+    color: var(--primary-color);
+}
+
+.icon-secondary {
+    color: var(--secondary-color);
+}
+
+.icon-dark {
+    color: var(--accent-color);
+}
+
+/* ========================================
+   14. UTILITAIRES
+   ======================================== */
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-secondary {
+    background-color: var(--secondary-color) !important;
+}
+
+.bg-danger {
+    background-color: var(--danger-color) !important;
+}
+
+.bg-warning {
+    background-color: var(--warning-color) !important;
+}
+
+.bg-info {
+    background-color: var(--info-color) !important;
+}
+
+.bg-success {
+    background-color: var(--success-color) !important;
+}
+
+.bg-light {
+    background-color: var(--bg-light) !important;
+}
+
+.bg-white {
+    background-color: var(--bg-white) !important;
+}
+
+.text-primary {
+    color: var(--primary-color) !important;
+}
+
+.text-secondary {
+    color: var(--secondary-color) !important;
+}
+
+.border-primary {
+    border-color: var(--primary-color) !important;
+}
+
+.border-secondary {
+    border-color: var(--secondary-color) !important;
+}
+
+.border-danger {
+    border-color: var(--danger-color) !important;
+}
+
+.border-warning {
+    border-color: var(--warning-color) !important;
+}
+
+.border-info {
+    border-color: var(--info-color) !important;
+}
+
+.border-success {
+    border-color: var(--success-color) !important;
+}
+
+.shadow-sm {
+    box-shadow: var(--shadow-sm) !important;
+}
+
+.shadow-md {
+    box-shadow: var(--shadow-md) !important;
+}
+
+.shadow-lg {
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.rounded {
+    border-radius: var(--radius-md) !important;
+}
+
+.rounded-lg {
+    border-radius: var(--radius-lg) !important;
+}
+
+/* ========================================
+   15. ANIMATIONS
+   ======================================== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateX(-100%);
+    }
+    to {
+        transform: translateX(0);
+    }
+}
+
+.slide-in {
+    animation: slideIn 0.4s ease;
+}
+
+/* ========================================
+   16. RESPONSIVE
+   ======================================== */
+@media (max-width: 768px) {
+    h1 { font-size: 2rem; }
+    h2 { font-size: 1.75rem; }
+    h3 { font-size: 1.5rem; }
+    
+    .card {
+        padding: var(--spacing-sm);
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.875rem;
+    }
+}

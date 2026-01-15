@@ -16,22 +16,34 @@
     <i class="fas fa-folder-open"></i>
     <span>Dossiers à traiter</span>
 </a>
+<a href="#" class="nav-item-banking" data-section="dossiers-traites">
+    <i class="fas fa-check-circle"></i>
+    <span>Dossiers Traités</span>
+</a>
+<a href="#" class="nav-item-banking" data-section="historique">
+    <i class="fas fa-history"></i>
+    <span>Historique</span>
+</a>
+<a href="{% url 'pro:reports' %}" class="nav-item-banking">
+    <i class="fas fa-chart-bar"></i>
+    <span>Rapports</span>
+</a>
 {% endblock %}
 
-{% block stats_cards %}
-<div class="kpi-card">
-    <div class="kpi-value">{{ dossiers|length|default:0 }}</div>
-    <div class="kpi-label">En attente de libération</div>
-</div>
-<div class="kpi-card">
-    <div class="kpi-value">{{ fonds_liberes_today|default:0 }}</div>
-    <div class="kpi-label">Libérés aujourd'hui</div>
-</div>
-{% endblock %}
+{# KPI cards will be shown inline within the content section's stats-grid #}
 
 {% block content %}
 <section class="content-section active" id="dashboard-section">
-    <div class="stats-grid mb-8"></div>
+    <div class="stats-grid mb-8">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ dossiers|length|default:0 }}</div>
+            <div class="kpi-label">En attente de libération</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ fonds_liberes_today|default:0 }}</div>
+            <div class="kpi-label">Libérés aujourd'hui</div>
+        </div>
+    </div>
     <div class="card">
         <div class="card-header">
             <h3 class="text-lg font-semibold">Dossiers en attente de libération</h3>
@@ -49,15 +61,15 @@
                     </thead>
                     <tbody>
                         {% for dossier in dossiers %}
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="py-4">{{ dossier.reference }}</td>
-                            <td class="py-4">{{ dossier.client.get_full_name|default:dossier.client.username }}</td>
-                            <td class="py-4 font-semibold">{{ dossier.montant }} FCFA</td>
+                        <tr class="border-b hover:bg-green-50 transition-colors">
+                            <td class="py-4"><a href="{% url 'pro:dossier_detail' dossier.pk %}" class="font-bold text-primary hover:underline">{{ dossier.reference }}</a></td>
+                            <td class="py-4"><span class="font-semibold">{{ dossier.client.get_full_name|default:dossier.client.username }}</span></td>
+                            <td class="py-4"><span class="font-bold text-lg text-success">{{ dossier.montant|floatformat:0 }} <span class="text-xs">FCFA</span></span></td>
                             <td class="py-4">
-                                <form method="post" action="{% url 'transition_dossier' dossier.pk 'liberer_fonds' %}">
+                                <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'liberer_fonds' %}">
                                     {% csrf_token %}
-                                    <button class="btn btn-primary btn-sm">
-                                        <i class="fas fa-check"></i> Libérer les fonds
+                                    <button class="btn btn-success btn-sm">
+                                        <i class="fas fa-check-circle"></i> Libérer les fonds
                                     </button>
                                 </form>
                             </td>
@@ -70,6 +82,184 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Dossiers à traiter -->
+<section class="content-section" id="dossiers-section">
+    <div class="card">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-money-check-alt text-success"></i> Dossiers à Traiter
+                <span class="badge bg-success ms-2">{{ dossiers|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Référence</th>
+                            <th>Client</th>
+                            <th>Email</th>
+                            <th class="text-end">Montant</th>
+                            <th>Produit</th>
+                            <th>Date Approbation</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dossier in dossiers %}
+                        <tr>
+                            <td class="ps-3">
+                                <a href="{% url 'pro:dossier_detail' dossier.pk %}" class="fw-bold text-primary text-decoration-none">
+                                    {{ dossier.reference }}
+                                </a>
+                            </td>
+                            <td>
+                                <div>
+                                    <strong>{{ dossier.client.get_full_name|default:dossier.client.username }}</strong>
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted">{{ dossier.client.email|default:"N/A" }}</small>
+                            </td>
+                            <td class="text-end">
+                                <strong class="text-success fs-5">{{ dossier.montant|floatformat:0 }}</strong>
+                                <small class="text-muted d-block">FCFA</small>
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ dossier.produit }}</span>
+                            </td>
+                            <td>
+                                <small>{{ dossier.date_maj|date:"d/m/Y" }}</small>
+                                <br><small class="text-muted">{{ dossier.date_maj|date:"H:i" }}</small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'pro:dossier_detail' dossier.pk %}" class="btn btn-sm btn-outline-primary" title="Voir le dossier">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'liberer_fonds' %}" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success" title="Libérer les fonds" onclick="return confirm('Confirmer la libération des fonds pour ce dossier ?')">
+                                            <i class="fas fa-check-circle"></i> Libérer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fas fa-check-circle fa-3x mb-3 d-block text-success"></i>
+                                <p class="mb-0 fw-bold">Aucun dossier en attente</p>
+                                <small>Tous les dossiers approuvés ont été traités</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Dossiers Traités -->
+<section class="content-section" id="dossiers-traites-section">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-check-circle text-success"></i> Dossiers Traités (Fonds Libérés)
+            </h5>
+            <span class="badge bg-secondary">{{ dossiers_traites|length }}</span>
+        </div>
+        <div class="card-body">
+            {% if dossiers_traites %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Client</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Date MAJ</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in dossiers_traites %}
+                        <tr>
+                            <td><a href="{% url 'pro:dossier_detail' d.pk %}" class="text-primary fw-semibold">{{ d.reference }}</a></td>
+                            <td>{{ d.client.username }}</td>
+                            <td><strong>{{ d.montant|floatformat:0 }} FCFA</strong></td>
+                            <td>
+                                {% if d.statut_agent == 'FONDS_LIBERE' %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Fonds libéré</span>
+                                {% elif d.statut_agent == 'REFUSE' %}
+                                <span class="badge bg-danger"><i class="fas fa-times"></i> Refusé</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ d.get_statut_agent_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ d.date_maj|date:"d/m/Y H:i" }}</small></td>
+                            <td>
+                                <a href="{% url 'pro:dossier_detail' d.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">Aucun dossier traité pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Section Historique -->
+<section class="content-section" id="historique-section">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-history text-info"></i> Historique des Actions
+            </h5>
+            <span class="badge bg-secondary">{{ historique_actions|length }}</span>
+        </div>
+        <div class="card-body">
+            {% if historique_actions %}
+            <ul class="list-group list-group-flush">
+                {% for action in historique_actions %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary">{{ action.action }}</span>
+                            <a href="{% url 'pro:dossier_detail' action.dossier.pk %}" class="text-primary fw-semibold">{{ action.dossier.reference }}</a>
+                        </div>
+                        <div class="small text-muted">
+                            {% if action.de_statut and action.vers_statut %}
+                            {{ action.de_statut }} → {{ action.vers_statut }}
+                            {% endif %}
+                            {% if action.commentaire_systeme %}
+                            <br>{{ action.commentaire_systeme }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="small text-muted">{{ action.timestamp|date:"d/m/Y H:i" }}</div>
+                        <div class="small">{% if action.acteur %}{{ action.acteur.username }}{% else %}Système{% endif %}</div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted mb-0">Aucune action enregistrée.</p>
+            {% endif %}
         </div>
     </div>
 </section>

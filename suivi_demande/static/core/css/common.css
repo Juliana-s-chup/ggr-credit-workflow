@@ -2,28 +2,39 @@
 /* Palette officielle Crédit du Congo - Groupe Attijariwafa bank */
 
 :root {
+  /* NOUVELLE PALETTE DE COULEURS */
+  --sunset-orange: #fd583d;
+  --selective-yellow: #feb806;
+  --bastille: #161219;
+  --cape-honey: #fee4a8;
+  --espresso: #5b2618;
+  --gray: #8b8989;
+  --terracotta: #e17563;
+  --kumera: #8e6e22;
+  --ronchi: #ebc04f;
+  
   /* Palette principale du logo */
-  --jaune-or: #F5C842;
-  --orange: #FF6B47;
-  --rouge-corail: #FF4444;
-  --noir: #2C2C2C;
-  --marron-fonce: #8B4513;
+  --jaune-or: var(--selective-yellow);
+  --orange: var(--sunset-orange);
+  --rouge-corail: var(--terracotta);
+  --noir: var(--bastille);
+  --marron-fonce: var(--espresso);
   
   /* Dégradés du logo */
-  --gradient-principal: linear-gradient(135deg, #F5C842 0%, #FF6B47 50%, #FF4444 100%);
-  --gradient-sidebar: linear-gradient(180deg, #2C2C2C 0%, #424242 100%);
+  --gradient-principal: linear-gradient(135deg, var(--selective-yellow) 0%, var(--sunset-orange) 50%, var(--terracotta) 100%);
+  --gradient-sidebar: linear-gradient(180deg, var(--bastille) 0%, var(--espresso) 100%);
   
   /* Couleurs neutres */
   --blanc: #ffffff;
-  --gris-clair: #f5f5f5;
-  --gris: #757575;
-  --gris-fonce: #424242;
+  --gris-clair: var(--cape-honey);
+  --gris: var(--gray);
+  --gris-fonce: var(--bastille);
   
   /* Couleurs fonctionnelles */
-  --success: #4caf50;
-  --warning: #ff9800;
-  --danger: #f44336;
-  --info: #2196f3;
+  --success: var(--ronchi);
+  --warning: var(--kumera);
+  --danger: var(--espresso);
+  --info: var(--terracotta);
   
   /* Variables de design */
   --radius: 10px;

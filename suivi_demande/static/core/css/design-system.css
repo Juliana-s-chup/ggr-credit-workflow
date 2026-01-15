@@ -11,20 +11,35 @@
    ======================================== */
 
 :root {
-  /* PALETTE PRINCIPALE - Logo Crédit du Congo */
-  --primary-gold: #F5C842;        /* Or principal - accents, highlights */
-  --primary-orange: #FF6B47;      /* Orange - transitions, hover states */
-  --primary-coral: #FF4444;       /* Rouge corail - CTA, alertes importantes */
-  --primary-dark: #2C2C2C;        /* Noir - textes, sidebar */
+  /* PALETTE PRINCIPALE - Logo Attijariwafa Bank / Crédit du Congo */
+  --primary-gold: #F0B015;        /* Jaune-orange vif - logo supérieur */
+  --primary-dark-gold: #D19010;   /* Jaune foncé */
+  --primary-darker-gold: #B98314; /* Jaune très foncé */
+  --primary-orange: #E65137;      /* Rouge-orange profond - logo inférieur */
+  --primary-coral: #C73F2A;       /* Rouge corail - transitions */
+  --primary-danger: #A43F31;      /* Rouge très foncé - alertes */
+  --primary-dark: #111111;        /* Noir profond - textes, sidebar */
   
-  /* DÉGRADÉS OFFICIELS */
-  --gradient-primary: linear-gradient(135deg, #F5C842 0%, #FF6B47 50%, #FF4444 100%);
-  --gradient-dark: linear-gradient(180deg, #2C2C2C 0%, #424242 100%);
-  --gradient-light: linear-gradient(135deg, #fefaf3 0%, #f8f4e6 100%);
+  /* NOUVELLE PALETTE DE COULEURS */
+  --sunset-orange: #fd583d;
+  --selective-yellow: #feb806;
+  --bastille: #161219;
+  --cape-honey: #fee4a8;
+  --espresso: #5b2618;
+  --gray: #8b8989;
+  --terracotta: #e17563;
+  --kumera: #8e6e22;
+  --ronchi: #ebc04f;
+  
+  /* DÉGRADÉS OFFICIELS - Basés sur le logo Attijariwafa Bank */
+  --gradient-primary: linear-gradient(135deg, var(--sunset-orange) 0%, var(--selective-yellow) 100%);
+  --gradient-gold-orange: linear-gradient(180deg, var(--sunset-orange) 0%, var(--selective-yellow) 50%, var(--terracotta) 100%);
+  --gradient-dark: linear-gradient(180deg, var(--bastille) 0%, var(--espresso) 100%);
+  --gradient-light: linear-gradient(135deg, var(--cape-honey) 0%, var(--ronchi) 100%);
   
   /* COULEURS NEUTRES */
   --white: #ffffff;
-  --light-bg: #fefaf3;            /* Fond principal - cohérent avec l'or */
+  --light-bg: var(--cape-honey);            /* Fond principal - cohérent avec l'or */
   --gray-50: #f9f9f9;
   --gray-100: #f5f5f5;
   --gray-200: #e5e5e5;
@@ -37,10 +52,10 @@
   --gray-900: #171717;
   
   /* COULEURS FONCTIONNELLES */
-  --success: #10b981;             /* Vert - validations, succès */
-  --warning: #f59e0b;             /* Jaune - avertissements */
-  --error: #ef4444;               /* Rouge - erreurs */
-  --info: #3b82f6;                /* Bleu - informations */
+  --success: var(--ronchi);             /* Vert - validations, succès */
+  --warning: var(--kumera);             /* Jaune - avertissements */
+  --error: var(--espresso);               /* Rouge - erreurs */
+  --info: var(--terracotta);                /* Bleu - informations */
   
   /* TYPOGRAPHIE */
   --font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;

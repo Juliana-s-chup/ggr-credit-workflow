@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Connexion Client - GGR Credit{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+  :root {
+    --primary-gold: #F0B015;
+    --primary-orange: #E65137;
+    --secondary-coral: #C73F2A;
+    --primary-dark: #111111;
+    --light: #f8f9fa;
+    --white: #ffffff;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #FFF8E7 0%, #FFE4B5 50%, #FFD89B 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+      radial-gradient(circle at 20% 20%, rgba(240, 176, 21, 0.15), transparent 40%),
+      radial-gradient(circle at 80% 80%, rgba(230, 81, 55, 0.15), transparent 40%);
+    pointer-events: none;
+  }
+
+  .login-container { max-width: 1050px; width: 100%; margin: 0 auto; position: relative; z-index: 1; }
+  .login-card { background: white; border-radius: 24px; padding: 0; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(240, 176, 21, 0.1); display: grid; grid-template-columns: 45% 55%; overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; }
+  .login-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, var(--primary-gold) 0%, var(--primary-orange) 50%, var(--secondary-coral) 100%); box-shadow: 0 2px 8px rgba(240, 176, 21, 0.4); }
+  .login-card:hover { transform: translateY(-5px); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(240, 176, 21, 0.2); }
+
+  .login-illustration { background: linear-gradient(135deg, #F0B015 0%, #E65137 100%); padding: 3rem; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; position: relative; overflow: hidden; }
+  .login-illustration svg { width: 100%; max-width: 300px; height: auto; margin-bottom: 2rem; }
+  .login-illustration h2 { font-size: 1.75rem; font-weight: 700; margin-bottom: 1rem; color: white; }
+  .login-illustration p { text-align: center; color: rgba(255, 255, 255, 0.9); line-height: 1.6; }
+
+  .login-form { padding: 3rem; background: linear-gradient(to bottom, #ffffff 0%, #FFF9F0 100%); }
+  @media (max-width: 768px) { .login-card { grid-template-columns: 1fr; } .login-illustration { display: none; } }
+
+  .portal-badge { display: inline-block; background: linear-gradient(135deg, rgba(240, 176, 21, 0.1), rgba(230, 81, 55, 0.1)); color: var(--primary-orange); padding: 0.65rem 1.75rem; border-radius: 50px; font-size: 0.75rem; font-weight: 700; margin-bottom: 1.5rem; border: 2px solid rgba(240, 176, 21, 0.3); letter-spacing: 1px; text-transform: uppercase; }
+  .login-title { font-size: 2rem; font-weight: 700; color: var(--dark); margin-bottom: 0.5rem; }
+  .login-subtitle { color: #6c757d; margin-bottom: 2rem; }
+
+  .form-group { margin-bottom: 1.5rem; }
+  .form-label { font-weight: 600; color: var(--dark); margin-bottom: 0.5rem; display: block; }
+  .form-control, input[type="text"], input[type="password"] { width: 100%; padding: 0.875rem 1rem; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 1rem; transition: all 0.3s; box-sizing: border-box; }
+  .form-control:focus, input[type="text"]:focus, input[type="password"]:focus { outline: none; border-color: var(--primary-gold); box-shadow: 0 0 0 3px rgba(240, 176, 21, 0.1); }
+  form input { width: 100% !important; }
+
+  .btn-login { width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--primary-gold) 0%, var(--primary-orange) 100%); color: white; border: none; border-radius: 12px; font-size: 1.05rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(230, 81, 55, 0.3); }
+  .btn-login:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(230, 81, 55, 0.4); background: linear-gradient(135deg, var(--primary-orange) 0%, var(--secondary-coral) 100%); }
+  .btn-login:active { transform: translateY(0); }
+
+  .logo { text-align: center; margin-bottom: 2rem; }
+  .logo img { max-width: 120px; height: auto; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="login-container">
+  <div class="login-card">
+    <!-- Illustration à gauche -->
+    <div class="login-illustration">
+      <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="200" cy="200" r="180" fill="rgba(255,255,255,0.1)"/>
+        <circle cx="200" cy="200" r="140" fill="rgba(255,255,255,0.15)"/>
+        <circle cx="200" cy="200" r="100" fill="rgba(255,255,255,0.1)"/>
+        <rect x="90" y="140" width="220" height="140" rx="20" fill="rgba(255,255,255,0.95)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+        <rect x="90" y="140" width="220" height="50" rx="20" fill="rgba(255,255,255,0.2)"/>
+        <rect x="110" y="200" width="50" height="40" rx="8" fill="rgba(255,255,255,0.9)"/>
+        <rect x="115" y="205" width="40" height="30" rx="4" fill="rgba(240,176,21,0.3)"/>
+        <circle cx="250" cy="245" r="20" fill="rgba(255,255,255,0.9)"/>
+        <circle cx="280" cy="245" r="20" fill="rgba(255,255,255,0.7)"/>
+        <rect x="170" y="210" width="120" height="6" rx="3" fill="rgba(255,255,255,0.6)"/>
+        <rect x="170" y="225" width="100" height="6" rx="3" fill="rgba(255,255,255,0.5)"/>
+        <rect x="170" y="240" width="80" height="6" rx="3" fill="rgba(255,255,255,0.4)"/>
+        <circle cx="200" cy="80" r="35" fill="rgba(255,255,255,0.2)" stroke="white" stroke-width="3"/>
+        <path d="M200,60 L210,70 L230,50" fill="none" stroke="white" stroke-width="4" stroke-linecap="round"/>
+      </svg>
+      <h2>Gérez vos crédits facilement</h2>
+      <p>Accédez à tous vos dossiers de crédit en un clic. Suivez l'évolution de vos demandes en temps réel.</p>
+    </div>
+
+    <!-- Formulaire à droite -->
+    <div class="login-form">
+      <div class="logo">
+        <img src="{% static 'core/img/Credit_Du_Congo.png' %}" alt="GGR Credit" />
+      </div>
+
+      <div class="text-center">
+        <span class="portal-badge">
+          <i class="fas fa-user-circle"></i> ESPACE CLIENT
+        </span>
+      </div>
+
+      <h1 class="login-title">Bienvenue</h1>
+      <p class="login-subtitle">Connectez-vous à votre espace personnel</p>
+
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="id_username" class="form-label">
+          <i class="fas fa-user"></i> Nom d'utilisateur
+        </label>
+        <input type="text" name="username" id="id_username" class="form-control" required autocomplete="username" autofocus>
+      </div>
+
+      <div class="form-group">
+        <label for="id_password" class="form-label">
+          <i class="fas fa-lock"></i> Mot de passe
+        </label>
+        <input type="password" name="password" id="id_password" class="form-control" required autocomplete="current-password">
+      </div>
+
+      <button type="submit" class="btn-login">
+        <i class="fas fa-sign-in-alt"></i> Se connecter
+      </button>
+    </form>
+
+    <div style="margin-top: 1rem; text-align: center;">
+      <a href="{% url 'suivi:signup' %}" class="btn btn-link" style="font-weight: 600; text-decoration: none;">Pas de compte ? S’inscrire</a>
+      <div class="text-muted" style="font-size: 0.85rem;">La création de compte est soumise à validation par un administrateur.</div>
+    </div>
+
+      <div style="margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #e0e0e0; text-align: center;">
+        <p style="font-size: 0.875rem; color: #6c757d; margin: 0;">
+          <i class="fas fa-shield-alt" style="color: var(--primary-gold);"></i> Connexion sécurisée SSL
+        </p>
+        <p style="font-size: 0.75rem; color: #adb5bd; margin-top: 0.5rem;">
+          © 2025 GGR Credit - Crédit du Congo
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

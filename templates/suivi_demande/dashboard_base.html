@@ -4,28 +4,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Dashboard{% endblock %} - Crédit du Congo</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>{% block title %}Dashboard{% endblock %}</title>
     
     <!-- Icons -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
+    <!-- Charte Graphique GGR (Polices + Styles) -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/charte_graphique.css' %}">
+    
+    <!-- New Color Palette -->
+    <link rel="stylesheet" type="text/css" href="{% static 'core/css/color-palette.css' %}">
+    
     <!-- CSS Framework -->
-    <link rel="stylesheet" type="text/css" href="{% static 'suivi_demande/css/design-system.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'core/css/design-system.css' %}">
     
     <!-- Dashboard specific CSS -->
     {% block extra_css %}{% endblock %}
+    
+    <!-- Charts library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" integrity="sha384-+3B2sZk7p8e2nKkqG7qgQv2l6r5f9m7kY9D9q0f0f8UO3s1d9oYhQ0wIhJQ7bM6j" crossorigin="anonymous"></script>
     
     <style>
         /* Layout principal */
         .dashboard-layout {
             display: flex;
             min-height: 100vh;
-            background: var(--light-bg);
+            background: var(--light-background);
         }
         
         .main-content {
@@ -33,6 +37,18 @@
             margin-left: 280px;
             padding: var(--spacing-8);
             transition: margin-left var(--transition-normal);
+        }
+        
+        /* Logo image styling */
+        .logo-image {
+            width: 56px;
+            height: 56px;
+            object-fit: contain;
+            border-radius: 8px;
+            display: block;
+        }
+        @media (max-width: 768px) {
+            .logo-image { width: 48px; height: 48px; }
         }
         
         /* Header unifié */
@@ -51,7 +67,7 @@
             display: flex;
             align-items: center;
             gap: var(--spacing-4);
-            color: var(--primary-coral);
+            color: var(--primary-action);
             font-size: var(--font-size-2xl);
             font-weight: var(--font-weight-bold);
         }
@@ -61,7 +77,7 @@
             align-items: center;
             gap: var(--spacing-4);
             padding: var(--spacing-3) var(--spacing-6);
-            background: var(--gradient-primary);
+            background: var(--gradient-sunset);
             color: var(--white);
             border-radius: var(--radius-lg);
             font-weight: var(--font-weight-semibold);
@@ -79,7 +95,7 @@
             height: 40px;
             border-radius: var(--radius-full);
             background: var(--white);
-            color: var(--primary-dark);
+            color: var(--primary-action);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -145,20 +161,9 @@
     <div class="dashboard-layout">
         <!-- Sidebar -->
         <aside class="sidebar-banking">
-            <!-- Logo officiel -->
-            <div class="logo-official">
-                <div class="logo-icon">
-                    <i class="fas fa-university"></i>
-                </div>
-                <div>
-                    <div class="font-bold text-lg">Crédit du Congo</div>
-                    <div class="text-xs opacity-80">Groupe Attijariwafa Bank</div>
-                </div>
-            </div>
-            
             <!-- Section titre -->
             <div class="text-center mt-8 mb-6">
-                <div class="text-sm font-semibold text-primary-gold uppercase tracking-wide">
+                <div class="text-xl font-semibold text-primary-gold uppercase tracking-wide">
                     {% block dashboard_role %}Dashboard{% endblock %}
                 </div>
             </div>
@@ -166,48 +171,46 @@
             <!-- Navigation -->
             <nav class="nav-banking flex-1">
                 {% block navigation %}
-                <a href="#" class="nav-item-banking active" data-section="dashboard">
+                <a href="javascript:void(0)" class="nav-item-banking active" data-section="dashboard">
                     <i class="fas fa-tachometer-alt"></i>
                     <span>Tableau de Bord</span>
                 </a>
                 {% endblock %}
             </nav>
             
-            <!-- Footer sidebar -->
-            <div class="mt-auto pt-6 border-t border-white border-opacity-20">
-                <div class="text-xs text-center opacity-60">
-                    Version 2.0.1<br>
-                    © 2024 Crédit du Congo
-                </div>
-            </div>
+            
         </aside>
         
         <!-- Contenu principal -->
         <main class="main-content">
             <!-- Header -->
             <header class="dashboard-header">
-                <h1 class="dashboard-title">
-                    <i class="{% block header_icon %}fas fa-tachometer-alt{% endblock %}"></i>
-                    {% block page_title %}Dashboard{% endblock %}
-                </h1>
-                
-                <div class="flex items-center gap-4">
-                    <!-- Notifications -->
-                    <button class="btn btn-secondary btn-sm">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge badge-error">3</span>
-                    </button>
-                    
-                    <!-- Profil utilisateur -->
-                    <div class="user-profile-header">
-                        <div class="user-avatar-header">
-                            {{ user.first_name.0|default:user.username.0|upper }}
-                        </div>
-                        <div>
-                            <div class="font-semibold">{{ user.get_full_name|default:user.username }}</div>
-                            <div class="text-xs opacity-80">{% block user_role %}Utilisateur{% endblock %}</div>
-                        </div>
-                    </div>
+                <div class="d-flex align-items-center gap-3">
+                    <img src="{% static 'core/img/Credit_Du_Congo.png' %}" alt="Crédit du Congo" class="logo-image" />
+                    <h1 class="dashboard-title m-0">
+                        <i class="{% block header_icon %}fas fa-tachometer-alt{% endblock %}"></i>
+                        {% block page_title %}Dashboard{% endblock %}
+                    </h1>
+                </div>
+                <div class="d-flex align-items-center gap-3">
+                    {% if request.user.is_authenticated %}
+                    {% if request.resolver_match.namespace == 'client' %}
+                    <form method="post" action="{% url 'client:logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Déconnexion</button>
+                    </form>
+                    {% elif request.resolver_match.namespace == 'pro' %}
+                    <form method="post" action="{% url 'pro:logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Déconnexion</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">Déconnexion</button>
+                    </form>
+                    {% endif %}
+                    {% endif %}
                 </div>
             </header>
             
@@ -264,6 +267,11 @@
                     const targetSection = document.getElementById(sectionId);
                     if (targetSection) {
                         targetSection.classList.add('active');
+                        // Scroll vers la section pour s'assurer qu'elle est visible
+                        targetSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        console.log('✓ Section affichée:', sectionId);
+                    } else {
+                        console.error('✗ Section non trouvée:', sectionId);
                     }
                 });
             });

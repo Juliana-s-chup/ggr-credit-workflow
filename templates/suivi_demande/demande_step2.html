@@ -1,25 +1,16 @@
 {% extends "base.html" %}
 {% block title %}Demande de crédit - Étape 2{% endblock %}
 
-{% block extra_scripts %}
-<script>
-  (function(){
-    const oui = document.getElementById('hasCreditsOui');
-    const non = document.getElementById('hasCreditsNon');
-    const details = document.getElementById('creditsDetails');
-    function sync(){
-      if (oui && oui.checked) { details.style.display = 'block'; }
-      else { details.style.display = 'none'; }
-    }
-    if (oui) oui.addEventListener('change', sync);
-    if (non) non.addEventListener('change', sync);
-  })();
-</script>
-{% endblock %}
+{% block extra_scripts %}{% endblock %}
 {% block content %}
 <section class="py-4 border-bottom">
   <div class="container d-flex justify-content-between align-items-center">
-    <h1 class="h5 mb-0">Demande de crédit</h1>
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'pro:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Retour au dashboard
+      </a>
+      <h1 class="h5 mb-0">Demande de crédit</h1>
+    </div>
     <div class="text-muted small">Étape 2/4 • Situation financière</div>
   </div>
 </section>
@@ -29,7 +20,7 @@
     <div class="row">
       <div class="col-lg-3 mb-3 mb-lg-0">
         <div class="list-group">
-          <a class="list-group-item" href="{% url 'demande_step1' %}">1 • Informations personnelles</a>
+          <a class="list-group-item" href="{% url 'pro:demande_step1' %}">1 • Renseignement du demandeur</a>
           <div class="list-group-item active">2 • Situation financière</div>
           <div class="list-group-item">3 • Détails du crédit</div>
           <div class="list-group-item">4 • Documents & Validation</div>
@@ -42,73 +33,15 @@
             <form method="post" novalidate>
               {% csrf_token %}
               <div class="row g-3">
-                <div class="col-12">
-                  <p class="text-secondary">Décrivez votre situation professionnelle et financière actuelle.</p>
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label">Situation professionnelle</label>
-                  {{ form.statut_emploi }}
-                  {% if form.statut_emploi.errors %}<div class="text-danger small">{{ form.statut_emploi.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Nom de l'employeur</label>
-                  <input type="text" name="employeur_nom" value="{{ form.employeur_nom.value|default_if_none:'' }}" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Poste occupé</label>
-                  <input type="text" name="poste_occupe" value="{{ form.poste_occupe.value|default_if_none:'' }}" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Ancienneté</label>
-                  {{ form.anciennete }}
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label">Revenu mensuel net (FCFA)</label>
-                  <input type="number" min="0" step="0.01" name="salaire_net_moyen" value="{{ form.salaire_net_moyen.value|default_if_none:'' }}" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Autres revenus mensuels (FCFA)</label>
-                  <input type="number" min="0" step="0.01" name="autres_revenus" value="{{ form.autres_revenus.value|default_if_none:0 }}" class="form-control" />
-                  <div class="form-text">Pensions, loyers, investissements, etc.</div>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Dépenses mensuelles (FCFA)</label>
-                  <input type="number" min="0" step="0.01" name="charges_mensuelles" value="{{ form.charges_mensuelles.value|default_if_none:0 }}" class="form-control" />
-                </div>
-
-                <div class="col-md-6">
-                  <label class="form-label d-block">Avez-vous des crédits en cours ?</label>
-                  <div class="d-flex gap-3">
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="has_credits" id="hasCreditsNon" value="NON" {% if form.has_credits.value != 'OUI' %}checked{% endif %}>
-                      <label class="form-check-label" for="hasCreditsNon">Non</label>
-                    </div>
-                    <div class="form-check">
-                      <input class="form-check-input" type="radio" name="has_credits" id="hasCreditsOui" value="OUI" {% if form.has_credits.value == 'OUI' %}checked{% endif %}>
-                      <label class="form-check-label" for="hasCreditsOui">Oui</label>
-                    </div>
-                  </div>
-                </div>
-
-                <div class="col-12" id="creditsDetails" style="display: {% if form.has_credits.value == 'OUI' %}block{% else %}none{% endif %};">
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label">Montant total des crédits (FCFA)</label>
-                      <input type="number" min="0" step="0.01" name="montant_total_credits" value="{{ form.montant_total_credits.value|default_if_none:'' }}" class="form-control" />
-                      {% if form.montant_total_credits.errors %}<div class="text-danger small">{{ form.montant_total_credits.errors.0 }}</div>{% endif %}
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label">Mensualités totales (FCFA)</label>
-                      <input type="number" min="0" step="0.01" name="mensualites_totales" value="{{ form.mensualites_totales.value|default_if_none:'' }}" class="form-control" />
-                      {% if form.mensualites_totales.errors %}<div class="text-danger small">{{ form.mensualites_totales.errors.0 }}</div>{% endif %}
-                    </div>
-                  </div>
-                </div>
+                <div class="col-md-4">{{ form.salaire_net_moyen_fcfa.label_tag }}{{ form.salaire_net_moyen_fcfa }}</div>
+                <div class="col-md-4">{{ form.echeances_prets_relevees.label_tag }}{{ form.echeances_prets_relevees }}</div>
+                <div class="col-md-4">{{ form.total_echeances_credits_cours.label_tag }}{{ form.total_echeances_credits_cours }}</div>
+                <div class="col-md-4">{{ form.salaire_net_avant_endettement_fcfa.label_tag }}{{ form.salaire_net_avant_endettement_fcfa }}</div>
+                <div class="col-md-4">{{ form.capacite_endettement_brute_fcfa.label_tag }}{{ form.capacite_endettement_brute_fcfa }}</div>
+                <div class="col-md-4">{{ form.capacite_endettement_nette_fcfa.label_tag }}{{ form.capacite_endettement_nette_fcfa }}</div>
               </div>
               <div class="d-flex justify-content-between mt-4">
-                <a class="btn btn-outline-secondary" href="{% url 'demande_step1' %}">Précédent</a>
+                <a class="btn btn-outline-secondary" href="{% url 'pro:demande_step1' %}">Précédent</a>
                 <button type="submit" class="btn btn-primary">Suivant</button>
               </div>
             </form>

@@ -1,7 +1,26 @@
-{% extends "base.html" %}
+{% extends "suivi_demande/dashboard_base.html" %}
 {% load static %}
 
 {% block title %}Gestion des utilisateurs{% endblock %}
+{% block dashboard_role %}Administration{% endblock %}
+{% block user_role %}Super Admin{% endblock %}
+{% block page_title %}Gestion des Utilisateurs{% endblock %}
+{% block header_icon %}fas fa-users{% endblock %}
+
+{% block navigation %}
+<a href="{% url 'pro:dashboard' %}" class="nav-item-banking">
+    <i class="fas fa-tachometer-alt"></i>
+    <span>Tableau de Bord</span>
+</a>
+<a href="{% url 'pro:admin_users' %}" class="nav-item-banking active">
+    <i class="fas fa-users"></i>
+    <span>Utilisateurs</span>
+</a>
+<a href="{% url 'pro:admin_create_user' %}" class="nav-item-banking">
+    <i class="fas fa-user-plus"></i>
+    <span>Créer Utilisateur</span>
+</a>
+{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
@@ -9,7 +28,7 @@
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h2><i class="fas fa-users"></i> Gestion des utilisateurs</h2>
-                <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+                <a href="{% url 'pro:dashboard' %}" class="btn btn-secondary">
                     <i class="fas fa-arrow-left"></i> Retour au dashboard
                 </a>
             </div>
@@ -79,7 +98,7 @@
                                                 <i class="fas fa-edit"></i> Modifier rôle
                                             </button>
                                             {% if not user_data.user.is_active %}
-                                            <form method="post" action="{% url 'admin_activate_user' user_data.user.id %}" class="d-inline">
+                                            <form method="post" action="{% url 'pro:admin_activate_user' user_data.user.id %}" class="d-inline">
                                                 {% csrf_token %}
                                                 <button type="submit" class="btn btn-outline-success btn-sm">
                                                     <i class="fas fa-check"></i> Activer
@@ -107,7 +126,7 @@
 <div class="modal fade" id="roleModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
-            <form method="post" action="{% url 'admin_change_role' %}">
+            <form method="post" action="{% url 'pro:admin_change_role' %}">
                 {% csrf_token %}
                 <div class="modal-header">
                     <h5 class="modal-title">Modifier le rôle utilisateur</h5>

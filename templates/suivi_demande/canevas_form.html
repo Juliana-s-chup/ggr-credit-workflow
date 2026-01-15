@@ -1,0 +1,468 @@
+{% extends "suivi_demande/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}{{ is_new|yesno:"Créer,Modifier" }} Canevas - {{ dossier.reference }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- En-tête moderne -->
+    <div class="text-center mb-5">
+        <div class="mb-3">
+            <div class="d-inline-block p-3 bg-primary bg-opacity-10 rounded-circle">
+                <i class="fas fa-file-contract fa-3x text-primary"></i>
+            </div>
+        </div>
+        <h1 class="display-6 fw-bold mb-2">Canevas de Proposition NOKI NOKI</h1>
+        <p class="text-muted fs-5">Dossier <span class="badge bg-primary">{{ dossier.reference }}</span> - {{ dossier.client.get_full_name }}</p>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Indicateur de progression moderne -->
+    <div class="mb-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="d-flex justify-content-between position-relative">
+                    <!-- Ligne de connexion -->
+                    <div class="position-absolute top-50 start-0 end-0 translate-middle-y" style="height: 3px; background: #e9ecef; z-index: 0;"></div>
+                    
+                    <!-- Étapes (4) -->
+                    <div class="step-item text-center" data-step="1">
+                        <div class="step-circle active mb-2">
+                            <i class="fas fa-info-circle"></i>
+                        </div>
+                        <small class="d-block fw-semibold">En-tête</small>
+                    </div>
+                    <div class="step-item text-center" data-step="2">
+                        <div class="step-circle mb-2">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <small class="d-block">Demandeur</small>
+                    </div>
+                    <div class="step-item text-center" data-step="3">
+                        <div class="step-circle mb-2">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <small class="d-block">Capacité</small>
+                    </div>
+                    <div class="step-item text-center" data-step="4">
+                        <div class="step-circle mb-2">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <small class="d-block">Détails du crédit</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulaire avec wizard -->
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <form method="post" id="canevasForm">
+                {% csrf_token %}
+
+                <!-- Contenu des onglets -->
+                <div class="tab-content" id="canevasTabContent">
+                    
+                    <!-- ONGLET 1: EN-TÊTE -->
+                    <div class="tab-pane fade show active" id="entete" role="tabpanel">
+                        <h4 class="mb-4">Informations d'en-tête</h4>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.agence.label }}</label>
+                                {{ form.agence }}
+                                {% if form.agence.errors %}
+                                    <div class="text-danger small">{{ form.agence.errors }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.code_agence.label }}</label>
+                                {{ form.code_agence }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.nom_exploitant.label }}</label>
+                                {{ form.nom_exploitant }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.matricule_exploitant.label }}</label>
+                                {{ form.matricule_exploitant }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.date_proposition.label }}</label>
+                                {{ form.date_proposition }}
+                            </div>
+                        </div>
+
+                    <!-- DOCUMENTS & VALIDATION (Étape 4) -->
+                    <h5 class="text-primary mb-3 mt-4">Documents & Validation</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_cni_ok }}
+                                <label class="form-check-label">{{ form.doc_cni_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_fiche_paie_ok }}
+                                <label class="form-check-label">{{ form.doc_fiche_paie_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_releve_ok }}
+                                <label class="form-check-label">{{ form.doc_releve_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_billet_ordre_ok }}
+                                <label class="form-check-label">{{ form.doc_billet_ordre_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_attestation_employeur_ok }}
+                                <label class="form-check-label">{{ form.doc_attestation_employeur_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_attestation_domiciliation_ok }}
+                                <label class="form-check-label">{{ form.doc_attestation_domiciliation_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_assurance_deces_invalidite_ok }}
+                                <label class="form-check-label">{{ form.doc_assurance_deces_invalidite_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                {{ form.validation_consentement }}
+                                <label class="form-check-label">{{ form.validation_consentement.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                    
+                    
+
+                    <!-- ONGLET 2: DEMANDEUR -->
+                    <div class="tab-pane fade" id="demandeur" role="tabpanel">
+                        <h4 class="mb-4">Renseignements sur le demandeur</h4>
+                        
+                        <!-- Identité -->
+                        <h5 class="text-primary mb-3"><i class="fas fa-id-card"></i> Identité</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.nom_prenom.label }}</label>
+                                {{ form.nom_prenom }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.date_naissance.label }}</label>
+                                {{ form.date_naissance }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.nationalite.label }}</label>
+                                {{ form.nationalite }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.adresse_exacte.label }}</label>
+                                {{ form.adresse_exacte }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.numero_telephone.label }}</label>
+                                {{ form.numero_telephone }}
+                            </div>
+                        </div>
+
+                        <!-- Emploi -->
+                        <h5 class="text-primary mb-3"><i class="fas fa-briefcase"></i> Emploi</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.radical.label }}</label>
+                                {{ form.radical }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.date_ouverture_compte.label }}</label>
+                                {{ form.date_ouverture_compte }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.date_domiciliation_salaire.label }}</label>
+                                {{ form.date_domiciliation_salaire }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.emploi_occupe.label }}</label>
+                                {{ form.emploi_occupe }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.statut_emploi.label }}</label>
+                                {{ form.statut_emploi }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.anciennete_emploi.label }}</label>
+                                {{ form.anciennete_emploi }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.type_contrat.label }}</label>
+                                {{ form.type_contrat }}
+                            </div>
+                        </div>
+
+                        <!-- Employeur -->
+                        <h5 class="text-primary mb-3"><i class="fas fa-building"></i> Employeur</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.nom_employeur.label }}</label>
+                                {{ form.nom_employeur }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.lieu_emploi.label }}</label>
+                                {{ form.lieu_emploi }}
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    {{ form.employeur_client_banque }}
+                                    <label class="form-check-label">{{ form.employeur_client_banque.label }}</label>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.radical_employeur.label }}</label>
+                                {{ form.radical_employeur }}
+                            </div>
+                        </div>
+
+                        <!-- Situation familiale -->
+                        <h5 class="text-primary mb-3"><i class="fas fa-home"></i> Situation familiale & Logement</h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.situation_famille.label }}</label>
+                                {{ form.situation_famille }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.nombre_personnes_charge.label }}</label>
+                                {{ form.nombre_personnes_charge }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.regime_matrimonial.label }}</label>
+                                {{ form.regime_matrimonial }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.salaire_conjoint.label }}</label>
+                                {{ form.salaire_conjoint }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.emploi_conjoint.label }}</label>
+                                {{ form.emploi_conjoint }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.statut_logement.label }}</label>
+                                {{ form.statut_logement }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ form.numero_tf.label }}</label>
+                                {{ form.numero_tf }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ONGLET 3: CAPACITÉ D'ENDETTEMENT -->
+                    <div class="tab-pane fade" id="capacite" role="tabpanel">
+                        <h4 class="mb-4">Capacité d'endettement</h4>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle"></i> Les calculs se font automatiquement à 40% du salaire net moyen.
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.salaire_net_moyen_fcfa.label }}</label>
+                                {{ form.salaire_net_moyen_fcfa }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.echeances_prets_relevees.label }}</label>
+                                {{ form.echeances_prets_relevees }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.total_echeances_credits_cours.label }}</label>
+                                {{ form.total_echeances_credits_cours }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.salaire_net_avant_endettement_fcfa.label }}</label>
+                                {{ form.salaire_net_avant_endettement_fcfa }}
+                                <small class="text-muted d-block">Calculé automatiquement</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.capacite_endettement_brute_fcfa.label }}</label>
+                                {{ form.capacite_endettement_brute_fcfa }}
+                                <small class="text-muted d-block">40% du salaire net</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{{ form.capacite_endettement_nette_fcfa.label }}</label>
+                                {{ form.capacite_endettement_nette_fcfa }}
+                                <small class="text-muted d-block">Capacité disponible</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ONGLET 4: DÉTAILS DU CRÉDIT -->
+                    <div class="tab-pane fade" id="pret" role="tabpanel">
+                        <h4 class="mb-4">Détails du crédit</h4>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label">{{ form.nature_pret.label }}</label>
+                                {{ form.nature_pret }}
+                            </div>
+                        </div>
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label">{{ form.motif_credit.label }}</label>
+                                {{ form.motif_credit }}
+                            </div>
+                        </div>
+
+                        <!-- Demande du client -->
+                        <h5 class="text-primary mb-3">Demande du client</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.demande_montant_fcfa.label }}</label>
+                                {{ form.demande_montant_fcfa }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.demande_duree_mois.label }}</label>
+                                {{ form.demande_duree_mois }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.demande_taux_pourcent.label }}</label>
+                                {{ form.demande_taux_pourcent }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.demande_periodicite.label }}</label>
+                                {{ form.demande_periodicite }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.demande_date_1ere_echeance.label }}</label>
+                                {{ form.demande_date_1ere_echeance }}
+                            </div>
+                        </div>
+
+                        <!-- Proposition -->
+                        <h5 class="text-success mb-3">Proposition</h5>
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.proposition_montant_fcfa.label }}</label>
+                                {{ form.proposition_montant_fcfa }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.proposition_duree_mois.label }}</label>
+                                {{ form.proposition_duree_mois }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.proposition_taux_pourcent.label }}</label>
+                                {{ form.proposition_taux_pourcent }}
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">{{ form.proposition_periodicite.label }}</label>
+                                {{ form.proposition_periodicite }}
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">{{ form.proposition_date_1ere_echeance.label }}</label>
+                                {{ form.proposition_date_1ere_echeance }}
+                            </div>
+                        </div>
+                    <!-- DOCUMENTS & VALIDATION (Étape 4) -->
+                    <h5 class="text-primary mb-3">Documents & Validation</h5>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_cni_ok }}
+                                <label class="form-check-label">{{ form.doc_cni_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_fiche_paie_ok }}
+                                <label class="form-check-label">{{ form.doc_fiche_paie_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_releve_ok }}
+                                <label class="form-check-label">{{ form.doc_releve_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_billet_ordre_ok }}
+                                <label class="form-check-label">{{ form.doc_billet_ordre_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_attestation_employeur_ok }}
+                                <label class="form-check-label">{{ form.doc_attestation_employeur_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_attestation_domiciliation_ok }}
+                                <label class="form-check-label">{{ form.doc_attestation_domiciliation_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-check">
+                                {{ form.doc_assurance_deces_invalidite_ok }}
+                                <label class="form-check-label">{{ form.doc_assurance_deces_invalidite_ok.label }}</label>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check">
+                                {{ form.validation_consentement }}
+                                <label class="form-check-label">{{ form.validation_consentement.label }}</label>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+
+                <!-- Boutons d'action -->
+                <div class="d-flex justify-content-between mt-4 pt-4 border-top">
+                    <a href="{% url 'pro:dossier_detail' dossier.pk %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> {{ is_new|yesno:"Créer,Enregistrer" }} le canevas
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.nav-tabs .nav-link {
+    color: #6c757d;
+}
+.nav-tabs .nav-link.active {
+    color: #0d6efd;
+    font-weight: 600;
+}
+.nav-tabs .nav-link:hover {
+    color: #0d6efd;
+}
+</style>
+{% endblock %}

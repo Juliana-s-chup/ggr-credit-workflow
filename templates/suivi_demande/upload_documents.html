@@ -1,0 +1,257 @@
+{% extends "suivi_demande/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Upload Documents - {{ dossier.reference }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- En-tête -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">
+                <i class="fas fa-upload text-primary"></i>
+                Upload des Documents
+            </h2>
+            <p class="text-muted mb-0">Dossier: <strong>{{ dossier.reference }}</strong> - {{ dossier.client.get_full_name }}</p>
+        </div>
+        <a href="{% url 'pro:dashboard' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Retour au dashboard
+        </a>
+    </div>
+
+    <!-- Messages -->
+    {% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Barre de progression -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Progression</h5>
+                <span class="badge {% if dossier_complet %}bg-success{% else %}bg-warning{% endif %} fs-6">
+                    {{ total_fournis }} / {{ total_obligatoires }} documents
+                </span>
+            </div>
+            <div class="progress" style="height: 25px;">
+                <div class="progress-bar {% if dossier_complet %}bg-success{% else %}bg-primary{% endif %}" 
+                     role="progressbar" 
+                     style="width: {{ pourcentage_completion }}%;" 
+                     aria-valuenow="{{ pourcentage_completion }}" 
+                     aria-valuemin="0" 
+                     aria-valuemax="100">
+                    {{ pourcentage_completion }}%
+                </div>
+            </div>
+            {% if dossier_complet %}
+            <div class="alert alert-success mt-3 mb-0">
+                <i class="fas fa-check-circle"></i> Tous les documents obligatoires sont fournis ! Vous pouvez maintenant transmettre le dossier.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Catégories de documents -->
+    {% for cat_key, cat_data in categories.items %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-{{ cat_data.color }} text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="{{ cat_data.icon }}"></i>
+                    {{ cat_data.label }}
+                </h5>
+                <span class="badge {% if cat_data.complet %}bg-success{% else %}bg-light text-dark{% endif %}">
+                    {{ cat_data.fournis }} / {{ cat_data.obligatoires }}
+                    {% if cat_data.complet %}<i class="fas fa-check ms-1"></i>{% endif %}
+                </span>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row g-3">
+                {% for doc in cat_data.documents %}
+                <div class="col-md-6">
+                    <div class="border rounded p-3 {% if doc.existe %}bg-light{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">
+                                    {{ doc.label }}
+                                    {% if doc.obligatoire %}
+                                        <span class="badge bg-danger badge-sm">Obligatoire</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary badge-sm">Optionnel</span>
+                                    {% endif %}
+                                </h6>
+                                {% if doc.existe %}
+                                    <div class="text-success small">
+                                        <i class="fas fa-check-circle"></i> 
+                                        <a href="{{ doc.fichier.fichier.url }}" target="_blank" class="text-success">
+                                            {{ doc.fichier.fichier.name|slice:"7:" }}
+                                        </a>
+                                        <span class="text-muted">({{ doc.fichier.taille|filesizeformat }})</span>
+                                    </div>
+                                {% else %}
+                                    <div class="text-muted small">
+                                        <i class="fas fa-exclamation-circle"></i> Non fourni
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex gap-2">
+                            {% if doc.existe %}
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-danger btn-delete-doc" 
+                                        data-piece-id="{{ doc.fichier.id }}"
+                                        data-doc-type="{{ doc.type }}">
+                                    <i class="fas fa-trash"></i> Supprimer
+                                </button>
+                                <button type="button" 
+                                        class="btn btn-sm btn-outline-primary btn-replace-doc" 
+                                        data-doc-type="{{ doc.type }}">
+                                    <i class="fas fa-sync"></i> Remplacer
+                                </button>
+                            {% else %}
+                                <button type="button" 
+                                        class="btn btn-sm btn-primary btn-upload-doc" 
+                                        data-doc-type="{{ doc.type }}">
+                                    <i class="fas fa-upload"></i> Uploader
+                                </button>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Input file caché -->
+                        <input type="file" 
+                               class="d-none file-input" 
+                               data-doc-type="{{ doc.type }}"
+                               accept=".pdf,.jpg,.jpeg,.png">
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+    <!-- Boutons d'action -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'pro:canevas_form' dossier.id %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Retour au canevas
+                </a>
+                <a href="{% url 'pro:dossier_detail' dossier.pk %}" class="btn btn-success btn-lg">
+                    <i class="fas fa-check"></i> Terminer
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Script pour l'upload AJAX -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dossierId = {{ dossier.id }};
+    const uploadUrl = "{% url 'pro:upload_document_ajax' dossier.id %}";
+    const deleteUrlTemplate = "{% url 'pro:delete_document_ajax' dossier.id 0 %}".replace('/0/', '/{pieceId}/');
+    
+    // Boutons upload
+    document.querySelectorAll('.btn-upload-doc, .btn-replace-doc').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const docType = this.dataset.docType;
+            const fileInput = document.querySelector(`.file-input[data-doc-type="${docType}"]`);
+            fileInput.click();
+        });
+    });
+    
+    // Upload de fichier
+    document.querySelectorAll('.file-input').forEach(input => {
+        input.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            
+            const docType = this.dataset.docType;
+            const formData = new FormData();
+            formData.append('type_piece', docType);
+            formData.append('fichier', file);
+            formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+            
+            // Afficher un loader
+            const btn = document.querySelector(`[data-doc-type="${docType}"].btn-upload-doc, [data-doc-type="${docType}"].btn-replace-doc`);
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Upload...';
+            btn.disabled = true;
+            
+            fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Recharger la page pour voir le document
+                } else {
+                    alert('Erreur: ' + data.error);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert('Erreur lors de l\'upload');
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+    });
+    
+    // Suppression de document
+    document.querySelectorAll('.btn-delete-doc').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
+            
+            const pieceId = this.dataset.pieceId;
+            const deleteUrl = deleteUrlTemplate.replace('{pieceId}', pieceId);
+            
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            this.disabled = true;
+            
+            fetch(deleteUrl, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.error);
+                    this.innerHTML = originalText;
+                    this.disabled = false;
+                }
+            })
+            .catch(error => {
+                alert('Erreur lors de la suppression');
+                this.innerHTML = originalText;
+                this.disabled = false;
+            });
+        });
+    });
+});
+</script>
+
+<style>
+.badge-sm {
+    font-size: 0.7rem;
+    padding: 0.2rem 0.4rem;
+}
+</style>
+{% endblock %}

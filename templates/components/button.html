@@ -1,0 +1,26 @@
+{# Composant Bouton Réutilisable #}
+<button type="{{ type|default:'button' }}"
+        class="btn-modern btn-{{ variant|default:'primary' }} {% if size %}btn-{{ size }}{% endif %} {% if full_width %}btn-full{% endif %}"
+        {% if id %}id="{{ id }}"{% endif %}
+        {% if name %}name="{{ name }}"{% endif %}
+        {% if disabled %}disabled aria-disabled="true"{% endif %}
+        {% if loading %}data-loading="true" aria-busy="true"{% endif %}
+        {% if aria_label %}aria-label="{{ aria_label }}"{% else %}aria-label="{{ text }}"{% endif %}
+        {% if data_attrs %}{{ data_attrs|safe }}{% endif %}>
+  
+  {% if icon_left %}
+  <span class="btn-icon btn-icon-left" aria-hidden="true">{{ icon_left|safe }}</span>
+  {% endif %}
+  
+  <span class="btn-text">{{ text }}</span>
+  
+  {% if icon_right %}
+  <span class="btn-icon btn-icon-right" aria-hidden="true">{{ icon_right|safe }}</span>
+  {% endif %}
+  
+  {% if loading %}
+  <span class="btn-spinner" role="status" aria-label="Chargement en cours">
+    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+  </span>
+  {% endif %}
+</button>

@@ -3,7 +3,12 @@
 {% block content %}
 <section class="py-4 border-bottom">
   <div class="container d-flex justify-content-between align-items-center">
-    <h1 class="h5 mb-0">Demande de crédit</h1>
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'pro:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Retour au dashboard
+      </a>
+      <h1 class="h5 mb-0">Demande de crédit</h1>
+    </div>
     <div class="text-muted small">Étape 4/4 • Documents & Validation</div>
   </div>
 </section>
@@ -13,13 +18,20 @@
     <div class="row">
       <div class="col-lg-3 mb-3 mb-lg-0">
         <div class="list-group">
-          <a class="list-group-item" href="{% url 'demande_step1' %}">1 • Informations personnelles</a>
-          <a class="list-group-item" href="{% url 'demande_step2' %}">2 • Situation financière</a>
-          <a class="list-group-item" href="{% url 'demande_step3' %}">3 • Détails du crédit</a>
+          <a class="list-group-item" href="{% url 'pro:demande_step1' %}">1 • Informations personnelles</a>
+          <a class="list-group-item" href="{% url 'pro:demande_step2' %}">2 • Situation financière</a>
+          <a class="list-group-item" href="{% url 'pro:demande_step3' %}">3 • Détails du crédit</a>
           <div class="list-group-item active">4 • Documents & Validation</div>
         </div>
       </div>
       <div class="col-lg-9">
+        {% if messages %}
+        <div class="mb-3">
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} mb-2" role="alert">{{ message }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
         <div class="card mb-3">
           <div class="card-header">Récapitulatif</div>
           <div class="card-body">
@@ -103,13 +115,29 @@
                   <label class="form-label">Relevé bancaire</label>
                   <input class="form-control" type="file" name="releve_bancaire" accept=".pdf,.jpg,.jpeg,.png" required />
                 </div>
+                <div class="col-md-4">
+                  <label class="form-label">Billet à ordre</label>
+                  <input class="form-control" type="file" name="billet_ordre" accept=".pdf,.jpg,.jpeg,.png" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Attestation de l'employeur</label>
+                  <input class="form-control" type="file" name="attestation_employeur" accept=".pdf,.jpg,.jpeg,.png" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Attestation de domiciliation irrévocable</label>
+                  <input class="form-control" type="file" name="attestation_domiciliation" accept=".pdf,.jpg,.jpeg,.png" required />
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Assurance décès-invalidité</label>
+                  <input class="form-control" type="file" name="assurance_deces_invalidite" accept=".pdf,.jpg,.jpeg,.png" required />
+                </div>
               </div>
               <div class="form-check mt-3">
                 <input class="form-check-input" type="checkbox" name="accepter_conditions" id="accepter_conditions" required />
                 <label for="accepter_conditions" class="form-check-label">Je certifie l'exactitude des informations et j'accepte les conditions générales.</label>
               </div>
               <div class="d-flex justify-content-between mt-4">
-                <a class="btn btn-outline-secondary" href="{% url 'demande_step3' %}">Précédent</a>
+                <a class="btn btn-outline-secondary" href="{% url 'pro:demande_step3' %}">Précédent</a>
                 <button type="submit" class="btn btn-primary">Soumettre</button>
               </div>
             </form>

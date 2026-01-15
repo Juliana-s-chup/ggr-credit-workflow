@@ -1,14 +1,10 @@
-# C:\Users\HP CORE i7 11TH GEN\CascadeProjects\ggr-credit-workflow\core\forms.py
+"""
+Formulaires pour l'application suivi_demande.
+"""
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import CreditApplication
-from .models import UserProfile
-
-class CreditApplicationForm(forms.ModelForm):
-    class Meta:
-        model = CreditApplication
-        fields = ["title", "amount"]
+from .models import UserProfile, UserRoles
 
 
 class SignupForm(UserCreationForm):
@@ -19,10 +15,21 @@ class SignupForm(UserCreationForm):
     birth_date = forms.DateField(label="Date de naissance", required=False, widget=forms.DateInput(attrs={"type": "date"}))
     address = forms.CharField(label="Adresse complète", max_length=255)
     accept_terms = forms.BooleanField(label="J'accepte les conditions générales")
+    role = forms.ChoiceField(
+        label="Rôle professionnel",
+        choices=[
+            (UserRoles.GESTIONNAIRE, "Gestionnaire"),
+            (UserRoles.ANALYSTE, "Analyste crédit"),
+            (UserRoles.RESPONSABLE_GGR, "Responsable GGR"),
+            (UserRoles.BOE, "Back Office Engagement"),
+            (UserRoles.SUPER_ADMIN, "Super administrateur"),
+        ],
+        required=False,
+    )
 
     class Meta(UserCreationForm.Meta):
         model = User
-        fields = ("username", "password1", "password2", "full_name", "email", "phone", "birth_date", "address", "accept_terms")
+        fields = ("username", "password1", "password2", "full_name", "email", "phone", "birth_date", "address", "accept_terms", "role")
 
     def save(self, commit=True):
         # Créer l'utilisateur inactif (Option A) et son profil

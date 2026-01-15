@@ -3,7 +3,12 @@
 {% block content %}
 <section class="py-4 border-bottom">
   <div class="container d-flex justify-content-between align-items-center">
-    <h1 class="h5 mb-0">Demande de crédit</h1>
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'pro:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Retour au dashboard
+      </a>
+      <h1 class="h5 mb-0">Demande de crédit</h1>
+    </div>
     <div class="text-muted small">Étape 3/4 • Détails du crédit</div>
   </div>
 </section>
@@ -13,8 +18,8 @@
     <div class="row">
       <div class="col-lg-3 mb-3 mb-lg-0">
         <div class="list-group">
-          <a class="list-group-item" href="{% url 'demande_step1' %}">1 • Informations personnelles</a>
-          <a class="list-group-item" href="{% url 'demande_step2' %}">2 • Situation financière</a>
+          <a class="list-group-item" href="{% url 'pro:demande_step1' %}">1 • Informations personnelles</a>
+          <a class="list-group-item" href="{% url 'pro:demande_step2' %}">2 • Situation financière</a>
           <div class="list-group-item active">3 • Détails du crédit</div>
           <div class="list-group-item">4 • Documents & Validation</div>
         </div>
@@ -51,33 +56,33 @@
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Motif du crédit</label>
-                  <input type="text" name="objet" value="{{ form.objet.value|default_if_none:'' }}" class="form-control" />
-                  {% if form.objet.errors %}<div class="text-danger small">{{ form.objet.errors.0 }}</div>{% endif %}
+                  {{ form.motif_credit }}
+                  {% if form.motif_credit.errors %}<div class="text-danger small">{{ form.motif_credit.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Montant souhaité (FCFA)</label>
-                  <input type="number" name="montant_demande" step="0.01" min="0" value="{{ form.montant_demande.value|default_if_none:'' }}" class="form-control" />
-                  {% if form.montant_demande.errors %}<div class="text-danger small">{{ form.montant_demande.errors.0 }}</div>{% endif %}
+                  {{ form.demande_montant_fcfa }}
+                  {% if form.demande_montant_fcfa.errors %}<div class="text-danger small">{{ form.demande_montant_fcfa.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Durée (mois)</label>
-                  {{ form.duree_mois }}
-                  {% if form.duree_mois.errors %}<div class="text-danger small">{{ form.duree_mois.errors.0 }}</div>{% endif %}
+                  {{ form.demande_duree_mois }}
+                  {% if form.demande_duree_mois.errors %}<div class="text-danger small">{{ form.demande_duree_mois.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="col-md-4">
                   <label class="form-label">Taux %</label>
-                  <input type="number" name="taux" step="0.01" min="0" value="{{ form.taux.value|default_if_none:'' }}" class="form-control" />
-                  {% if form.taux.errors %}<div class="text-danger small">{{ form.taux.errors.0 }}</div>{% endif %}
+                  {{ form.demande_taux_pourcent }}
+                  {% if form.demande_taux_pourcent.errors %}<div class="text-danger small">{{ form.demande_taux_pourcent.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Périodicité</label>
-                  {{ form.periodicite }}
-                  {% if form.periodicite.errors %}<div class="text-danger small">{{ form.periodicite.errors.0 }}</div>{% endif %}
+                  {{ form.demande_periodicite }}
+                  {% if form.demande_periodicite.errors %}<div class="text-danger small">{{ form.demande_periodicite.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Date 1re échéance</label>
-                  <input type="date" name="date_premiere_echeance" value="{{ form.date_premiere_echeance.value|default_if_none:'' }}" class="form-control" />
-                  {% if form.date_premiere_echeance.errors %}<div class="text-danger small">{{ form.date_premiere_echeance.errors.0 }}</div>{% endif %}
+                  {{ form.demande_date_1ere_echeance }}
+                  {% if form.demande_date_1ere_echeance.errors %}<div class="text-danger small">{{ form.demande_date_1ere_echeance.errors.0 }}</div>{% endif %}
                 </div>
                 <div class="col-12">
                   <div class="border rounded p-3 bg-light">
@@ -85,15 +90,15 @@
                     <div class="row g-2 small">
                       <div class="col-md-3">
                         <div class="text-muted">Montant</div>
-                        <div>{{ form.montant_demande.value|default_if_none:'—' }} {% if form.montant_demande.value %}FCFA{% endif %}</div>
+                        <div>{{ form.demande_montant_fcfa.value|default_if_none:'—' }} {% if form.demande_montant_fcfa.value %}FCFA{% endif %}</div>
                       </div>
                       <div class="col-md-3">
                         <div class="text-muted">Durée</div>
-                        <div>{% if form.duree_mois.value %}{{ form.duree_mois.value }} mois{% else %}—{% endif %}</div>
+                        <div>{% if form.demande_duree_mois.value %}{{ form.demande_duree_mois.value }} mois{% else %}—{% endif %}</div>
                       </div>
                       <div class="col-md-3">
                         <div class="text-muted">Taux d'intérêt</div>
-                        <div>{% if form.taux.value %}{{ form.taux.value }}%{% else %}—{% endif %}</div>
+                        <div>{% if form.demande_taux_pourcent.value %}{{ form.demande_taux_pourcent.value }}%{% else %}—{% endif %}</div>
                       </div>
                       <div class="col-md-3">
                         <div class="text-muted">Mensualité estimée</div>
@@ -105,7 +110,7 @@
                 </div>
               </div>
               <div class="d-flex justify-content-between mt-4">
-                <a class="btn btn-outline-secondary" href="{% url 'demande_step2' %}">Précédent</a>
+                <a class="btn btn-outline-secondary" href="{% url 'pro:demande_step2' %}">Précédent</a>
                 <button type="submit" class="btn btn-primary">Suivant</button>
               </div>
             </form>

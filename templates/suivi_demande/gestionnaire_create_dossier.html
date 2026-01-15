@@ -1,0 +1,76 @@
+{% extends "suivi_demande/dashboard_base.html" %}
+{% load static %}
+
+{% block title %}Créer un Dossier Client{% endblock %}
+{% block dashboard_role %}Gestionnaire de Compte{% endblock %}
+{% block user_role %}Gestionnaire{% endblock %}
+{% block page_title %}Nouveau Dossier Client{% endblock %}
+{% block header_icon %}fas fa-folder-plus{% endblock %}
+
+{% block navigation %}
+<a href="{% url 'pro:dashboard' %}" class="nav-item-banking">
+    <i class="fas fa-tachometer-alt"></i>
+    <span>Tableau de Bord</span>
+</a>
+<a href="{% url 'pro:gestionnaire_create_dossier' %}" class="nav-item-banking active">
+    <i class="fas fa-plus-circle"></i>
+    <span>Nouveau Dossier</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<section class="content-section active">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Créer un nouveau dossier pour un client</h3>
+        </div>
+        <div class="card-body">
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">Client</label>
+                        {{ form.client }}
+                        {{ form.client.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Produit de crédit</label>
+                        {{ form.produit }}
+                        {{ form.produit.errors }}
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="form-group">
+                        <label class="form-label">Montant demandé (FCFA)</label>
+                        {{ form.montant }}
+                        {{ form.montant.errors }}
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Durée (mois)</label>
+                        {{ form.duree_mois }}
+                        {{ form.duree_mois.errors }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Objet du financement</label>
+                    {{ form.objet }}
+                    {{ form.objet.errors }}
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Créer le Dossier
+                    </button>
+                    <a href="{% url 'pro:dashboard' %}" class="btn btn-secondary">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}

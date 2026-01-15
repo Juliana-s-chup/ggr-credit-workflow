@@ -1,0 +1,37 @@
+{# Composant KPI Card Réutilisable #}
+<div class="kpi-card animate-fade-in" 
+     {% if id %}id="{{ id }}"{% endif %}
+     role="article"
+     aria-label="{{ label }}">
+  
+  <div class="kpi-header">
+    {% if icon %}
+    <div class="kpi-icon" aria-hidden="true">{{ icon|safe }}</div>
+    {% endif %}
+  </div>
+  
+  <div class="kpi-value" aria-live="polite">{{ value|default:"0" }}</div>
+  
+  <div class="kpi-label">{{ label }}</div>
+  
+  {% if trend %}
+  <div class="kpi-trend {{ trend.direction|default:'neutral' }}" 
+       role="status"
+       aria-label="Tendance: {{ trend.text }}">
+    {% if trend.direction == 'up' %}
+      <span aria-hidden="true">↑</span>
+    {% elif trend.direction == 'down' %}
+      <span aria-hidden="true">↓</span>
+    {% endif %}
+    {{ trend.text }}
+  </div>
+  {% endif %}
+  
+  {% if link %}
+  <a href="{{ link.url }}" 
+     class="kpi-link"
+     aria-label="Voir les détails de {{ label }}">
+    {{ link.text|default:"Voir détails" }}
+  </a>
+  {% endif %}
+</div>

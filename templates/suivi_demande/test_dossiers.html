@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test - Liste des Dossiers</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        .info { background-color: #e7f3ff; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .warning { background-color: #fff3cd; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+        .success { background-color: #d4edda; padding: 15px; margin-bottom: 20px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test - Liste de TOUS les Dossiers en Base</h1>
+    
+    <div class="info">
+        <strong>Utilisateur connecté:</strong> {{ request.user.username }}<br>
+        <strong>Rôle:</strong> {{ request.user.profile.role|default:"?" }}
+    </div>
+    
+    {% if total_dossiers == 0 %}
+    <div class="warning">
+        <h2>⚠️ Aucun dossier en base de données !</h2>
+        <p>Créez un dossier en cliquant sur "Nouveau Dossier" dans le menu.</p>
+    </div>
+    {% else %}
+    <div class="success">
+        <h2>✓ {{ total_dossiers }} dossier(s) trouvé(s) en base</h2>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Référence</th>
+                <th>Client</th>
+                <th>Montant</th>
+                <th>Produit</th>
+                <th>Statut Agent</th>
+                <th>Statut Client</th>
+                <th>Date Création</th>
+                <th>Acteur Courant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dossier in all_dossiers %}
+            <tr>
+                <td>{{ dossier.id }}</td>
+                <td><strong>{{ dossier.reference }}</strong></td>
+                <td>{{ dossier.client.username }}</td>
+                <td>{{ dossier.montant|floatformat:0 }} FCFA</td>
+                <td>{{ dossier.produit }}</td>
+                <td>{{ dossier.statut_agent }}</td>
+                <td>{{ dossier.statut_client }}</td>
+                <td>{{ dossier.date_soumission|date:"d/m/Y H:i" }}</td>
+                <td>{{ dossier.acteur_courant.username|default:"-" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <h2 style="margin-top: 30px;">📊 Statistiques par Statut Agent</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Statut Agent</th>
+                <th>Nombre</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in statuts_stats %}
+            <tr>
+                <td>{{ stat.statut_agent }}</td>
+                <td><strong>{{ stat.count }}</strong></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+    
+    <div style="margin-top: 30px;">
+        <a href="{% url 'pro:dashboard' %}" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">← Retour au Dashboard</a>
+    </div>
+</body>
+</html>

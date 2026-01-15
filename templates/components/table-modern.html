@@ -1,0 +1,74 @@
+{# Composant Table Moderne Réutilisable #}
+<div class="table-container" {% if id %}id="{{ id }}"{% endif %}>
+  
+  {% if title or actions %}
+  <div class="table-header">
+    {% if title %}
+    <h3 class="table-title">{{ title }}</h3>
+    {% endif %}
+    
+    {% if actions %}
+    <div class="table-actions">
+      {{ actions|safe }}
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+  
+  <div class="table-responsive">
+    <table class="modern-table" 
+           role="table"
+           {% if aria_label %}aria-label="{{ aria_label }}"{% else %}aria-label="{{ title }}"{% endif %}>
+      
+      {% if headers %}
+      <thead>
+        <tr role="row">
+          {% for header in headers %}
+          <th role="columnheader" 
+              {% if header.sortable %}
+              aria-sort="{{ header.sort_direction|default:'none' }}"
+              {% endif %}
+              scope="col">
+            {% if header.sortable %}
+            <button type="button" 
+                    class="table-sort-btn"
+                    data-sort="{{ header.key }}"
+                    aria-label="Trier par {{ header.label }}">
+              {{ header.label }}
+              <span class="sort-icon" aria-hidden="true"></span>
+            </button>
+            {% else %}
+            {{ header.label }}
+            {% endif %}
+          </th>
+          {% endfor %}
+        </tr>
+      </thead>
+      {% endif %}
+      
+      <tbody>
+        {% if rows %}
+          {% for row in rows %}
+          <tr role="row">
+            {% for cell in row %}
+            <td role="cell">{{ cell|safe }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="{{ headers|length }}" class="text-center">
+              {{ empty_message|default:"Aucune donnée disponible" }}
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  
+  {% if pagination %}
+  <div class="table-footer">
+    {{ pagination|safe }}
+  </div>
+  {% endif %}
+</div>

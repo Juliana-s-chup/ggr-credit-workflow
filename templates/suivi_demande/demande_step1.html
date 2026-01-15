@@ -3,8 +3,13 @@
 {% block content %}
 <section class="py-4 border-bottom">
   <div class="container d-flex justify-content-between align-items-center">
-    <h1 class="h5 mb-0">Demande de crédit</h1>
-    <div class="text-muted small">Crédit du Congo • Espace client</div>
+    <div class="d-flex align-items-center gap-3">
+      <a href="{% url 'pro:dashboard' %}" class="btn btn-sm btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i>Retour au dashboard
+      </a>
+      <h1 class="h5 mb-0">Demande de crédit</h1>
+    </div>
+    <div class="text-muted small">Étape 1/4 • Renseignement du demandeur</div>
   </div>
 </section>
 
@@ -13,16 +18,16 @@
     <div class="row">
       <div class="col-lg-3 mb-3 mb-lg-0">
         <div class="list-group">
-          <div class="list-group-item {% if step == 1 %}active{% endif %}">1 • Informations personnelles</div>
-          <div class="list-group-item {% if step == 2 %}active{% endif %}">2 • Situation financière</div>
-          <div class="list-group-item {% if step == 3 %}active{% endif %}">3 • Détails du crédit</div>
-          <div class="list-group-item {% if step == 4 %}active{% endif %}">4 • Documents & Validation</div>
+          <div class="list-group-item active">1 • Renseignement du demandeur</div>
+          <a class="list-group-item" href="{% url 'pro:demande_step2' %}">2 • Situation financière</a>
+          <div class="list-group-item">3 • Détails du crédit</div>
+          <div class="list-group-item">4 • Documents & Validation</div>
         </div>
       </div>
       <div class="col-lg-9">
         <div class="card">
           <div class="card-header">
-            Informations personnelles
+            Renseignement du demandeur
             {% if request.session.profile_prefilled %}
               <span class="badge bg-success ms-2">
                 <i class="fas fa-check"></i> Données pré-remplies
@@ -40,69 +45,114 @@
             {% endif %}
             <form method="post" novalidate>
               {% csrf_token %}
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label">Nom</label>
-                  <input type="text" name="nom" value="{{ form.nom.value|default_if_none:'' }}" class="form-control" required />
-                  {% if form.nom.errors %}<div class="text-danger small">{{ form.nom.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Prénom</label>
-                  <input type="text" name="prenom" value="{{ form.prenom.value|default_if_none:'' }}" class="form-control" required />
-                  {% if form.prenom.errors %}<div class="text-danger small">{{ form.prenom.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Date de naissance</label>
-                  <input type="date" name="date_naissance" value="{{ form.date_naissance.value|default_if_none:'' }}" class="form-control" required />
-                  {% if form.date_naissance.errors %}<div class="text-danger small">{{ form.date_naissance.errors.0 }}</div>{% endif %}
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Lieu de naissance</label>
-                  <input type="text" name="lieu_naissance" value="{{ form.lieu_naissance.value|default_if_none:'' }}" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Nationalité</label>
-                  <input type="text" name="nationalite" value="{{ form.nationalite.value|default_if_none:'' }}" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Situation familiale</label>
-                  <select name="situation_familiale" class="form-select">
-                    {% for val, label in form.SITUATION_FAM %}
-                      <option value="{{ val }}" {% if form.situation_familiale.value == val %}selected{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Nombre de personnes à charge</label>
-                  <input type="number" min="0" name="nb_personnes_charge" value="{{ form.nb_personnes_charge.value|default_if_none:0 }}" class="form-control" />
-                </div>
-                <div class="col-12">
-                  <label class="form-label">Adresse</label>
-                  <textarea name="adresse" rows="2" class="form-control">{{ form.adresse.value|default_if_none:'' }}</textarea>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Ville</label>
-                  <input type="text" name="ville" value="{{ form.ville.value|default_if_none:'' }}" class="form-control" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Pays</label>
-                  <select name="pays" class="form-select">
-                    {% for val, label in form.PAYS_CHOICES %}
-                      <option value="{{ val }}" {% if form.pays.value %}{% if form.pays.value == val %}selected{% endif %}{% else %}{% if val == 'Congo' %}selected{% endif %}{% endif %}>{{ label }}</option>
-                    {% endfor %}
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Téléphone</label>
-                  <input type="tel" name="telephone" id="telephone" value="{{ form.telephone.value|default_if_none:'' }}" class="form-control"
-                         inputmode="tel" placeholder="Ex: +242 06 12 34 56"
-                         pattern="^[+0-9][0-9\s-]{6,}$" title="Numéro de téléphone (ex: +242 06 12 34 56)" />
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label">Email</label>
-                  <input type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" class="form-control" />
+              {% if form.errors %}
+              <div class="alert alert-danger">
+                <div class="fw-semibold mb-1">Veuillez corriger les erreurs ci-dessous.</div>
+                {{ form.non_field_errors }}
+              </div>
+              {% endif %}
+
+              <!-- Option PRO: rattacher à un client existant -->
+              <div class="alert alert-secondary py-2 px-3 small">
+                <div class="fw-semibold mb-1">Client existant (optionnel, réservé au portail PRO)</div>
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-4">
+                    {{ form.client_identifier.label_tag }}
+                    {{ form.client_identifier }}
+                    {% for e in form.client_identifier.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                  </div>
+                  <div class="col-md-8">
+                    <div class="form-check mt-3">
+                      {{ form.permettre_suivi_client }}
+                      <label class="form-check-label" for="id_permettre_suivi_client">{{ form.permettre_suivi_client.label }}</label>
+                    </div>
+                  </div>
                 </div>
               </div>
+
+              <!-- Identité -->
+              <h6 class="mb-3 mt-1 text-primary">Identité</h6>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  {{ form.nom_prenom.label_tag }}
+                  {{ form.nom_prenom }}
+                  {% for e in form.nom_prenom.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col-md-3">
+                  {{ form.date_naissance.label_tag }}
+                  {{ form.date_naissance }}
+                  {% for e in form.date_naissance.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col-md-3">
+                  {{ form.nationalite.label_tag }}
+                  {{ form.nationalite }}
+                  {% for e in form.nationalite.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+              </div>
+
+              <!-- Adresse -->
+              <h6 class="mb-3 mt-4 text-primary">Adresse</h6>
+              <div class="row g-3">
+                <div class="col-12">
+                  {{ form.adresse_exacte.label_tag }}
+                  {{ form.adresse_exacte }}
+                  {% for e in form.adresse_exacte.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}
+                </div>
+                <div class="col-md-4">{{ form.telephone_travail.label_tag }}{{ form.telephone_travail }}</div>
+                <div class="col-md-4">{{ form.telephone_domicile.label_tag }}{{ form.telephone_domicile }}</div>
+                <div class="col-md-4">{{ form.numero_telephone.label_tag }}{{ form.numero_telephone }}{% for e in form.numero_telephone.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+                <div class="col-md-4">
+                  {{ form.radical.label_tag }}
+                  {{ form.radical }}
+                </div>
+                <div class="col-md-4">
+                  {{ form.date_ouverture_compte.label_tag }}
+                  {{ form.date_ouverture_compte }}
+                </div>
+                <div class="col-md-4">
+                  {{ form.date_domiciliation_salaire.label_tag }}
+                  {{ form.date_domiciliation_salaire }}
+                </div>
+              </div>
+
+              <!-- Emploi -->
+              <h6 class="mb-3 mt-4 text-primary">Emploi</h6>
+              <div class="row g-3">
+                <div class="col-md-6">{{ form.emploi_occupe.label_tag }}{{ form.emploi_occupe }}{% for e in form.emploi_occupe.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+                <div class="col-md-3">{{ form.statut_emploi.label_tag }}{{ form.statut_emploi }}</div>
+                <div class="col-md-3">{{ form.anciennete_emploi.label_tag }}{{ form.anciennete_emploi }}{% for e in form.anciennete_emploi.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+                <div class="col-md-3">{{ form.type_contrat.label_tag }}{{ form.type_contrat }}</div>
+              </div>
+
+              <!-- Employeur -->
+              <h6 class="mb-3 mt-4 text-primary">Employeur</h6>
+              <div class="row g-3">
+                <div class="col-md-6">{{ form.nom_employeur.label_tag }}{{ form.nom_employeur }}{% for e in form.nom_employeur.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+                <div class="col-md-6">{{ form.lieu_emploi.label_tag }}{{ form.lieu_emploi }}{% for e in form.lieu_emploi.errors %}<div class="text-danger small">{{ e }}</div>{% endfor %}</div>
+                <div class="col-md-4">{{ form.employeur_client_banque.label_tag }}<div>{{ form.employeur_client_banque }}</div></div>
+                <div class="col-md-4">{{ form.radical_employeur.label_tag }}{{ form.radical_employeur }}</div>
+              </div>
+
+              <!-- Situation familiale -->
+              <h6 class="mb-3 mt-4 text-primary">Situation familiale</h6>
+              <div class="row g-3">
+                <div class="col-md-4">{{ form.situation_famille.label_tag }}{{ form.situation_famille }}</div>
+                <div class="col-md-4">{{ form.nombre_personnes_charge.label_tag }}{{ form.nombre_personnes_charge }}</div>
+                <div class="col-md-4" id="regime-wrapper" style="display:none;">{{ form.regime_matrimonial.label_tag }}{{ form.regime_matrimonial }}</div>
+              </div>
+
+              <!-- Logement & conjoint -->
+              <h6 class="mb-3 mt-4 text-primary">Logement</h6>
+              <div class="row g-3">
+                <div class="col-md-4">{{ form.emploi_conjoint.label_tag }}{{ form.emploi_conjoint }}</div>
+                <div class="col-md-4">{{ form.salaire_conjoint.label_tag }}{{ form.salaire_conjoint }}</div>
+                <div class="col-md-4">{{ form.statut_logement.label_tag }}{{ form.statut_logement }}</div>
+                <div class="col-md-4" id="tf-wrapper" style="display:none;">{{ form.numero_tf.label_tag }}{{ form.numero_tf }}</div>
+                <div class="col-md-8" id="logement-autres-wrapper" style="display:none;">{{ form.logement_autres_precision.label_tag }}{{ form.logement_autres_precision }}</div>
+              </div>
+
+              
+
               <div class="d-flex justify-content-between mt-4">
                 <a class="btn btn-outline-secondary disabled">Précédent</a>
                 <button type="submit" class="btn btn-primary">Suivant</button>
@@ -131,7 +181,7 @@
       });
     }
     // Masque léger pour le téléphone: conserve chiffres, +, espaces; espace toutes les 2-3 digits
-    const tel = document.getElementById('telephone');
+    const tel = document.querySelector('input[name="numero_telephone"]');
     if (tel){
       tel.addEventListener('input', function(){
         let x = this.value.replace(/[^+0-9]/g,'').replace(/(\++)/g,'+');
@@ -146,6 +196,32 @@
           this.value = x.replace(/(\d{2})(?=\d)/g, '$1 ').trim();
         }
       });
+    }
+
+    // Affichage conditionnel: régime matrimonial si Marié(e)
+    const sitFamWrapper = document.querySelector('#regime-wrapper');
+    const sitFamRadios = document.querySelectorAll('input[name="situation_famille"]');
+    function updateRegime(){
+      let val = document.querySelector('input[name="situation_famille"]:checked');
+      const show = val && val.value === 'MARIE';
+      if (sitFamWrapper) sitFamWrapper.style.display = show ? '' : 'none';
+    }
+    sitFamRadios.forEach(r => r.addEventListener('change', updateRegime));
+    updateRegime();
+
+    // Affichage conditionnel: N° TF si Propriétaire et précision si Autres
+    const tfWrapper = document.querySelector('#tf-wrapper');
+    const autresWrapper = document.querySelector('#logement-autres-wrapper');
+    const statutLogement = document.querySelector('select[name="statut_logement"]');
+    function updateLogement(){
+      const isProp = statutLogement && statutLogement.value === 'PROPRIETAIRE';
+      const isAutres = statutLogement && statutLogement.value === 'AUTRES';
+      if (tfWrapper) tfWrapper.style.display = isProp ? '' : 'none';
+      if (autresWrapper) autresWrapper.style.display = isAutres ? '' : 'none';
+    }
+    if (statutLogement){
+      statutLogement.addEventListener('change', updateLogement);
+      updateLogement();
     }
   })();
 </script>

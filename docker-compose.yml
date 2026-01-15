@@ -1,0 +1,144 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: ggr_credit_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-credit_db}
+      POSTGRES_USER: ${DB_USER:-credit_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-credit_password}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=fr_FR.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-credit_user}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ggr_network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: ggr_credit_redis
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_password}
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - ggr_network
+
+  # Django Web Application
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ggr_credit_web
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn core.wsgi:application --bind 0.0.0.0:8000 --workers 4"
+    environment:
+      - DEBUG=${DEBUG:-False}
+      - SECRET_KEY=${SECRET_KEY}
+      - DATABASE_URL=postgresql://${DB_USER:-credit_user}:${DB_PASSWORD:-credit_password}@db:5432/${DB_NAME:-credit_db}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-localhost,127.0.0.1}
+      - SENTRY_DSN=${SENTRY_DSN}
+      - ENVIRONMENT=production
+    volumes:
+      - ./staticfiles:/app/staticfiles
+      - ./media:/app/media
+      - ./logs:/app/logs
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - ggr_network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: ggr_credit_nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./staticfiles:/app/staticfiles:ro
+      - ./media:/app/media:ro
+    ports:
+      - "80:80"
+    depends_on:
+      - web
+    networks:
+      - ggr_network
+    restart: unless-stopped
+
+  # Celery Worker (Tâches asynchrones)
+  celery_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ggr_credit_celery
+    command: celery -A core worker -l info --concurrency=2
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-credit_user}:${DB_PASSWORD:-credit_password}@db:5432/${DB_NAME:-credit_db}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - db
+      - redis
+    networks:
+      - ggr_network
+    restart: unless-stopped
+
+  # Celery Beat (Tâches planifiées)
+  celery_beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ggr_credit_celery_beat
+    command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    environment:
+      - DATABASE_URL=postgresql://${DB_USER:-credit_user}:${DB_PASSWORD:-credit_password}@db:5432/${DB_NAME:-credit_db}
+      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
+    volumes:
+      - ./logs:/app/logs
+    depends_on:
+      - db
+      - redis
+    networks:
+      - ggr_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  ggr_network:
+    driver: bridge

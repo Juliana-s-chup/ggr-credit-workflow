@@ -3,7 +3,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
   <h1 class="h4 m-0">Mes notifications</h1>
-  <form method="post" action="{% url 'notifications_mark_all' %}">
+  <form method="post" action="{% url 'pro:notifications_mark_all' %}">
     {% csrf_token %}
     <button class="btn btn-outline-secondary btn-sm" type="submit">Tout marquer comme lu</button>
   </form>

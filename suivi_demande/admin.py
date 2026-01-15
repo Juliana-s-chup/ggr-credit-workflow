@@ -1,6 +1,9 @@
+"""
+Configuration de l'interface d'administration Django.
+"""
 from django.contrib import admin
+
 from .models import (
-    CreditApplication,
     UserProfile,
     DossierCredit,
     PieceJointe,
@@ -8,11 +11,6 @@ from .models import (
     JournalAction,
     Notification,
 )
-
-@admin.register(CreditApplication)
-class CreditApplicationAdmin(admin.ModelAdmin):
-    list_display = ("id", "title", "client", "amount", "status", "created_at")
-    list_filter = ("status", "created_at")
 
 
 @admin.register(UserProfile)

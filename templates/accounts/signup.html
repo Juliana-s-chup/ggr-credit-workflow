@@ -1,71 +1,696 @@
 {% extends "base.html" %}
 {% block title %}Inscription - GGR Credit{% endblock %}
+{% block navbar %}{% endblock %}
 {% block extra_head %}
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
-      --primary: #E8A51A;         /* Jaune ocre */
-      --primary-light: #cf9317;   /* Jaune un peu plus foncé */
-      --secondary: #D1523F;       /* Rouge terre cuite */
-      --secondary-dark: #ba4837;
-      --background: #F8FAFC;
-      --text: #0B0B14;
+      /* Utiliser les couleurs originales du thème GGR Credit */
+      --primary: var(--bs-primary, #E65137);
+      --primary-dark: var(--bs-primary-dark, #D84315);
+      --secondary: var(--bs-danger, #dc3545);
+      --secondary-dark: var(--bs-danger-dark, #bb2d3b);
+      --success: var(--bs-success, #198754);
+      --info: var(--bs-info, #0dcaf0);
+      --background: var(--bs-light, #f8f9fa);
+      --text: var(--bs-dark, #212529);
       --text-light: #ffffff;
       --text-gray: #555;
-      --border: #ddd;
-      --radius: 8px;
-      --radius-lg: 12px;
-      --shadow: 0 4px 12px rgba(0,0,0,0.08);
-      --transition: all 0.3s ease;
+      --border: #D5D7DA;
+      --radius: 12px;
+      --radius-lg: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.1);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
     }
-
-    body { font-family: 'Inter', sans-serif; }
-
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--background);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .signup-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: var(--background);
+      z-index: -1;
+    }
+    
+    .signup-background::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23E65137" fill-opacity="0.05" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,154.7C960,171,1056,181,1152,165.3C1248,149,1344,107,1392,85.3L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+      background-size: cover;
+    }
+    
     .signup-header {
       background: linear-gradient(135deg, var(--primary), var(--secondary));
       color: var(--text-light);
-      padding: 1rem 2rem;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 1.5rem 2rem;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-
-    .signup-container { display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
-    .signup-card { background: #fff; padding: 2rem; border-radius: var(--radius-lg); box-shadow: var(--shadow); width: 100%; max-width: 560px; }
-    h2 { color: var(--secondary); font-weight: 700; text-align: center; margin-bottom: 1rem; }
-    .form-intro { text-align: center; color: var(--text-gray); margin-bottom: 1rem; }
-
-    /* Style des inputs si le widget n'a pas la classe form-control */
-    form input[type="text"], form input[type="password"], form input[type="email"] {
-      width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: var(--radius);
-      background-color: #F9F9F9; transition: var(--transition);
+    
+    .signup-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 60px 20px;
+      flex: 1;
     }
-    form input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 2px rgba(232,165,26,0.2); background-color: #fff; }
-
-    .btn-primary { background: linear-gradient(to right, var(--primary), var(--primary-light)); border: none; color: var(--text); font-weight: 600; }
-    .btn-primary:hover { background: linear-gradient(to right, var(--primary-light), var(--primary)); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(232,165,26,0.2); }
+    
+    .signup-card {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(20px);
+      padding: 3rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 580px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .signup-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+    }
+    
+    .signup-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 2rem;
+      box-shadow: 0 8px 20px rgba(230, 81, 55, 0.3);
+      animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    .signup-icon i {
+      font-size: 2rem;
+      color: white;
+    }
+    
+    h2 {
+      color: var(--text);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 0.5rem;
+      font-size: 2rem;
+    }
+    
+    .form-intro {
+      text-align: center;
+      color: var(--text-gray);
+      margin-bottom: 2rem;
+      font-size: 1rem;
+    }
+    
+    .form-label {
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: #ffffff;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(230, 81, 55, 0.1);
+      background: #ffffff;
+      transform: translateY(-2px);
+    }
+    
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+    
+    .form-group p {
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-group input {
+      margin-bottom: 0.5rem;
+    }
+    
+    .form-group .helptext {
+      font-size: 0.875rem;
+      color: #6c757d;
+      margin-top: 0.25rem;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      color: white;
+      font-weight: 600;
+      padding: 14px 24px;
+      border-radius: var(--radius);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-primary::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    
+    .btn-primary:hover::before {
+      left: 100%;
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(230, 81, 55, 0.3);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .alert {
+      border-radius: var(--radius);
+      border: none;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      animation: slideInDown 0.5s ease;
+    }
+    
+    @keyframes slideInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .form-footer {
+      text-align: center;
+      margin-top: 2rem;
+    }
+    
+    .form-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    
+    .form-footer a:hover {
+      color: var(--primary-dark);
+      text-decoration: underline;
+    }
+    
+    .divider {
+      text-align: center;
+      margin: 2rem 0;
+      position: relative;
+    }
+    
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    
+    .divider span {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0 1rem;
+      color: #6c757d;
+      font-size: 0.875rem;
+    }
+    
+    .errorlist {
+      list-style: none;
+      padding: 0;
+      margin: 0.5rem 0;
+    }
+    
+    .errorlist li {
+      color: var(--secondary);
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    @media (max-width: 576px) {
+      .signup-card {
+        padding: 2rem;
+        margin: 1rem;
+      }
+      
+      h2 {
+        font-size: 1.5rem;
+      }
+    }
   </style>
 {% endblock %}
 {% block content %}
+  <div class="signup-background"></div>
+  
   <div class="signup-header">
     <div class="container d-flex justify-content-between align-items-center">
-      <div class="fw-bold">Crédit du Congo</div>
-      <a href="/accounts/login/" class="text-white text-decoration-none">
-        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+      <div class="fw-bold d-flex align-items-center gap-3">
+        {% load static %}
+        <img src="{% static 'core/img/Credit_Du_Congo.png' %}" 
+             alt="Crédit du Congo" 
+             height="40" 
+             style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));" />
+        <span>Crédit du Congo</span>
+      </div>
+      <a href="{% url 'login' %}" class="text-white text-decoration-none d-flex align-items-center gap-2">
+        <i class="fas fa-sign-in-alt"></i>
+        <span>Se connecter</span>
       </a>
     </div>
   </div>
-
-  <div class="container signup-container">
+  
+  <div class="signup-container">
     <div class="signup-card">
+      <!-- Icon animé -->
+      <div class="signup-icon">
+        <i class="fas fa-user-plus"></i>
+      </div>
+      
       <h2>Créer un compte</h2>
-      <p class="form-intro">Rejoignez Crédit du Congo et bénéficiez de nos services.</p>
-      <form method="post" class="mt-2">
+      <p class="form-intro">Rejoignez Crédit du Congo et bénéficiez de nos services</p>
+      {% if portal == 'pro' %}
+        <div class="text-center mb-3"><span class="badge bg-dark"><i class="fas fa-briefcase me-1"></i> Portail Professionnel</span></div>
+      {% else %}
+        <div class="text-center mb-3"><span class="badge bg-secondary"><i class="fas fa-user me-1"></i> Portail Client</span></div>
+      {% endif %}
+      
+      <form method="post" id="signupForm" novalidate>
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-primary w-100 mt-2">Créer le compte</button>
+        <input type="hidden" name="as" value="{{ portal|default:'client' }}" />
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} d-flex align-items-center gap-2">
+              <i class="fas fa-info-circle"></i>
+              <div>{{ message }}</div>
+            </div>
+          {% endfor %}
+        {% endif %}
+        
+        {% if form.non_field_errors %}
+          <div class="alert alert-danger d-flex align-items-center gap-2">
+            <i class="fas fa-exclamation-triangle"></i>
+            <div>{{ form.non_field_errors }}</div>
+          </div>
+        {% endif %}
+        
+        <div class="form-group">
+          <label for="id_username" class="form-label">
+            <i class="fas fa-user me-2"></i>Nom d'utilisateur
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <ul class="errorlist">
+              {% for error in form.username.errors %}
+                <li><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if form.username.help_text %}
+            <div class="helptext">{{ form.username.help_text }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="form-group">
+          <label for="id_email" class="form-label">
+            <i class="fas fa-envelope me-2"></i>Adresse email
+          </label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <ul class="errorlist">
+              {% for error in form.email.errors %}
+                <li><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if form.email.help_text %}
+            <div class="helptext">{{ form.email.help_text }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="form-group">
+          <label for="id_password1" class="form-label">
+            <i class="fas fa-lock me-2"></i>Mot de passe
+          </label>
+          {{ form.password1 }}
+          <div id="password-strength" class="mt-2" style="height: 8px; background: #eee; border-radius: 6px; overflow: hidden;">
+            <div id="password-strength-bar" style="height: 100%; width: 0; background: #dc3545; transition: width .3s ease, background .3s ease;"></div>
+          </div>
+          <small id="password-hint" class="text-muted">Utilisez au moins 8 caractères avec lettres, chiffres et symboles.</small>
+          {% if form.password1.errors %}
+            <ul class="errorlist">
+              {% for error in form.password1.errors %}
+                <li><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if form.password1.help_text %}
+            <div class="helptext">{{ form.password1.help_text }}</div>
+          {% endif %}
+        </div>
+        
+        <div class="form-group">
+          <label for="id_password2" class="form-label">
+            <i class="fas fa-lock me-2"></i>Confirmer le mot de passe
+          </label>
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <ul class="errorlist">
+              {% for error in form.password2.errors %}
+                <li><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+          {% if form.password2.help_text %}
+            <div class="helptext">{{ form.password2.help_text }}</div>
+          {% endif %}
+        </div>
+
+        <div class="form-group form-check d-flex align-items-start gap-2">
+          <input class="form-check-input mt-1" type="checkbox" value="1" id="id_terms" required>
+          <label class="form-check-label" for="id_terms">
+            J’accepte les <a href="#" onclick="return false;">Conditions Générales d’Utilisation</a> et la <a href="#" onclick="return false;">Politique de confidentialité</a>.
+          </label>
+        </div>
+
+        {% if portal == 'pro' %}
+        <div class="form-group">
+          <label for="id_role" class="form-label">
+            <i class="fas fa-user-tie me-2"></i>Rôle professionnel
+          </label>
+          {{ form.role }}
+          <div class="helptext">Sélectionnez le rôle à associer à votre compte professionnel.</div>
+          {% if form.role.errors %}
+            <ul class="errorlist">
+              {% for error in form.role.errors %}
+                <li><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+        {% else %}
+          <input type="hidden" name="role" value="" />
+        {% endif %}
+        
+        <button type="submit" class="btn btn-primary w-100 d-flex align-items-center justify-content-center gap-2" id="signupSubmit">
+          <i class="fas fa-user-plus"></i>
+          <span>Créer le compte</span>
+        </button>
+        
+        <div class="alert alert-info d-flex align-items-center gap-2 mt-4">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Information :</strong> Après la création, un administrateur doit approuver votre compte avant que vous puissiez vous connecter.
+          </div>
+        </div>
+        
+        <div class="divider">
+          <span>ou</span>
+        </div>
+        
+        <div class="form-footer">
+          <p class="mb-2">Vous avez déjà un compte ?</p>
+          <a href="{% url 'login' %}" class="btn btn-outline-primary w-100">
+            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+          </a>
+        </div>
       </form>
-      <p class="text-center mt-3 text-muted small">Après la création, un administrateur doit approuver votre compte avant connexion.</p>
-      <p class="text-center mt-2">Vous avez déjà un compte ? <a href="/accounts/login/" style="color: var(--secondary);">Connectez-vous ici</a></p>
     </div>
   </div>
+  
+  <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Configuration des champs du formulaire
+    const username = document.getElementById('id_username');
+    const email = document.getElementById('id_email');
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    const form = document.getElementById('signupForm');
+    const submitBtn = document.getElementById('signupSubmit');
+    const terms = document.getElementById('id_terms');
+    const strengthBar = document.getElementById('password-strength-bar');
+    const passwordHint = document.getElementById('password-hint');
+    const roleSelect = document.getElementById('id_role');
+    
+    // Configuration des champs avec classe form-control
+    const inputs = [username, email, password1, password2];
+    inputs.forEach(input => {
+      if (input) {
+        input.className = 'form-control';
+        
+        // Ajouter des placeholders spécifiques
+        if (input.id === 'id_username') {
+          input.placeholder = 'Choisissez un nom d\'utilisateur';
+          input.setAttribute('autocomplete', 'username');
+        } else if (input.id === 'id_email') {
+          input.placeholder = 'votre.email@exemple.com';
+          input.setAttribute('autocomplete', 'email');
+        } else if (input.id === 'id_password1') {
+          input.placeholder = 'Choisissez un mot de passe sécurisé';
+          input.setAttribute('autocomplete', 'new-password');
+        } else if (input.id === 'id_password2') {
+          input.placeholder = 'Confirmez votre mot de passe';
+          input.setAttribute('autocomplete', 'new-password');
+        }
+        
+        input.setAttribute('required', 'required');
+      }
+    });
+    if (roleSelect) {
+      roleSelect.classList.add('form-control');
+      roleSelect.setAttribute('required', 'required');
+    }
+    
+    // Focus sur le premier champ vide
+    if (username && !username.value) {
+      username.focus();
+    } else if (email && !email.value) {
+      email.focus();
+    }
+    
+    // Validation et animation au submit
+    if (form && submitBtn) {
+      form.addEventListener('submit', function(e) {
+        // Validation simple côté client
+        if (!username.value.trim()) {
+          e.preventDefault();
+          showError('Veuillez entrer un nom d\'utilisateur');
+          username.focus();
+          return;
+        }
+        
+        if (!email.value.trim()) {
+          e.preventDefault();
+          showError('Veuillez entrer une adresse email');
+          email.focus();
+          return;
+        }
+        
+        if (!password1.value.trim()) {
+          e.preventDefault();
+          showError('Veuillez entrer un mot de passe');
+          password1.focus();
+          return;
+        }
+        
+        if (password1.value !== password2.value) {
+          e.preventDefault();
+          showError('Les mots de passe ne correspondent pas');
+          password2.focus();
+          return;
+        }
+        
+        if (password1.value.length < 8) {
+          e.preventDefault();
+          showError('Le mot de passe doit contenir au moins 8 caractères');
+          password1.focus();
+          return;
+        }
+        if (terms && !terms.checked) {
+          e.preventDefault();
+          showError('Vous devez accepter les Conditions et la Politique de confidentialité');
+          terms.focus();
+          return;
+        }
+        if (roleSelect && !roleSelect.value) {
+          e.preventDefault();
+          showError('Veuillez sélectionner un rôle professionnel');
+          roleSelect.focus();
+          return;
+        }
+        
+        // Animation de chargement
+        submitBtn.classList.add('btn-loading');
+        submitBtn.setAttribute('disabled', 'disabled');
+        submitBtn.querySelector('span').textContent = 'Création en cours...';
+      });
+    }
+    
+    // Fonction pour afficher les erreurs
+    function showError(message) {
+      const existingAlert = form.querySelector('.alert-danger');
+      if (existingAlert) {
+        existingAlert.remove();
+      }
+      
+      const alert = document.createElement('div');
+      alert.className = 'alert alert-danger d-flex align-items-center gap-2';
+      alert.innerHTML = `
+        <i class="fas fa-exclamation-triangle"></i>
+        <div>${message}</div>
+      `;
+      
+      form.insertBefore(alert, form.firstChild);
+      
+      // Auto-suppression après 5 secondes
+      setTimeout(() => {
+        if (alert.parentNode) {
+          alert.style.opacity = '0';
+          setTimeout(() => alert.remove(), 300);
+        }
+      }, 5000);
+    }
+    
+    // Validation en temps réel: correspondance et force du mot de passe
+    if (password1 && password2) {
+      password1.addEventListener('input', function(){
+        const score = calcStrength(password1.value);
+        strengthBar.style.width = score + '%';
+        if (score < 40) { strengthBar.style.background = '#dc3545'; passwordHint.textContent = 'Faible : ajoutez lettres, chiffres et symboles.'; }
+        else if (score < 70) { strengthBar.style.background = '#ffc107'; passwordHint.textContent = 'Moyen : renforcez votre mot de passe.'; }
+        else { strengthBar.style.background = '#198754'; passwordHint.textContent = 'Fort.'; }
+      });
+      password2.addEventListener('input', function() {
+        if (this.value && password1.value !== this.value) {
+          this.style.borderColor = 'var(--secondary)';
+        } else if (this.value && password1.value === this.value) {
+          this.style.borderColor = 'var(--success)';
+        } else {
+          this.style.borderColor = 'var(--border)';
+        }
+      });
+    }
+
+    // Calcul simple de la force du mot de passe
+    function calcStrength(pwd){
+      if (!pwd) return 0;
+      let score = 0;
+      if (pwd.length >= 8) score += 30;
+      if (/[A-Z]/.test(pwd)) score += 15;
+      if (/[a-z]/.test(pwd)) score += 15;
+      if (/[0-9]/.test(pwd)) score += 20;
+      if (/[^A-Za-z0-9]/.test(pwd)) score += 20;
+      return Math.min(score, 100);
+    }
+    
+    // Animation des champs au focus
+    inputs.forEach(input => {
+      if (input) {
+        input.addEventListener('focus', function() {
+          this.parentElement.style.transform = 'scale(1.02)';
+        });
+        
+        input.addEventListener('blur', function() {
+          this.parentElement.style.transform = 'scale(1)';
+        });
+      }
+    });
+    
+    // Animation de la carte au chargement
+    const signupCard = document.querySelector('.signup-card');
+    if (signupCard) {
+      signupCard.style.opacity = '0';
+      signupCard.style.transform = 'translateY(30px)';
+      
+      setTimeout(() => {
+        signupCard.style.transition = 'all 0.6s ease';
+        signupCard.style.opacity = '1';
+        signupCard.style.transform = 'translateY(0)';
+      }, 100);
+    }
+    
+    // Ajouter la classe de chargement au bouton
+    const style = document.createElement('style');
+    style.textContent = `
+      .btn-loading {
+        position: relative;
+        color: transparent !important;
+      }
+      
+      .btn-loading::after {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        top: 50%;
+        left: 50%;
+        margin-left: -10px;
+        margin-top: -10px;
+        border: 2px solid #ffffff;
+        border-radius: 50%;
+        border-top-color: transparent;
+        animation: spin 1s linear infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    `;
+    document.head.appendChild(style);
+  });
+  </script>
 {% endblock %}

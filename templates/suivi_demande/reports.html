@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% block title %}Rapports & Statistiques{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h1 class="h3 mb-1">
+        <i class="fas fa-chart-bar text-primary"></i> Rapports & Statistiques
+      </h1>
+      <p class="text-muted mb-0">Analyse et suivi de l'activité des dossiers de crédit</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a class="btn btn-outline-secondary" href="{% url 'pro:dashboard' %}">
+        <i class="fas fa-arrow-left"></i> Dashboard
+      </a>
+      <a class="btn btn-success" href="#" onclick="alert('Fonctionnalité Export Excel en développement'); return false;">
+        <i class="fas fa-file-excel"></i> Exporter Excel
+      </a>
+    </div>
+  </div>
+
+  <!-- Filtres avancés -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+      <h5 class="mb-0">
+        <i class="fas fa-filter text-primary"></i> Filtres avancés
+        <button class="btn btn-sm btn-link float-end" type="button" data-bs-toggle="collapse" data-bs-target="#filtersCollapse">
+          <i class="fas fa-chevron-down"></i>
+        </button>
+      </h5>
+    </div>
+    <div class="collapse show" id="filtersCollapse">
+      <div class="card-body">
+        <form method="get">
+          <!-- Période -->
+          <div class="row g-3 mb-3">
+            <div class="col-12">
+              <h6 class="text-muted mb-2"><i class="fas fa-calendar"></i> Période</h6>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Date début</label>
+              {{ form.date_debut }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Date fin</label>
+              {{ form.date_fin }}
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Type période</label>
+              {{ form.periode }}
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Année</label>
+              {{ form.annee }}
+            </div>
+            <div class="col-md-2">
+              <label class="form-label small">Mois (1-12)</label>
+              {{ form.mois }}
+            </div>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label class="form-label small">Trimestre (1-4)</label>
+              {{ form.trimestre }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Semestre (1-2)</label>
+              {{ form.semestre }}
+            </div>
+          </div>
+          
+          <hr class="my-3">
+          
+          <!-- Statuts -->
+          <div class="row g-3 mb-3">
+            <div class="col-12">
+              <h6 class="text-muted mb-2"><i class="fas fa-list"></i> Statuts</h6>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Statut agent</label>
+              {{ form.statut_agent }}
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small">Statut client</label>
+              {{ form.statut_client }}
+            </div>
+          </div>
+          
+          <hr class="my-3">
+          
+          <!-- Acteurs -->
+          <div class="row g-3 mb-3">
+            <div class="col-12">
+              <h6 class="text-muted mb-2"><i class="fas fa-users"></i> Acteurs</h6>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Client</label>
+              {{ form.client }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Gestionnaire</label>
+              {{ form.gestionnaire }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Analyste</label>
+              {{ form.analyste }}
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small">Responsable GGR</label>
+              {{ form.responsable_ggr }}
+            </div>
+          </div>
+          
+          <div class="d-flex gap-2 mt-3">
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-search"></i> Appliquer les filtres
+            </button>
+            <a href="{% url 'pro:reports' %}" class="btn btn-outline-secondary">
+              <i class="fas fa-redo"></i> Réinitialiser
+            </a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="row g-3 mb-4">
+    <!-- Résumé global -->
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm border-primary">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-muted mb-1 small">Total Dossiers</p>
+              <h3 class="mb-0 text-primary">{{ dossiers|length }}</h3>
+            </div>
+            <div class="bg-primary bg-opacity-10 p-3 rounded">
+              <i class="fas fa-folder-open text-primary fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm border-success">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-muted mb-1 small">Montant Total</p>
+              <h3 class="mb-0 text-success">{{ dossiers|length|default:0 }}</h3>
+              <small class="text-muted">FCFA</small>
+            </div>
+            <div class="bg-success bg-opacity-10 p-3 rounded">
+              <i class="fas fa-coins text-success fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    {% if kpi_role.label %}
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm border-info">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-muted mb-1 small">{{ kpi_role.label }}</p>
+              <h3 class="mb-0 text-info">{{ kpi_role.primary|default:0 }}</h3>
+            </div>
+            <div class="bg-info bg-opacity-10 p-3 rounded">
+              <i class="fas fa-chart-line text-info fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+    
+    {% if kpi_role.secondary %}
+    {% for k, v in kpi_role.secondary.items %}
+    <div class="col-lg-3 col-md-6">
+      <div class="card shadow-sm border-warning">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <p class="text-muted mb-1 small">{{ k }}</p>
+              <h3 class="mb-0 text-warning">{{ v }}</h3>
+            </div>
+            <div class="bg-warning bg-opacity-10 p-3 rounded">
+              <i class="fas fa-tasks text-warning fs-4"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+  
+  <!-- Graphiques -->
+  <div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+      <h5 class="mb-0"><i class="fas fa-chart-pie text-primary"></i> Visualisations</h5>
+    </div>
+    <div class="card-body">
+      <div class="row g-4 mb-4">
+        <div class="col-md-6">
+          <h6 class="mb-2">Répartition par statut (agent)</h6>
+          <canvas id="chartAgent" height="140"></canvas>
+        </div>
+        <div class="col-md-6">
+          <h6 class="mb-2">Répartition par statut (client)</h6>
+          <canvas id="chartClient" height="140"></canvas>
+        </div>
+      </div>
+      <div class="row g-4 mb-4">
+        <div class="col-12">
+          <h6 class="mb-2">Montants par produit</h6>
+          <canvas id="chartProduit" height="120"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Tableau des dossiers -->
+  <div class="card shadow-sm">
+    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+      <h5 class="mb-0"><i class="fas fa-table text-primary"></i> Liste détaillée des dossiers</h5>
+      <span class="badge bg-primary">{{ dossiers|length }} résultat(s)</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+          <thead class="table-light">
+            <tr>
+              <th class="ps-3">Référence</th>
+              <th>Client</th>
+              <th>Produit</th>
+              <th class="text-end">Montant</th>
+              <th>Statut Agent</th>
+              <th>Statut Client</th>
+              <th>Date</th>
+              <th class="text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for d in dossiers %}
+            <tr>
+              <td class="ps-3">
+                <strong class="text-primary">{{ d.reference }}</strong>
+              </td>
+              <td>
+                <div>
+                  <strong>{{ d.client.get_full_name|default:d.client.username }}</strong>
+                  {% if d.client.email %}
+                  <br><small class="text-muted">{{ d.client.email }}</small>
+                  {% endif %}
+                </div>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ d.produit }}</span>
+              </td>
+              <td class="text-end">
+                <strong class="text-success">{{ d.montant|floatformat:0 }}</strong>
+                <small class="text-muted">FCFA</small>
+              </td>
+              <td>
+                {% if 'NOUVEAU' in d.statut_agent %}
+                  <span class="badge bg-info">{{ d.get_statut_agent_display }}</span>
+                {% elif 'TRANSMIS' in d.statut_agent %}
+                  <span class="badge bg-primary">{{ d.get_statut_agent_display }}</span>
+                {% elif 'EN_COURS' in d.statut_agent %}
+                  <span class="badge bg-warning text-dark">{{ d.get_statut_agent_display }}</span>
+                {% elif 'APPROUVE' in d.statut_agent or 'LIBERE' in d.statut_agent %}
+                  <span class="badge bg-success">{{ d.get_statut_agent_display }}</span>
+                {% elif 'REFUSE' in d.statut_agent %}
+                  <span class="badge bg-danger">{{ d.get_statut_agent_display }}</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ d.get_statut_agent_display }}</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if 'EN_ATTENTE' in d.statut_client %}
+                  <span class="badge bg-info">{{ d.get_statut_client_display }}</span>
+                {% elif 'EN_COURS' in d.statut_client %}
+                  <span class="badge bg-warning text-dark">{{ d.get_statut_client_display }}</span>
+                {% elif 'TERMINE' in d.statut_client %}
+                  <span class="badge bg-success">{{ d.get_statut_client_display }}</span>
+                {% elif 'RAPPROCHER' in d.statut_client %}
+                  <span class="badge bg-danger">{{ d.get_statut_client_display }}</span>
+                {% else %}
+                  <span class="badge bg-secondary">{{ d.get_statut_client_display }}</span>
+                {% endif %}
+              </td>
+              <td>
+                <small>{{ d.date_soumission|date:"d/m/Y" }}</small>
+                <br><small class="text-muted">{{ d.date_soumission|date:"H:i" }}</small>
+              </td>
+              <td class="text-center">
+                <a href="{% url 'pro:dossier_detail' d.pk %}" class="btn btn-sm btn-outline-primary" title="Voir le dossier">
+                  <i class="fas fa-eye"></i>
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" class="text-center py-5 text-muted">
+                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                <p class="mb-0">Aucun dossier trouvé pour ces critères.</p>
+                <small>Essayez de modifier vos filtres ou réinitialisez-les.</small>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+    </div>
+  </div>
+</div>
+
+<!-- Data for charts -->
+<script id="charts-data" type="application/json">{{ charts_json|default:'{}'|safe }}</script>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+  (function(){
+    const dataEl = document.getElementById('charts-data');
+    let charts = {};
+    try { charts = JSON.parse((dataEl && dataEl.textContent) || '{}'); } catch(e) { charts = {}; }
+    if(!charts || !charts.agent) return;
+    const colors = [
+      '#0d6efd','#198754','#dc3545','#ffc107','#20c997','#6f42c1','#fd7e14','#0dcaf0','#6c757d','#e83e8c'
+    ];
+    const ctxAgent = document.getElementById('chartAgent');
+    const ctxClient = document.getElementById('chartClient');
+    const ctxProduit = document.getElementById('chartProduit');
+    if(ctxAgent){
+      new Chart(ctxAgent, {
+        type: 'pie',
+        data: {
+          labels: charts.agent.labels,
+          datasets: [{ 
+            data: charts.agent.data, 
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'right' },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.label + ': ' + ctx.parsed + ' dossier(s)';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    if(ctxClient){
+      new Chart(ctxClient, {
+        type: 'doughnut',
+        data: {
+          labels: charts.client.labels,
+          datasets: [{ 
+            data: charts.client.data, 
+            backgroundColor: colors,
+            borderWidth: 2,
+            borderColor: '#fff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'right' },
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return ctx.label + ': ' + ctx.parsed + ' dossier(s)';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+    if(ctxProduit){
+      new Chart(ctxProduit, {
+        type: 'bar',
+        data: {
+          labels: charts.produit.labels,
+          datasets: [{
+            label: 'Montant (FCFA)',
+            data: charts.produit.data,
+            backgroundColor: colors[0],
+            borderColor: colors[0],
+            borderWidth: 1
+          }]
+        },
+        options: { 
+          responsive: true,
+          scales: { 
+            y: { 
+              beginAtZero: true,
+              ticks: {
+                callback: function(value) {
+                  return value.toLocaleString('fr-FR') + ' FCFA';
+                }
+              }
+            } 
+          },
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: function(ctx) {
+                  return 'Montant: ' + ctx.parsed.y.toLocaleString('fr-FR') + ' FCFA';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  })();
+</script>
+{% endblock %}

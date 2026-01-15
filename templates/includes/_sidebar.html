@@ -1,0 +1,353 @@
+{% load static %}
+
+<aside class="sidebar" 
+       id="sidebar"
+       aria-label="Navigation secondaire"
+       data-sidebar>
+  
+  <!-- Sidebar Toggle -->
+  <button class="sidebar-toggle"
+          type="button"
+          aria-controls="sidebar"
+          aria-label="Réduire le menu"
+          data-sidebar-toggle>
+    <svg class="sidebar-toggle-icon" aria-hidden="true">
+      <use xlink:href="#icon-chevron-left"></use>
+    </svg>
+  </button>
+  
+  <!-- Sidebar Navigation -->
+  <nav class="sidebar-nav">
+    <ul class="sidebar-menu">
+      
+      <!-- Dashboard -->
+      <li class="sidebar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+        <a href="{% url 'dashboard' %}" 
+           class="sidebar-link"
+           {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
+          <svg class="sidebar-icon" aria-hidden="true">
+            <use xlink:href="#icon-dashboard"></use>
+          </svg>
+          <span class="sidebar-text">Dashboard</span>
+        </a>
+      </li>
+      
+      <!-- Dossiers -->
+      <li class="sidebar-item {% if 'dossiers' in request.path %}active{% endif %}">
+        <a href="{% url 'dossiers:list' %}" 
+           class="sidebar-link"
+           {% if 'dossiers' in request.path %}aria-current="page"{% endif %}>
+          <svg class="sidebar-icon" aria-hidden="true">
+            <use xlink:href="#icon-folder"></use>
+          </svg>
+          <span class="sidebar-text">Mes Dossiers</span>
+          {% if dossiers_en_cours_count > 0 %}
+          <span class="sidebar-badge">{{ dossiers_en_cours_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+      
+      <!-- Nouvelle Demande -->
+      {% if user.profile.role == 'CLIENT' %}
+      <li class="sidebar-item">
+        <a href="{% url 'dossiers:create' %}" class="sidebar-link">
+          <svg class="sidebar-icon" aria-hidden="true">
+            <use xlink:href="#icon-plus"></use>
+          </svg>
+          <span class="sidebar-text">Nouvelle Demande</span>
+        </a>
+      </li>
+      {% endif %}
+      
+      <!-- Notifications -->
+      <li class="sidebar-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+        <a href="{% url 'notifications' %}" 
+           class="sidebar-link"
+           {% if request.resolver_match.url_name == 'notifications' %}aria-current="page"{% endif %}>
+          <svg class="sidebar-icon" aria-hidden="true">
+            <use xlink:href="#icon-bell"></use>
+          </svg>
+          <span class="sidebar-text">Notifications</span>
+          {% if unread_notifications_count > 0 %}
+          <span class="sidebar-badge sidebar-badge--alert">{{ unread_notifications_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+      
+      <!-- Divider -->
+      <li class="sidebar-divider" role="separator"></li>
+      
+      <!-- Documents -->
+      <li class="sidebar-item">
+        <a href="{% url 'documents' %}" class="sidebar-link">
+          <svg class="sidebar-icon" aria-hidden="true">
+            <use xlink:href="#icon-file"></use>
+          </svg>
+          <span class="sidebar-text">Documents</span>
+        </a>
+      </li>
+      
+      <!-- Aide -->
+      <li class="sidebar-item">
+        <a href="{% url 'help' %}" class="sidebar-link">
+          <svg class="sidebar-icon" aria-hidden="true">
+            <use xlink:href="#icon-help"></use>
+          </svg>
+          <span class="sidebar-text">Aide</span>
+        </a>
+      </li>
+      
+      <!-- Paramètres -->
+      <li class="sidebar-item">
+        <a href="{% url 'settings' %}" class="sidebar-link">
+          <svg class="sidebar-icon" aria-hidden="true">
+            <use xlink:href="#icon-settings"></use>
+          </svg>
+          <span class="sidebar-text">Paramètres</span>
+        </a>
+      </li>
+      
+    </ul>
+  </nav>
+  
+  <!-- Sidebar Footer -->
+  <div class="sidebar-footer">
+    <div class="sidebar-user">
+      <div class="sidebar-user-avatar">
+        {{ user.get_full_name.0|default:user.username.0|upper }}
+      </div>
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-name">{{ user.get_full_name|default:user.username }}</div>
+        <div class="sidebar-user-role">{{ user.profile.get_role_display }}</div>
+      </div>
+    </div>
+  </div>
+  
+</aside>
+
+<style>
+/* Sidebar Styles */
+.sidebar {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  bottom: 0;
+  width: 280px;
+  background: white;
+  border-right: 1px solid var(--neutral-200);
+  display: flex;
+  flex-direction: column;
+  transition: width var(--transition-base);
+  z-index: var(--z-fixed);
+}
+
+.sidebar.is-collapsed {
+  width: 64px;
+}
+
+/* Toggle Button */
+.sidebar-toggle {
+  position: absolute;
+  top: var(--gap-4);
+  right: -12px;
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 1px solid var(--neutral-200);
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  z-index: 1;
+}
+
+.sidebar-toggle:hover {
+  background: var(--brand-50);
+  border-color: var(--brand-500);
+}
+
+.sidebar-toggle-icon {
+  width: 16px;
+  height: 16px;
+  stroke: var(--neutral-700);
+  fill: none;
+  stroke-width: 2;
+  transition: transform var(--transition-base);
+}
+
+.sidebar.is-collapsed .sidebar-toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Navigation */
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--gap-4) 0;
+}
+
+.sidebar-menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sidebar-item {
+  margin: var(--gap-1) var(--gap-3);
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-3);
+  padding: var(--gap-3);
+  color: var(--neutral-700);
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.sidebar-link:hover {
+  background: var(--neutral-100);
+  color: var(--brand-500);
+}
+
+.sidebar-item.active .sidebar-link {
+  background: var(--brand-50);
+  color: var(--brand-500);
+  font-weight: var(--font-semibold);
+}
+
+.sidebar-icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  flex-shrink: 0;
+}
+
+.sidebar-text {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar.is-collapsed .sidebar-text {
+  opacity: 0;
+  width: 0;
+}
+
+.sidebar-badge {
+  background: var(--brand-500);
+  color: white;
+  font-size: var(--text-xs);
+  font-weight: var(--font-bold);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  min-width: 20px;
+  text-align: center;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar-badge--alert {
+  background: var(--error-500);
+}
+
+.sidebar.is-collapsed .sidebar-badge {
+  opacity: 0;
+  width: 0;
+}
+
+.sidebar-divider {
+  height: 1px;
+  background: var(--neutral-200);
+  margin: var(--gap-4) var(--gap-3);
+}
+
+/* Footer */
+.sidebar-footer {
+  padding: var(--gap-4);
+  border-top: 1px solid var(--neutral-200);
+}
+
+.sidebar-user {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-3);
+}
+
+.sidebar-user-avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--brand-500);
+  color: white;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: var(--font-bold);
+  font-size: var(--text-lg);
+  flex-shrink: 0;
+}
+
+.sidebar-user-info {
+  flex: 1;
+  min-width: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.sidebar.is-collapsed .sidebar-user-info {
+  opacity: 0;
+  width: 0;
+}
+
+.sidebar-user-name {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--neutral-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-user-role {
+  font-size: var(--text-xs);
+  color: var(--neutral-600);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Layout Adjustment */
+.layout--with-sidebar .main-content {
+  margin-left: 280px;
+  transition: margin-left var(--transition-base);
+}
+
+.sidebar.is-collapsed ~ .main-content {
+  margin-left: 64px;
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .sidebar.is-open {
+    transform: translateX(0);
+  }
+  
+  .layout--with-sidebar .main-content {
+    margin-left: 0;
+  }
+}
+</style>

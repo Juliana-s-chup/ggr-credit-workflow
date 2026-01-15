@@ -1,4 +1,8 @@
+"""
+Context processors pour ajouter des variables globales aux templates.
+"""
 from .models import Notification
+
 
 def notifications(request):
     """Expose unread notifications count and latest items for authenticated users."""

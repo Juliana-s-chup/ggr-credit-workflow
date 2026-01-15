@@ -1,0 +1,27 @@
+{# Composant Alert Réutilisable #}
+<div class="alert-modern alert-{{ variant|default:'info' }}"
+     {% if id %}id="{{ id }}"{% endif %}
+     role="alert"
+     aria-live="polite"
+     {% if dismissible %}aria-labelledby="alert-title-{{ id }}"{% endif %}>
+  
+  {% if icon %}
+  <div class="alert-icon" aria-hidden="true">{{ icon|safe }}</div>
+  {% endif %}
+  
+  <div class="alert-content">
+    {% if title %}
+    <h4 class="alert-title" id="alert-title-{{ id }}">{{ title }}</h4>
+    {% endif %}
+    <div class="alert-message">{{ message|safe }}</div>
+  </div>
+  
+  {% if dismissible %}
+  <button type="button" 
+          class="alert-close"
+          data-dismiss="alert"
+          aria-label="Fermer l'alerte">
+    <span aria-hidden="true">&times;</span>
+  </button>
+  {% endif %}
+</div>

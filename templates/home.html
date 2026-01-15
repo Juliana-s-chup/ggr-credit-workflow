@@ -1,31 +1,27 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crédit du Congo - Innovation Bancaire</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}GGR Credit - Accueil{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block extra_head %}
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
     :root {
-      /* Palette cyberpunk inspirée mais professionnelle */
-      --primary: #E30613;
-      --primary-glow: #FF4757;
-      --secondary: #FFA000;
-      --accent: #00D8FF;
-      --dark: #0A0A0F;
-      --darker: #050508;
-      --light: #F0F0F5;
-      --surface: #1A1A25;
-      --text: #FFFFFF;
-      --text-secondary: #B8B8CC;
-      
-      /* Effets futuristes */
-      --glow: 0 0 20px rgba(227, 6, 19, 0.3);
-      --glow-accent: 0 0 30px rgba(0, 216, 255, 0.4);
-      --shadow-neon: 0 0 15px rgba(227, 6, 19, 0.5);
+      --primary-red: #E65137;
+      --primary-red-dark: #D84315;
+      --primary-blue: #0066cc;
+      --primary-blue-dark: #0052a3;
+      --secondary-green: #28a745;
+      --secondary-green-dark: #1e7e34;
+      --light: #f8f9fa;
+      --dark: #212529;
+      --white: #ffffff;
+      --shadow: 0 10px 30px rgba(0,0,0,0.1);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,0.15);
     }
-
+    
     * {
       margin: 0;
       padding: 0;
@@ -499,7 +495,7 @@
   <header>
     <div class="container">
       <div class="header-content">
-        <a href="{% url 'home' %}" class="logo">
+        <a href="{% url 'suivi:home' %}" class="logo">
           <div class="logo-icon">
             <i class="fas fa-university"></i>
           </div>
@@ -507,9 +503,9 @@
         </a>
         
         <nav class="nav-cyber">
-          <a href="{% url 'home' %}" class="nav-link">ACCUEIL</a>
-          <a href="{% url 'demande_start' %}" class="nav-link">CRÉDIT</a>
-          <a href="{% url 'dashboard' %}" class="nav-link">SUIVI</a>
+          <a href="{% url 'suivi:home' %}" class="nav-link">ACCUEIL</a>
+          <a href="{% url 'suivi:demande_start' %}" class="nav-link">CRÉDIT</a>
+          <a href="{% url 'suivi:dashboard' %}" class="nav-link">SUIVI</a>
           <a href="#contact" class="nav-link">CONTACT</a>
           <a href="{% url 'login' %}" class="nav-cta">CONNEXION</a>
         </nav>
@@ -537,11 +533,11 @@
         </p>
         
         <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
-          <a href="{% url 'demande_start' %}" class="btn-cyber btn-primary">
+          <a href="{% url 'suivi:demande_start' %}" class="btn-cyber btn-primary">
             <i class="fas fa-rocket"></i>
             DÉMARRER LA SIMULATION
           </a>
-          <a href="{% url 'dashboard' %}" class="btn-cyber btn-outline">
+          <a href="{% url 'suivi:dashboard' %}" class="btn-cyber btn-outline">
             <i class="fas fa-terminal"></i>
             ACCÉDER AU SYSTÈME
           </a>
@@ -622,7 +618,7 @@
       <p style="font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">
         Rejoignez la révolution bancaire aujourd'hui
       </p>
-      <a href="{% url 'demande_start' %}" class="btn-cyber btn-primary" style="font-size: 1.1rem;">
+      <a href="{% url 'suivi:demande_start' %}" class="btn-cyber btn-primary" style="font-size: 1.1rem;">
         <i class="fas fa-play"></i>
         INITIER LA SÉQUENCE
       </a>

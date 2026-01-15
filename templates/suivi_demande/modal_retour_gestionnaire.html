@@ -1,0 +1,23 @@
+<div class="modal fade" id="retourGestionnaireModal" tabindex="-1" aria-labelledby="retourGestionnaireLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="retourGestionnaireLabel">Retourner le dossier au gestionnaire</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="retourGestionnaireForm" method="post" action="">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Motif du retour (obligatoire)</label>
+            <textarea name="commentaire_retour" class="form-control" rows="4" placeholder="Expliquez les éléments manquants ou failles constatées" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Confirmer le retour</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

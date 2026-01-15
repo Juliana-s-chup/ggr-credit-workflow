@@ -1,0 +1,31 @@
+{% if messages %}
+<div class="alerts-container" role="region" aria-label="Notifications">
+  {% for message in messages %}
+  <div class="alert alert--{{ message.tags }}" 
+       role="alert" 
+       aria-live="polite"
+       data-alert>
+    <div class="alert-content">
+      <svg class="alert-icon" aria-hidden="true">
+        {% if message.tags == 'success' %}
+        <use xlink:href="#icon-check-circle"></use>
+        {% elif message.tags == 'error' %}
+        <use xlink:href="#icon-x-circle"></use>
+        {% elif message.tags == 'warning' %}
+        <use xlink:href="#icon-alert-triangle"></use>
+        {% else %}
+        <use xlink:href="#icon-info"></use>
+        {% endif %}
+      </svg>
+      <p class="alert-message">{{ message }}</p>
+    </div>
+    <button type="button" 
+            class="alert-close" 
+            data-dismiss="alert"
+            aria-label="Fermer la notification">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}

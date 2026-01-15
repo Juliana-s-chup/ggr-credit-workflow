@@ -1,0 +1,10 @@
+{# Composant Badge Réutilisable #}
+<span class="badge-modern badge-{{ variant|default:'primary' }}"
+      {% if id %}id="{{ id }}"{% endif %}
+      role="status"
+      aria-label="{{ aria_label|default:text }}">
+  {% if icon %}
+  <span class="badge-icon" aria-hidden="true">{{ icon|safe }}</span>
+  {% endif %}
+  {{ text }}
+</span>

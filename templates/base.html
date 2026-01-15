@@ -10,27 +10,33 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" 
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
   
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Design System Unifié -->
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'css/design-system.css' %}">
+  
+  <!-- Design Moderne 2025 -->
+  <link rel="stylesheet" href="{% static 'css/modern-dashboard.css' %}">
+  
   <style>
+    /* Variables Bootstrap compatibles avec le Design System */
     :root {
-      /* Palette Crédit du Congo - Variables CSS améliorées */
-      --bs-primary: #E8A51A;   /* Jaune ocre */
-      --bs-primary-dark: #cf9317;
-      --bs-primary-darker: #b98314;
-      
-      --bs-danger: #D1523F;    /* Rouge terre cuite */
-      --bs-danger-dark: #ba4837;
-      --bs-danger-darker: #a43f31;
-      
-      --bs-dark: #0B0B14;      /* Presque noir */
-      --bs-light: #f8f9fa;
-      --bs-white: #ffffff;
-      
+      --bs-primary: #FFB800;           /* Jaune-or du logo */
+      --bs-primary-dark: #E6A600;
+      --bs-danger: #FF6B4A;            /* Corail du logo */
+      --bs-danger-dark: #E65137;
+      --bs-dark: #1A1A1A;              /* Noir vague */
+      --bs-light: #F9FAFB;
+      --bs-white: #FFFFFF;
       --bs-body-color: var(--bs-dark);
-      --bs-link-color: var(--bs-dark);
-      --bs-link-hover-color: var(--bs-primary);
-      
+      --bs-link-color: var(--bs-primary);
+      --bs-link-hover-color: var(--bs-primary-dark);
       --navbar-height: 70px;
-      --transition-base: all 0.3s ease;
+      --transition-base: all 0.2s ease;
     }
 
     /* Optimisations de performance et accessibilité */
@@ -255,15 +261,21 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body>
+  {% block navbar %}
   <nav class="navbar navbar-expand-lg navbar-light brand-navbar" aria-label="Navigation principale">
     <div class="container">
       {% load static %}
-      <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}" aria-label="Crédit du Congo - Retour à l'accueil">
-        <img src="{% static 'suivi_demande/img/Credit_Du_Congo.png' %}" 
-             alt="Crédit du Congo" 
+      {% if request.resolver_match.namespace == 'client' %}
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'client:home' %}" aria-label="Logo - Retour à l'accueil">
+      {% elif request.resolver_match.namespace == 'pro' %}
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'pro:home' %}" aria-label="Logo - Retour à l'accueil">
+      {% else %}
+      <a class="navbar-brand d-flex align-items-center" href="#" aria-label="Logo - Retour à l'accueil">
+      {% endif %}
+        <img src="{% static 'core/img/Credit_Du_Congo.png' %}" 
+             alt="Logo" 
              class="brand-logo"
              width="32" height="32" />
-        <span>Crédit du Congo</span>
       </a>
       
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" 
@@ -272,123 +284,26 @@
       </button>
       
       <div id="mainNav" class="collapse navbar-collapse">
-        <ul class="navbar-nav mx-auto">
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" 
-               href="{% url 'home' %}">Accueil</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" 
-               href="{% url 'dashboard' %}">Dashboard</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link {% if request.resolver_match.url_name == 'my_applications' %}active{% endif %}" 
-               href="{% url 'my_applications' %}">Mes dossiers</a>
-          </li>
-        </ul>
-        
         <ul class="navbar-nav ms-auto align-items-lg-center">
           {% if request.user.is_authenticated %}
-            <li class="nav-item d-none d-lg-block">
-              <a class="btn btn-primary me-2" href="{% url 'demande_start' %}" role="button">
-                <i class="fas fa-plus"></i> Nouvelle Demande
-              </a>
-            </li>
-            
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle position-relative d-flex align-items-center" 
-                 href="#" id="notifDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <span class="me-1">Notifications</span>
-                {% if unread_notifications_count and unread_notifications_count > 0 %}
-                  <span class="badge bg-danger rounded-pill ms-1">{{ unread_notifications_count }}</span>
-                {% endif %}
-              </a>
-              
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notifDropdown" style="min-width: 340px;">
-                <li class="dropdown-header d-flex justify-content-between align-items-center px-3 py-2">
-                  <span class="fw-semibold">Dernières notifications</span>
-                  <form method="post" action="{% url 'notifications_mark_all' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-link btn-sm p-0 text-decoration-none">
-                      Tout lire
-                    </button>
-                  </form>
-                </li>
-                <li><hr class="dropdown-divider my-1"/></li>
-                
-                {% if latest_notifications %}
-                  {% for n in latest_notifications %}
-                    <li class="px-3 py-2 {% if not n.lu %}notification-unread{% endif %}">
-                      <div class="d-flex justify-content-between align-items-start">
-                        <div class="me-2 flex-grow-1">
-                          <div class="fw-semibold mb-1">{{ n.titre }}</div>
-                          <div class="small text-muted mb-1">
-                            {{ n.created_at|date:"d/m/Y H:i" }} • {{ n.type }}
-                          </div>
-                          {% if n.message %}
-                            <div class="small text-dark mt-1">{{ n.message|truncatechars:100 }}</div>
-                          {% endif %}
-                        </div>
-                        {% if not n.lu %}
-                          <form method="post" action="{% url 'notifications_mark_one' n.pk %}" class="flex-shrink-0">
-                            {% csrf_token %}
-                            <input type="hidden" name="next" value="{{ request.path }}"/>
-                            <button type="submit" class="btn btn-outline-secondary btn-sm" 
-                                    aria-label="Marquer comme lu">
-                              Lu
-                            </button>
-                          </form>
-                        {% endif %}
-                      </div>
-                    </li>
-                    {% if not forloop.last %}<hr class="my-1"/>{% endif %}
-                  {% endfor %}
-                  <li><hr class="dropdown-divider my-1"/></li>
-                  <li>
-                    <a class="dropdown-item text-center fw-semibold" href="{% url 'notifications_list' %}">
-                      Voir toutes les notifications
-                    </a>
-                  </li>
-                {% else %}
-                  <li class="px-3 py-3 text-center text-muted">
-                    <i class="d-block mb-1">Aucune notification</i>
-                    <small>Toutes vos notifications apparaîtront ici</small>
-                  </li>
-                {% endif %}
-              </ul>
-            </li>
-            
-            <li class="nav-item">
-              <span class="navbar-text me-2 d-none d-lg-inline">
-                Bonjour, <strong>{{ request.user.username }}</strong>
-              </span>
+            <li class="nav-item d-none d-lg-block me-3">
+              <span class="navbar-text">Bonjour, <strong>{{ request.user.username }}</strong></span>
             </li>
             <li class="nav-item">
               <form method="post" action="{% url 'logout' %}" class="d-inline">
                 {% csrf_token %}
-                <button type="submit" class="nav-link btn btn-link p-0">Déconnexion</button>
+                <button type="submit" class="btn btn-outline-secondary btn-sm">Déconnexion</button>
               </form>
             </li>
           {% else %}
             <li class="nav-item">
-              <a class="nav-link" href="{% url 'notifications_list' %}">Notifications</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'test_notifications' %}">🔧 Test Notifications</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'test_retour_simple' %}">🧪 Test Retour Simple</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'debug_direct' %}">🔍 Debug Direct</a>
-            </li>
-            <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
-              <a class="btn btn-primary" href="{% url 'signup' %}">Inscription</a>
+              <a class="nav-link" href="{% url 'login' %}">Connexion</a>
             </li>
           {% endif %}
         </ul>
-    </div>
+      </div>
   </nav>
+  {% endblock %}
 
   <main class="container py-4" role="main">
     {% if messages %}

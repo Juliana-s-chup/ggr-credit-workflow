@@ -1,0 +1,47 @@
+/*
+ * COLOR PALETTE - CRÉDIT DU CONGO
+ * Nouvelle palette de couleurs pour une meilleure expérience visuelle
+ */
+
+:root {
+  /* CSS HEX Variables */
+  --sunset-orange: #fd583d;
+  --selective-yellow: #feb806;
+  --bastille: #161219;
+  --cape-honey: #fee4a8;
+  --espresso: #5b2618;
+  --gray: #8b8989;
+  --terracotta: #e17563;
+  --kumera: #8e6e22;
+  --ronchi: #ebc04f;
+
+  /* CSS RGB Variables */
+  --sunset-orange-rgb: 253, 88, 61;
+  --selective-yellow-rgb: 254, 184, 6;
+  --bastille-rgb: 22, 18, 25;
+  --cape-honey-rgb: 254, 228, 168;
+  --espresso-rgb: 91, 38, 24;
+  --gray-rgb: 139, 137, 137;
+  --terracotta-rgb: 225, 117, 99;
+  --kumera-rgb: 142, 110, 34;
+  --ronchi-rgb: 235, 192, 79;
+
+  /* Derived gradient variables for banking components */
+  --gradient-sunset: linear-gradient(135deg, var(--sunset-orange) 0%, var(--selective-yellow) 100%);
+  --gradient-warm: linear-gradient(135deg, var(--terracotta) 0%, var(--ronchi) 100%);
+  --gradient-earth: linear-gradient(180deg, var(--espresso) 0%, var(--bastille) 100%);
+  
+  /* Light and dark variants */
+  --light-background: var(--cape-honey);
+  --dark-text: var(--bastille);
+  --muted-text: var(--gray);
+  
+  /* Semantic color mappings for UI components */
+  --primary-action: var(--sunset-orange);
+  --primary-action-hover: var(--espresso);
+  --secondary-action: var(--selective-yellow);
+  --accent-color: var(--terracotta);
+  --success-color: var(--ronchi);
+  --warning-color: var(--kumera);
+  --error-color: var(--espresso);
+}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Rapports</h1>
+
+<div class="row" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Total dossiers (périmètre)</div>
+    <div style="font-size:20px; font-weight:700;">{{ stats.total_dossiers }}</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>En cours</div>
+    <div style="font-size:20px; font-weight:700;">{{ stats.en_cours }}</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Approuvés</div>
+    <div style="font-size:20px; font-weight:700;">{{ stats.approuves }}</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Refusés</div>
+    <div style="font-size:20px; font-weight:700;">{{ stats.refuses }}</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:240px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Montant total</div>
+    <div style="font-size:20px; font-weight:700;">{{ stats.montant_total|default:0 }}</div>
+  </div>
+</div>
+
+<div class="row" style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:16px;">
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Dossiers traités (période)</div>
+    <div style="font-size:20px; font-weight:700;">{{ kpis.processed_count|default:0 }}</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Taux d’acceptation</div>
+    <div style="font-size:20px; font-weight:700;">{{ kpis.acceptance_rate|default:0 }}%</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Taux de refus</div>
+    <div style="font-size:20px; font-weight:700;">{{ kpis.reject_rate|default:0 }}%</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:220px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Délai moyen (jours)</div>
+    <div style="font-size:20px; font-weight:700;">{{ kpis.lead_time_avg_days|default:0 }}</div>
+  </div>
+  <div class="card" style="padding:12px; min-width:200px; border:1px solid #e0e0e0; border-radius:8px;">
+    <div>Dossiers renvoyés</div>
+    <div style="font-size:20px; font-weight:700;">{{ kpis.rework_count|default:0 }}</div>
+  </div>
+</div>
+
+<!-- Graphiques interactifs -->
+<h2 style="margin-top:24px; margin-bottom:16px;">📊 Visualisations analytiques</h2>
+
+<div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(400px, 1fr)); gap:20px; margin-bottom:24px;">
+  <!-- Courbe: Évolution mensuelle -->
+  <div class="card" style="padding:16px; border:1px solid #e0e0e0; border-radius:8px;">
+    <h3 style="font-size:16px; margin-bottom:12px;">📈 Évolution des dossiers traités par mois</h3>
+    <canvas id="chartMonthly" height="200"></canvas>
+  </div>
+
+  <!-- Camembert: Répartition par statut -->
+  <div class="card" style="padding:16px; border:1px solid #e0e0e0; border-radius:8px;">
+    <h3 style="font-size:16px; margin-bottom:12px;">🥧 Répartition par statut</h3>
+    <canvas id="chartStatuts" height="200"></canvas>
+  </div>
+</div>
+
+<!-- Histogramme: Lead time par gestionnaire -->
+<div class="card" style="padding:16px; border:1px solid #e0e0e0; border-radius:8px; margin-bottom:24px;">
+  <h3 style="font-size:16px; margin-bottom:12px;">📊 Délai moyen de traitement par gestionnaire (jours)</h3>
+  <canvas id="chartLeadTime" height="120"></canvas>
+</div>
+
+<h2 style="margin-top:8px;">Volumes par statut (périmètre)</h2>
+<table class="table" style="width:100%; border-collapse:collapse;">
+  <thead>
+    <tr>
+      <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Statut</th>
+      <th style="text-align:left; border-bottom:1px solid #ddd; padding:8px;">Nombre</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for row in par_statut %}
+      <tr>
+        <td style="border-bottom:1px solid #f0f0f0; padding:8px;">{{ row.statut_agent }}</td>
+        <td style="border-bottom:1px solid #f0f0f0; padding:8px;">{{ row.count }}</td>
+      </tr>
+    {% empty %}
+      <tr><td colspan="2" style="padding:8px;">Aucune donnée à afficher pour votre périmètre.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function(){
+  const chartsData = {{ charts_json|safe }};
+  if (!chartsData) return;
+
+  const colors = ['#0d6efd','#198754','#dc3545','#ffc107','#20c997','#6f42c1','#fd7e14','#0dcaf0'];
+
+  // 1. Courbe: Évolution mensuelle
+  const ctxMonthly = document.getElementById('chartMonthly');
+  if (ctxMonthly && chartsData.monthly) {
+    new Chart(ctxMonthly, {
+      type: 'line',
+      data: {
+        labels: chartsData.monthly.labels,
+        datasets: [{
+          label: 'Dossiers traités',
+          data: chartsData.monthly.data,
+          borderColor: colors[0],
+          backgroundColor: colors[0] + '20',
+          tension: 0.3,
+          fill: true
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ctx.dataset.label + ': ' + ctx.parsed.y + ' dossier(s)'
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+        }
+      }
+    });
+  }
+
+  // 2. Camembert: Répartition par statut
+  const ctxStatuts = document.getElementById('chartStatuts');
+  if (ctxStatuts && chartsData.statuts) {
+    new Chart(ctxStatuts, {
+      type: 'pie',
+      data: {
+        labels: chartsData.statuts.labels,
+        datasets: [{
+          data: chartsData.statuts.data,
+          backgroundColor: colors,
+          borderWidth: 2,
+          borderColor: '#fff'
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'right' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ctx.label + ': ' + ctx.parsed + ' dossier(s)'
+            }
+          }
+        }
+      }
+    });
+  }
+
+  // 3. Histogramme: Lead time par gestionnaire
+  const ctxLeadTime = document.getElementById('chartLeadTime');
+  if (ctxLeadTime && chartsData.lead_time) {
+    new Chart(ctxLeadTime, {
+      type: 'bar',
+      data: {
+        labels: chartsData.lead_time.labels,
+        datasets: [{
+          label: 'Délai moyen (jours)',
+          data: chartsData.lead_time.data,
+          backgroundColor: colors[3],
+          borderColor: colors[3],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, position: 'top' },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => 'Délai: ' + ctx.parsed.y + ' jour(s)'
+            }
+          }
+        },
+        scales: {
+          y: { beginAtZero: true }
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

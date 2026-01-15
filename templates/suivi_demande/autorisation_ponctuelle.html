@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Demande d'Autorisation Ponctuelle{% endblock %}
+{% block content %}
+<section class="py-4 border-bottom">
+  <div class="container d-flex justify-content-between align-items-center">
+    <h1 class="h5 mb-0">Demande d'Autorisation Ponctuelle</h1>
+    <div class="text-muted small">Segment des particuliers</div>
+  </div>
+</section>
+
+<section class="py-4">
+  <div class="container">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <div class="card mb-4">
+        <div class="card-header">En-tête</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">{{ form.date.label_tag }}{{ form.date }}</div>
+            <div class="col-md-2">{{ form.fdc.label_tag }}{{ form.fdc }}</div>
+            <div class="col-md-3">{{ form.gestionnaire.label_tag }}{{ form.gestionnaire }}</div>
+            <div class="col-md-4">{{ form.agence.label_tag }}{{ form.agence }}</div>
+            <div class="col-md-6">{{ form.client.label_tag }}{{ form.client }}</div>
+            <div class="col-md-3">{{ form.radical.label_tag }}{{ form.radical }}</div>
+            <div class="col-md-3">{{ form.segment.label_tag }}{{ form.segment }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">1 - Engagements</div>
+        <div class="card-body">
+          {{ formset.management_form }}
+          <div class="table-responsive">
+            <table class="table table-sm align-middle">
+              <thead>
+                <tr>
+                  <th>Nature</th>
+                  <th>Lignes de crédit</th>
+                  <th>Validité</th>
+                  <th>Utilisation</th>
+                  <th>Dépassement en cours</th>
+                  <th>Montant sollicité</th>
+                  <th>Dépassement (accord)</th>
+                  <th>Engagement (accord)</th>
+                  <th>Validité dépassement</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for f in formset %}
+                  <tr>
+                    <td>{{ f.nature }}</td>
+                    <td>{{ f.lignes_credit }}</td>
+                    <td>{{ f.validite }}</td>
+                    <td>{{ f.utilisation }}</td>
+                    <td>{{ f.depassement_en_cours }}</td>
+                    <td>{{ f.montant_sollicite }}</td>
+                    <td>{{ f.depassement_accord }}</td>
+                    <td>{{ f.engagement_accord }}</td>
+                    <td>{{ f.validite_depassement }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <div class="text-muted small">Données en FCFA</div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">Synthèse financière</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-3">{{ form.salaire_moyen.label_tag }}{{ form.salaire_moyen }}</div>
+            <div class="col-md-3">{{ form.montant_echeance.label_tag }}{{ form.montant_echeance }}</div>
+            <div class="col-md-3">{{ form.disponible_ab.label_tag }}{{ form.disponible_ab }}</div>
+            <div class="col-md-3">{{ form.disponible_ab_div2.label_tag }}{{ form.disponible_ab_div2 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">2 - Garanties</div>
+        <div class="card-body">
+          {{ form.garanties_deja_formalisees.label_tag }}
+          {{ form.garanties_deja_formalisees }}
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">3 - Mouvement et rentabilité (M XAF)</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">{{ form.mouvement_2022.label_tag }}{{ form.mouvement_2022 }}</div>
+            <div class="col-md-4">{{ form.mouvement_2023.label_tag }}{{ form.mouvement_2023 }}</div>
+            <div class="col-md-4">{{ form.mouvement_2024.label_tag }}{{ form.mouvement_2024 }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">4 - Objet de la demande</div>
+        <div class="card-body">
+          {{ form.objet_demande.label_tag }}
+          {{ form.objet_demande }}
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">5 - Avis motivés</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-4">{{ form.avis_gestionnaire.label_tag }}{{ form.avis_gestionnaire }}</div>
+            <div class="col-md-4">{{ form.avis_responsable_succursale.label_tag }}{{ form.avis_responsable_succursale }}</div>
+            <div class="col-md-4">{{ form.avis_analyste_credit.label_tag }}{{ form.avis_analyste_credit }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-4">
+        <div class="card-header">6 - Décision</div>
+        <div class="card-body">
+          <div class="row g-3">
+            <div class="col-md-6">{{ form.decision_ggr.label_tag }}{{ form.decision_ggr }}</div>
+            <div class="col-md-6">{{ form.decision_dg.label_tag }}{{ form.decision_dg }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</section>
+{% endblock %}

@@ -1,45 +1,606 @@
-{% extends "base.html" %}
-{% block title %}Dashboard Super Admin{% endblock %}
-{% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-  <div>
-    <h1 class="h4 mb-1">Vue d'ensemble (Super Administrateur)</h1>
-    <p class="text-muted mb-0">Derniers dossiers créés (100 plus récents)</p>
-  </div>
-  <div>
-    <a href="{% url 'admin_users' %}" class="btn btn-primary">
-      <i class="fas fa-users"></i> Gérer les utilisateurs
-    </a>
-  </div>
-</div>
-{% if dossiers %}
-<table class="table align-middle">
-  <thead>
-    <tr>
-      <th>Référence</th>
-      <th>Client</th>
-      <th>Produit</th>
-      <th>Montant</th>
-      <th>Statut agent</th>
-      <th>Statut client</th>
-      <th>Soumis le</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for d in dossiers %}
-    <tr>
-      <td>{{ d.reference }}</td>
-      <td>{{ d.client.username }}</td>
-      <td>{{ d.produit }}</td>
-      <td>{{ d.montant }}</td>
-      <td>{{ d.get_statut_agent_display }}</td>
-      <td>{{ d.get_statut_client_display }}</td>
-      <td>{{ d.date_soumission|date:"d/m/Y H:i" }}</td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p class="text-muted">Aucun dossier pour l'instant.</p>
-{% endif %}
+{% extends "suivi_demande/dashboard_base.html" %}
+{% block title %}Dashboard Super Administrateur{% endblock %}
+{% block dashboard_role %}Super Administrateur{% endblock %}
+{% block user_role %}Super Admin{% endblock %}
+{% block page_title %}Centre d'Administration{% endblock %}
+{% block header_icon %}fas fa-shield-alt{% endblock %}
+
+{% block navigation %}
+<a href="javascript:void(0)" class="nav-item-banking active" data-section="dashboard">
+  <i class="fas fa-tachometer-alt"></i>
+  <span>Tableau de Bord</span>
+</a>
+<a href="javascript:void(0)" class="nav-item-banking" data-section="utilisateurs">
+  <i class="fas fa-users"></i>
+  <span>Utilisateurs</span>
+</a>
+<a href="javascript:void(0)" class="nav-item-banking" data-section="creer-utilisateur">
+  <i class="fas fa-user-plus"></i>
+  <span>Créer Utilisateur</span>
+</a>
+<a href="javascript:void(0)" class="nav-item-banking" data-section="historique">
+  <i class="fas fa-history"></i>
+  <span>Historique</span>
+</a>
+<a href="{% url 'pro:reports' %}" class="nav-item-banking">
+  <i class="fas fa-chart-bar"></i>
+  <span>Rapports</span>
+</a>
 {% endblock %}
+
+{% block stats_cards %}
+<div class="kpi-card">
+  <div class="kpi-value">{{ stats_total_users|default:0 }}</div>
+  <div class="kpi-label">Utilisateurs</div>
+  </div>
+<div class="kpi-card">
+  <div class="kpi-value">{{ stats_users_active|default:0 }}</div>
+  <div class="kpi-label">Actifs</div>
+  </div>
+<div class="kpi-card">
+  <div class="kpi-value">{{ stats_users_inactive|default:0 }}</div>
+  <div class="kpi-label">Inactifs</div>
+  </div>
+<div class="kpi-card">
+  <div class="kpi-value">{{ historique_utilisateurs|length|default:0 }}</div>
+  <div class="kpi-label">Actions récentes</div>
+  </div>
+{% endblock %}
+
+{% block content %}
+<!-- Section Dashboard -->
+<section class="content-section active" id="dashboard-section">
+  <div class="grid md:grid-cols-2 gap-6">
+    <div class="card">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <h3 class="text-lg font-semibold">Gestion des Utilisateurs</h3>
+        <div class="d-flex gap-2">
+          <a href="javascript:void(0)" class="btn btn-primary btn-sm" data-section="utilisateurs"><i class="fas fa-users"></i> Gérer</a>
+          <a href="javascript:void(0)" class="btn btn-success btn-sm" data-section="creer-utilisateur"><i class="fas fa-user-plus"></i> Créer</a>
+        </div>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          {% for role_label, count in stats_roles.items %}
+          <li class="list-group-item d-flex justify-content-between"><span>{{ role_label }}</span><span class="badge bg-primary">{{ count }}</span></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <h3 class="text-lg font-semibold">Utilisateurs Récents</h3>
+      </div>
+      <div class="card-body">
+        {% if users_recent %}
+        <ul class="list-group list-group-flush">
+          {% for user in users_recent %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div>
+              <strong>{{ user.get_full_name|default:user.username }}</strong>
+              <br><small class="text-muted">{{ user.email }}</small>
+            </div>
+            <div class="text-end">
+              {% if user.profile %}<span class="badge bg-info">{{ user.profile.get_role_display }}</span>{% endif %}
+              <br><small class="text-muted">{{ user.date_joined|date:"d/m/Y" }}</small>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-muted">Aucun utilisateur récent.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Section Rapports -->
+<section class="content-section" id="rapports-section">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-lg font-semibold">Rapports sur les Utilisateurs Créés</h3>
+        </div>
+        <div class="card-body">
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-md font-semibold">Générer un Rapport</h4>
+                    </div>
+                    <div class="card-body">
+                        <form class="space-y-4" method="get" action="{% url 'pro:reports' %}">
+                            <input type="hidden" name="type" value="users" />
+                            <div class="grid md:grid-cols-2 gap-3">
+                                <div class="form-group">
+                                    <label class="form-label">Type de période</label>
+                                    <select class="form-input" name="periode" id="periodeSelect">
+                                        <option value="">— Aucune —</option>
+                                        <option value="M">Mensuel</option>
+                                        <option value="Q">Trimestriel</option>
+                                        <option value="S">Semestriel</option>
+                                        <option value="Y">Annuel</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Année</label>
+                                    <input type="number" class="form-input" name="annee" id="anneeInput" min="2000" max="2100" placeholder="2025" />
+                                </div>
+                            </div>
+                            <div class="grid md:grid-cols-3 gap-3">
+                                <div class="form-group" id="moisGroup" style="display:none;">
+                                    <label class="form-label">Mois (1-12)</label>
+                                    <input type="number" class="form-input" name="mois" min="1" max="12" placeholder="1..12" />
+                                </div>
+                                <div class="form-group" id="trimestreGroup" style="display:none;">
+                                    <label class="form-label">Trimestre (1-4)</label>
+                                    <input type="number" class="form-input" name="trimestre" min="1" max="4" placeholder="1..4" />
+                                </div>
+                                <div class="form-group" id="semestreGroup" style="display:none;">
+                                    <label class="form-label">Semestre (1-2)</label>
+                                    <input type="number" class="form-input" name="semestre" min="1" max="2" placeholder="1..2" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Dates (optionnel)</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <input type="date" class="form-input" name="date_debut" />
+                                    <input type="date" class="form-input" name="date_fin" />
+                                </div>
+                                <div class="text-xs text-muted mt-1">Si les dates ne sont pas renseignées, la période choisie sera utilisée.</div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <button type="submit" class="btn btn-primary w-full">
+                                    <i class="fas fa-file-alt"></i> Voir les rapports
+                                </button>
+                                <a class="btn btn-secondary w-full" href="{% url 'pro:reports' %}">
+                                    <i class="fas fa-download"></i> Exporter Excel
+                                </a>
+                            </div>
+                        </form>
+                        <script>
+                        (function(){
+                          const sel = document.getElementById('periodeSelect');
+                          const mois = document.getElementById('moisGroup');
+                          const tri = document.getElementById('trimestreGroup');
+                          const sem = document.getElementById('semestreGroup');
+                          function update(){
+                            const v = sel.value;
+                            mois.style.display = (v === 'M') ? '' : 'none';
+                            tri.style.display = (v === 'Q') ? '' : 'none';
+                            sem.style.display = (v === 'S') ? '' : 'none';
+                          }
+                          sel.addEventListener('change', update);
+                          update();
+                        })();
+                        </script>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-md font-semibold">Rapports Récents</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
+                                <div>
+                                    <div class="font-medium">Ouvrir la page Rapports</div>
+                                    <div class="text-xs text-muted">Filtrer et visualiser les utilisateurs</div>
+                                </div>
+                                <a class="btn btn-secondary btn-sm" href="{% url 'pro:reports' %}">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                            </div>
+                            <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
+                                <div>
+                                    <div class="font-medium">Exporter Excel (filtres de la page Rapports)</div>
+                                    <div class="text-xs text-muted">Télécharger le fichier XLSX</div>
+                                </div>
+                                <a class="btn btn-secondary btn-sm" href="{% url 'pro:reports' %}">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Historique -->
+<section class="content-section" id="historique-section">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-history text-info"></i> Historique des Actions sur les Utilisateurs
+            </h5>
+            <span class="badge bg-secondary">{{ historique_utilisateurs|length }}</span>
+        </div>
+        <div class="card-body">
+            {% if historique_utilisateurs %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date & Heure</th>
+                            <th>Action</th>
+                            <th>Utilisateur Concerné</th>
+                            <th>Effectué par</th>
+                            <th>Détails</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in historique_utilisateurs %}
+                        <tr>
+                            <td><small>{{ log.action_time|date:"d/m/Y H:i" }}</small></td>
+                            <td>
+                                {% if log.action_flag == 1 %}
+                                <span class="badge bg-success"><i class="fas fa-plus"></i> Création</span>
+                                {% elif log.action_flag == 2 %}
+                                <span class="badge bg-warning text-dark"><i class="fas fa-edit"></i> Modification</span>
+                                {% elif log.action_flag == 3 %}
+                                <span class="badge bg-danger"><i class="fas fa-trash"></i> Suppression</span>
+                                {% else %}
+                                <span class="badge bg-info">Action</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <strong>{{ log.object_repr }}</strong>
+                            </td>
+                            <td>{{ log.user.username }}</td>
+                            <td>
+                                <small class="text-muted">
+                                    {% if "password" in log.change_message %}
+                                        Mot de passe modifié
+                                    {% elif "added" in log.change_message %}
+                                        Utilisateur créé
+                                    {% elif "First name" in log.change_message or "Last name" in log.change_message %}
+                                        Informations personnelles modifiées
+                                    {% elif "Email" in log.change_message %}
+                                        Email modifié
+                                    {% elif "Role" in log.change_message %}
+                                        Rôle modifié
+                                    {% elif log.change_message %}
+                                        Modification effectuée
+                                    {% else %}
+                                        —
+                                    {% endif %}
+                                </small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted mb-0">Aucune action enregistrée.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Section Utilisateurs -->
+<section class="content-section" id="utilisateurs-section">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-users text-primary"></i> Liste des Utilisateurs
+                <span class="badge bg-primary ms-2">{{ all_users|length }}</span>
+            </h5>
+            <div class="d-flex gap-2">
+                <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary" data-section="dashboard">
+                    <i class="fas fa-arrow-left"></i> Retour Dashboard
+                </a>
+                <a href="javascript:void(0)" class="btn btn-sm btn-success" data-section="creer-utilisateur">
+                    <i class="fas fa-user-plus"></i> Créer Utilisateur
+                </a>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Utilisateur</th>
+                            <th>Email</th>
+                            <th>Rôle</th>
+                            <th>Statut</th>
+                            <th>Date d'inscription</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in all_users %}
+                        <tr>
+                            <td class="ps-3">
+                                <div>
+                                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                    <br><small class="text-muted">@{{ user.username }}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <small>{{ user.email|default:"N/A" }}</small>
+                            </td>
+                            <td>
+                                {% if user.profile %}
+                                    <span class="badge bg-info">{{ user.profile.get_role_display }}</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Aucun rôle</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if user.is_active %}
+                                    <span class="badge bg-success">Actif</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Inactif</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small>{{ user.date_joined|date:"d/m/Y" }}</small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-sm btn-outline-primary" 
+                                            title="Modifier"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#editUserModal"
+                                            data-user-id="{{ user.id }}"
+                                            data-username="{{ user.username }}"
+                                            data-email="{{ user.email }}"
+                                            data-firstname="{{ user.first_name }}"
+                                            data-lastname="{{ user.last_name }}"
+                                            data-role="{% if user.profile %}{{ user.profile.role }}{% endif %}"
+                                            data-active="{{ user.is_active|yesno:'1,0' }}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <form method="post" action="{% url 'pro:admin_toggle_status' user.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm {% if user.is_active %}btn-outline-warning{% else %}btn-outline-success{% endif %}" 
+                                                title="{% if user.is_active %}Désactiver{% else %}Activer{% endif %}"
+                                                onclick="return confirm('{% if user.is_active %}Désactiver{% else %}Activer{% endif %} cet utilisateur ?')">
+                                            <i class="fas {% if user.is_active %}fa-ban{% else %}fa-check{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">
+                                <i class="fas fa-users fa-3x mb-3 d-block"></i>
+                                <p class="mb-0">Aucun utilisateur trouvé</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Section Créer Utilisateur -->
+<section class="content-section" id="creer-utilisateur-section">
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-user-plus text-success"></i> Créer un Nouvel Utilisateur
+            </h5>
+            <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary" data-section="dashboard">
+                <i class="fas fa-arrow-left"></i> Retour Dashboard
+            </a>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'pro:admin_create_user' %}">
+                {% csrf_token %}
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nom d'utilisateur <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="username" name="username" required>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="first_name" class="form-label">Prénom</label>
+                            <input type="text" class="form-control" id="first_name" name="first_name">
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="last_name" class="form-label">Nom</label>
+                            <input type="text" class="form-control" id="last_name" name="last_name">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Mot de passe <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password" name="password" required>
+                            <small class="text-muted">Minimum 8 caractères</small>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="password_confirm" class="form-label">Confirmer le mot de passe <span class="text-danger">*</span></label>
+                            <input type="password" class="form-control" id="password_confirm" name="password_confirm" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Rôle <span class="text-danger">*</span></label>
+                            <select class="form-select" id="role" name="role" required>
+                                <option value="">-- Sélectionner un rôle --</option>
+                                <option value="CLIENT">Client</option>
+                                <option value="GESTIONNAIRE">Gestionnaire</option>
+                                <option value="ANALYSTE">Analyste</option>
+                                <option value="RESPONSABLE_GGR">Responsable GGR</option>
+                                <option value="BOE">BOE (Back Office Engagement)</option>
+                                <option value="SUPER_ADMIN">Super Administrateur</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label for="is_active" class="form-label">Statut</label>
+                            <select class="form-select" id="is_active" name="is_active">
+                                <option value="1" selected>Actif</option>
+                                <option value="0">Inactif</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex gap-2 justify-content-end">
+                    <a href="javascript:void(0)" class="btn btn-secondary" data-section="dashboard">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Créer l'utilisateur
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+<!-- Modale unique de modification d'utilisateur -->
+<div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">
+                    <i class="fas fa-user-edit"></i> Modifier l'utilisateur
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" id="editUserForm">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_username" class="form-label">Nom d'utilisateur <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="edit_username" name="username" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="edit_email" name="email" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_first_name" class="form-label">Prénom</label>
+                                <input type="text" class="form-control" id="edit_first_name" name="first_name">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_last_name" class="form-label">Nom</label>
+                                <input type="text" class="form-control" id="edit_last_name" name="last_name">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_role" class="form-label">Rôle <span class="text-danger">*</span></label>
+                                <select class="form-select" id="edit_role" name="role" required>
+                                    <option value="CLIENT">Client</option>
+                                    <option value="GESTIONNAIRE">Gestionnaire</option>
+                                    <option value="ANALYSTE">Analyste</option>
+                                    <option value="RESPONSABLE_GGR">Responsable GGR</option>
+                                    <option value="BOE">BOE (Back Office Engagement)</option>
+                                    <option value="SUPER_ADMIN">Super Administrateur</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="edit_is_active" class="form-label">Statut</label>
+                                <select class="form-select" id="edit_is_active" name="is_active">
+                                    <option value="1">Actif</option>
+                                    <option value="0">Inactif</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="edit_new_password" class="form-label">Nouveau mot de passe</label>
+                                <input type="password" class="form-control" id="edit_new_password" name="new_password" placeholder="Laisser vide pour ne pas changer">
+                                <small class="text-muted">Minimum 8 caractères. Laisser vide si vous ne souhaitez pas changer le mot de passe.</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var modalElement = document.getElementById('editUserModal');
+    
+    if (!modalElement) {
+        console.error('Modale non trouvée !');
+        return;
+    }
+    
+    // Écouter l'événement d'ouverture de la modale
+    modalElement.addEventListener('show.bs.modal', function(event) {
+        // Bouton qui a déclenché la modale
+        var button = event.relatedTarget;
+        
+        if (!button) return;
+        
+        // Récupérer les données depuis les attributs data-*
+        var userId = button.getAttribute('data-user-id');
+        var username = button.getAttribute('data-username');
+        var email = button.getAttribute('data-email');
+        var firstName = button.getAttribute('data-firstname');
+        var lastName = button.getAttribute('data-lastname');
+        var role = button.getAttribute('data-role');
+        var isActive = button.getAttribute('data-active');
+        
+        // Remplir les champs du formulaire
+        document.getElementById('edit_username').value = username || '';
+        document.getElementById('edit_email').value = email || '';
+        document.getElementById('edit_first_name').value = firstName || '';
+        document.getElementById('edit_last_name').value = lastName || '';
+        document.getElementById('edit_role').value = role || 'CLIENT';
+        document.getElementById('edit_is_active').value = isActive || '1';
+        document.getElementById('edit_new_password').value = '';
+        
+        // Mettre à jour l'action du formulaire
+        document.getElementById('editUserForm').action = '/dashboard/admin/edit-user/' + userId + '/';
+    });
+});
+</script>

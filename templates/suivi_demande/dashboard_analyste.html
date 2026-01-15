@@ -12,137 +12,179 @@
 {% block header_icon %}fas fa-chart-line{% endblock %}
 
 {% block navigation %}
-<a href="#" class="nav-item-banking active" data-section="dashboard">
+<a href="javascript:void(0)" class="nav-item-banking active" data-section="dashboard">
     <i class="fas fa-tachometer-alt"></i>
     <span>Tableau de Bord</span>
 </a>
-<a href="#" class="nav-item-banking" data-section="dossiers">
+<a href="javascript:void(0)" class="nav-item-banking" data-section="dossiers">
     <i class="fas fa-folder-open"></i>
     <span>Dossiers à Analyser</span>
-    <span class="badge badge-warning ml-auto">{{ dossiers_en_attente|length|default:5 }}</span>
 </a>
-<a href="#" class="nav-item-banking" data-section="analyses">
-    <i class="fas fa-microscope"></i>
-    <span>Mes Analyses</span>
+<a href="javascript:void(0)" class="nav-item-banking" data-section="dossiers-traites">
+    <i class="fas fa-check-circle"></i>
+    <span>Dossiers Traités</span>
 </a>
-<a href="#" class="nav-item-banking" data-section="rapports">
+<a href="javascript:void(0)" class="nav-item-banking" data-section="historique">
+    <i class="fas fa-history"></i>
+    <span>Historique</span>
+</a>
+<a href="{% url 'pro:reports' %}" class="nav-item-banking">
     <i class="fas fa-file-alt"></i>
     <span>Rapports</span>
 </a>
-<a href="#" class="nav-item-banking" data-section="outils">
-    <i class="fas fa-calculator"></i>
-    <span>Outils d'Analyse</span>
-</a>
 {% endblock %}
 
-{% block stats_cards %}
-<div class="kpi-card">
-    <div class="kpi-value">{{ dossiers_en_attente|length|default:12 }}</div>
-    <div class="kpi-label">Dossiers en Attente</div>
-    <div class="text-xs text-warning mt-2">
-        <i class="fas fa-clock"></i> Priorité haute: 3
-    </div>
-</div>
-
-<div class="kpi-card">
-    <div class="kpi-value">{{ analyses_completees|default:47 }}</div>
-    <div class="kpi-label">Analyses Complétées</div>
-    <div class="text-xs text-success mt-2">
-        <i class="fas fa-arrow-up"></i> +15% ce mois
-    </div>
-</div>
-
-<div class="kpi-card">
-    <div class="kpi-value">{{ taux_approbation|default:73 }}%</div>
-    <div class="kpi-label">Taux d'Approbation</div>
-    <div class="text-xs text-info mt-2">
-        <i class="fas fa-chart-line"></i> Moyenne secteur: 68%
-    </div>
-</div>
-
-<div class="kpi-card">
-    <div class="kpi-value">{{ delai_moyen|default:2.4 }}j</div>
-    <div class="kpi-label">Délai Moyen</div>
-    <div class="text-xs text-success mt-2">
-        <i class="fas fa-stopwatch"></i> Objectif: 3j
-    </div>
-</div>
-{% endblock %}
+{# KPI cards will be inlined within the content section's stats-grid below to avoid duplicate block definitions #}
 
 {% block content %}
 <!-- Section Dashboard -->
 <section class="content-section active" id="dashboard-section">
-    <div class="stats-grid">
-        {% block stats_cards %}{% endblock %}
-    </div>
-    
-    <div class="grid md:grid-cols-2 gap-6 mb-8">
-        <!-- Dossiers Prioritaires -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-lg font-semibold flex items-center gap-2">
-                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                    Dossiers Prioritaires
-                </h3>
-            </div>
-            <div class="card-body">
-                {% for dossier in dossiers_prioritaires|slice:":5" %}
-                <div class="flex items-center justify-between p-4 border-l-4 border-warning bg-yellow-50 rounded mb-3">
-                    <div>
-                        <div class="font-semibold text-primary">{{ dossier.reference }}</div>
-                        <div class="text-sm text-muted">{{ dossier.client.get_full_name }}</div>
-                        <div class="text-xs text-warning">
-                            <i class="fas fa-clock"></i> 
-                            Échéance: {{ dossier.date_echeance|default:"2 jours" }}
+    <!-- KPI Cards Modernes -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-warning">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small">Dossiers en Attente</p>
+                            <h3 class="mb-0 text-warning">{{ dossiers_en_attente|length|default:0 }}</h3>
+                            <small class="text-muted">À analyser</small>
+                        </div>
+                        <div class="bg-warning bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-clock text-warning fs-4"></i>
                         </div>
                     </div>
-                    <div class="flex flex-col gap-2">
-                        <span class="badge badge-warning">{{ dossier.montant|floatformat:0 }} FCFA</span>
-                        <button class="btn btn-primary btn-sm">
-                            <i class="fas fa-eye"></i> Analyser
-                        </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-success">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small">Analyses Complétées</p>
+                            <h3 class="mb-0 text-success">{{ analyses_completees|default:0 }}</h3>
+                            <small class="text-muted">Cette période</small>
+                        </div>
+                        <div class="bg-success bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-check-circle text-success fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-info">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small">Taux d'Approbation</p>
+                            <h3 class="mb-0 text-info">{{ taux_approbation|default:0 }}%</h3>
+                            <small class="text-muted">Moyenne secteur: 68%</small>
+                        </div>
+                        <div class="bg-info bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-chart-line text-info fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-md-6">
+            <div class="card shadow-sm border-primary">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <p class="text-muted mb-1 small">Délai Moyen</p>
+                            <h3 class="mb-0 text-primary">{{ delai_moyen|default:0 }}j</h3>
+                            <small class="text-muted">Objectif: 3j</small>
+                        </div>
+                        <div class="bg-primary bg-opacity-10 p-3 rounded">
+                            <i class="fas fa-stopwatch text-primary fs-4"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row g-4 mb-4">
+        <!-- Dossiers Prioritaires -->
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> Dossiers Prioritaires
+                        <span class="badge bg-warning ms-2">{{ dossiers_prioritaires|length|default:0 }}</span>
+                    </h5>
+                </div>
+            <div class="card-body">
+                {% for dossier in dossiers_prioritaires|slice:":5" %}
+                <div class="d-flex align-items-center p-3 border-l-4 border-warning bg-warning bg-opacity-10 rounded mb-2">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center mb-1">
+                            <a class="fw-semibold text-primary text-decoration-none" href="{% url 'pro:dossier_detail' dossier.pk %}">{{ dossier.reference }}</a>
+                            <span class="badge bg-warning ms-2">{{ dossier.montant|floatformat:0 }} FCFA</span>
+                        </div>
+                        <div class="text-muted small">
+                            <i class="fas fa-user"></i> {{ dossier.client.get_full_name|default:dossier.client.username }}
+                        </div>
+                        <div class="text-warning small">
+                            <i class="fas fa-clock"></i> Échéance: {{ dossier.date_echeance|default:"2 jours" }}
+                        </div>
+                    </div>
+                    <div class="ms-3">
+                        <a href="{% url 'pro:dossier_detail' dossier.pk %}" class="btn btn-sm btn-outline-warning">
+                            <i class="fas fa-eye"></i>
+                        </a>
                     </div>
                 </div>
                 {% empty %}
-                <div class="text-center py-8 text-muted">
-                    <i class="fas fa-check-circle text-success text-3xl mb-4"></i>
-                    <p>Aucun dossier prioritaire en attente</p>
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-check-circle text-success fa-2x mb-3"></i>
+                    <p class="mb-0">Aucun dossier prioritaire</p>
+                    <small>Tous les dossiers sont en cours de traitement</small>
                 </div>
                 {% endfor %}
             </div>
         </div>
         
         <!-- Activité Récente -->
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-lg font-semibold flex items-center gap-2">
-                    <i class="fas fa-history text-info"></i>
-                    Activité Récente
-                </h3>
-            </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history text-info"></i> Activité Récente
+                    </h5>
+                </div>
             <div class="card-body">
-                <div class="space-y-4">
-                    <div class="flex items-start gap-3">
-                        <div class="w-2 h-2 bg-success rounded-full mt-2"></div>
-                        <div class="flex-1">
-                            <div class="text-sm font-medium">Analyse approuvée</div>
-                            <div class="text-xs text-muted">Dossier CR-2024-0156 • Il y a 2h</div>
+                <div class="space-y-3">
+                    {% for dossier in dossiers_a_analyser|slice:":5" %}
+                    {% if dossier.journal.exists %}
+                    {% with last_entry=dossier.journal.first %}
+                    <div class="d-flex align-items-start gap-3 p-2 rounded hover:bg-light">
+                        <div class="w-2 h-2 {% if 'TRANSITION' in last_entry.action %}bg-success{% elif 'RETOUR' in last_entry.action %}bg-warning{% else %}bg-info{% endif %} rounded-circle mt-2"></div>
+                        <div class="flex-grow-1">
+                            <div class="fw-medium">
+                                <a href="{% url 'pro:dossier_detail' dossier.pk %}" class="text-primary text-decoration-none">{{ dossier.reference }}</a>
+                                <span class="badge {% if 'TRANSITION' in last_entry.action %}bg-success{% elif 'RETOUR' in last_entry.action %}bg-warning{% else %}bg-info{% endif %} ms-2">{{ last_entry.get_action_display }}</span>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="fas fa-user"></i> {{ dossier.client.get_full_name|default:dossier.client.username }} • <i class="fas fa-clock"></i> {{ last_entry.timestamp|timesince }}
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-start gap-3">
-                        <div class="w-2 h-2 bg-warning rounded-full mt-2"></div>
-                        <div class="flex-1">
-                            <div class="text-sm font-medium">Demande d'informations</div>
-                            <div class="text-xs text-muted">Dossier CR-2024-0158 • Il y a 4h</div>
-                        </div>
+                    {% endwith %}
+                    {% endif %}
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-inbox fa-2x mb-3"></i>
+                        <p class="mb-0">Aucune activité récente</p>
+                        <small>Aucun dossier traité récemment</small>
                     </div>
-                    <div class="flex items-start gap-3">
-                        <div class="w-2 h-2 bg-error rounded-full mt-2"></div>
-                        <div class="flex-1">
-                            <div class="text-sm font-medium">Analyse rejetée</div>
-                            <div class="text-xs text-muted">Dossier CR-2024-0154 • Hier</div>
-                        </div>
-                    </div>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -208,72 +250,83 @@
 
 <!-- Section Dossiers -->
 <section class="content-section" id="dossiers-section">
-    <div class="card">
-        <div class="card-header">
-            <div class="flex justify-between items-center">
-                <h3 class="text-lg font-semibold">Dossiers à Analyser</h3>
-                <div class="flex gap-2">
-                    <select class="form-input text-sm">
-                        <option>Tous les statuts</option>
-                        <option>Nouveau</option>
-                        <option>En cours</option>
-                        <option>Prioritaire</option>
-                    </select>
-                    <button class="btn btn-secondary btn-sm">
-                        <i class="fas fa-filter"></i>
-                    </button>
-                </div>
+    <div class="card shadow-sm">
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-microscope text-primary"></i> Dossiers à Analyser
+                <span class="badge bg-primary ms-2">{{ dossiers_a_analyser|length }}</span>
+            </h5>
+            <div class="d-flex gap-2">
+                <a href="javascript:void(0)" class="btn btn-sm btn-outline-secondary" data-section="dashboard">
+                    <i class="fas fa-arrow-left"></i> Retour Dashboard
+                </a>
+                <select class="form-select form-select-sm">
+                    <option>Tous les statuts</option>
+                    <option>Nouveau</option>
+                    <option>En cours</option>
+                    <option>Prioritaire</option>
+                </select>
+                <button class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-filter"></i>
+                </button>
             </div>
         </div>
-        <div class="card-body">
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b border-gray-200">
-                            <th class="text-left py-3 px-4 font-semibold">Référence</th>
-                            <th class="text-left py-3 px-4 font-semibold">Client</th>
-                            <th class="text-left py-3 px-4 font-semibold">Montant</th>
-                            <th class="text-left py-3 px-4 font-semibold">Produit</th>
-                            <th class="text-left py-3 px-4 font-semibold">Priorité</th>
-                            <th class="text-left py-3 px-4 font-semibold">Actions</th>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Référence</th>
+                            <th>Client</th>
+                            <th class="text-end">Montant</th>
+                            <th>Produit</th>
+                            <th>Priorité</th>
+                            <th>Date</th>
+                            <th class="text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for dossier in dossiers_a_analyser %}
-                        <tr class="border-b border-gray-100 hover:bg-gray-50">
-                            <td class="py-4 px-4">
-                                <span class="font-medium text-primary">{{ dossier.reference }}</span>
-                                <div class="text-xs text-muted">{{ dossier.date_soumission|date:"d/m/Y" }}</div>
+                        <tr>
+                            <td class="ps-3">
+                                <a class="fw-bold text-primary text-decoration-none" href="{% url 'pro:dossier_detail' dossier.pk %}">{{ dossier.reference }}</a>
                             </td>
-                            <td class="py-4 px-4">
-                                <div class="font-medium">{{ dossier.client.get_full_name }}</div>
-                                <div class="text-xs text-muted">{{ dossier.client.email }}</div>
+                            <td>
+                                <div>
+                                    <strong>{{ dossier.client.get_full_name|default:dossier.client.username }}</strong>
+                                    {% if dossier.client.email %}
+                                    <br><small class="text-muted">{{ dossier.client.email }}</small>
+                                    {% endif %}
+                                </div>
                             </td>
-                            <td class="py-4 px-4">
-                                <span class="font-semibold">{{ dossier.montant|floatformat:0 }} FCFA</span>
+                            <td class="text-end">
+                                <strong class="text-success">{{ dossier.montant|floatformat:0 }}</strong>
+                                <small class="text-muted">FCFA</small>
                             </td>
-                            <td class="py-4 px-4">{{ dossier.produit }}</td>
-                            <td class="py-4 px-4">
-                                <span class="badge {% if dossier.priorite == 'HAUTE' %}badge-error{% elif dossier.priorite == 'MOYENNE' %}badge-warning{% else %}badge-info{% endif %}">
+                            <td>
+                                <span class="badge bg-secondary">{{ dossier.produit }}</span>
+                            </td>
+                            <td>
+                                <span class="badge {% if dossier.priorite == 'HAUTE' %}bg-danger{% elif dossier.priorite == 'MOYENNE' %}bg-warning text-dark{% else %}bg-info{% endif %}">
                                     {{ dossier.get_priorite_display|default:"Normale" }}
                                 </span>
                             </td>
-                            <td class="py-4 px-4">
-                                <div class="flex gap-2">
-                                    <button class="btn btn-primary btn-sm">
-                                        <i class="fas fa-microscope"></i> Analyser
-                                    </button>
-                                    <button class="btn btn-secondary btn-sm">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
+                            <td>
+                                <small>{{ dossier.date_soumission|date:"d/m/Y" }}</small>
+                                <br><small class="text-muted">{{ dossier.date_soumission|date:"H:i" }}</small>
+                            </td>
+                            <td class="text-center">
+                                <a href="{% url 'pro:dossier_detail' dossier.pk %}" class="btn btn-sm btn-outline-primary" title="Voir le dossier">
+                                    <i class="fas fa-eye"></i>
+                                </a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="6" class="py-12 text-center text-muted">
-                                <i class="fas fa-inbox text-4xl mb-4"></i>
-                                <p>Aucun dossier à analyser</p>
+                            <td colspan="7" class="text-center py-5 text-muted">
+                                <i class="fas fa-inbox fa-3x mb-3 d-block"></i>
+                                <p class="mb-0">Aucun dossier à analyser</p>
+                                <small>Tous les dossiers sont en cours de traitement</small>
                             </td>
                         </tr>
                         {% endfor %}
@@ -284,79 +337,78 @@
     </div>
 </section>
 
-<!-- Section Analyses -->
-<section class="content-section" id="analyses-section">
-    <div class="card">
-        <div class="card-header">
-            <h3 class="text-lg font-semibold">Mes Analyses Récentes</h3>
-        </div>
-        <div class="card-body">
-            <div class="grid gap-4">
-                {% for analyse in mes_analyses|slice:":10" %}
-                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                    <div class="flex justify-between items-start mb-3">
-                        <div>
-                            <h4 class="font-semibold text-primary">{{ analyse.dossier.reference }}</h4>
-                            <p class="text-sm text-muted">{{ analyse.dossier.client.get_full_name }}</p>
-                        </div>
-                        <span class="status-banking status-{{ analyse.statut|lower }}">
-                            {{ analyse.get_statut_display }}
-                        </span>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-4 text-sm">
-                        <div>
-                            <span class="text-muted">Score de risque:</span>
-                            <span class="font-semibold ml-2">{{ analyse.score_risque|default:"En cours" }}</span>
-                        </div>
-                        <div>
-                            <span class="text-muted">Recommandation:</span>
-                            <span class="font-semibold ml-2">{{ analyse.recommandation|default:"Pending" }}</span>
-                        </div>
-                        <div>
-                            <span class="text-muted">Date:</span>
-                            <span class="font-semibold ml-2">{{ analyse.date_analyse|date:"d/m/Y" }}</span>
-                        </div>
-                    </div>
-                </div>
-                {% empty %}
-                <div class="text-center py-12 text-muted">
-                    <i class="fas fa-microscope text-4xl mb-4"></i>
-                    <p>Aucune analyse récente</p>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</section>
-
 <!-- Section Rapports -->
 <section class="content-section" id="rapports-section">
     <div class="grid md:grid-cols-2 gap-6">
         <div class="card">
             <div class="card-header">
-                <h3 class="text-lg font-semibold">Générer un Rapport</h3>
+                <h3 class="text-lg font-semibold">Rapports d'Analyse des Dossiers</h3>
             </div>
             <div class="card-body">
-                <form class="space-y-4">
-                    <div class="form-group">
-                        <label class="form-label">Type de rapport</label>
-                        <select class="form-input">
-                            <option>Rapport mensuel</option>
-                            <option>Analyse par secteur</option>
-                            <option>Performance analyste</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Période</label>
-                        <div class="grid grid-cols-2 gap-2">
-                            <input type="date" class="form-input">
-                            <input type="date" class="form-input">
+                <form class="space-y-4" method="get" action="{% url 'pro:reports' %}">
+                    <div class="grid md:grid-cols-2 gap-3">
+                        <div class="form-group">
+                            <label class="form-label">Type de période</label>
+                            <select class="form-input" name="periode" id="periodeSelect">
+                                <option value="">— Aucune —</option>
+                                <option value="M">Mensuel</option>
+                                <option value="Q">Trimestriel</option>
+                                <option value="S">Semestriel</option>
+                                <option value="Y">Annuel</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Année</label>
+                            <input type="number" class="form-input" name="annee" id="anneeInput" min="2000" max="2100" placeholder="2025" />
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-primary w-full">
-                        <i class="fas fa-file-pdf"></i> Générer le Rapport
-                    </button>
+                    <div class="grid md:grid-cols-3 gap-3">
+                        <div class="form-group" id="moisGroup" style="display:none;">
+                            <label class="form-label">Mois (1-12)</label>
+                            <input type="number" class="form-input" name="mois" min="1" max="12" placeholder="1..12" />
+                        </div>
+                        <div class="form-group" id="trimestreGroup" style="display:none;">
+                            <label class="form-label">Trimestre (1-4)</label>
+                            <input type="number" class="form-input" name="trimestre" min="1" max="4" placeholder="1..4" />
+                        </div>
+                        <div class="form-group" id="semestreGroup" style="display:none;">
+                            <label class="form-label">Semestre (1-2)</label>
+                            <input type="number" class="form-input" name="semestre" min="1" max="2" placeholder="1..2" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Dates (optionnel)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="date" class="form-input" name="date_debut" />
+                            <input type="date" class="form-input" name="date_fin" />
+                        </div>
+                        <div class="text-xs text-muted mt-1">Si les dates ne sont pas renseignées, la période choisie sera utilisée.</div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="submit" class="btn btn-primary w-full">
+                            <i class="fas fa-file-alt"></i> Voir les rapports
+                        </button>
+                        <a class="btn btn-secondary w-full" href="{% url 'pro:reports' %}">
+                            <i class="fas fa-download"></i> Exporter Excel
+                        </a>
+                    </div>
                 </form>
+                <script>
+                (function(){
+                  const sel = document.getElementById('periodeSelect');
+                  const mois = document.getElementById('moisGroup');
+                  const tri = document.getElementById('trimestreGroup');
+                  const sem = document.getElementById('semestreGroup');
+                  function update(){
+                    const v = sel.value;
+                    mois.style.display = (v === 'M') ? '' : 'none';
+                    tri.style.display = (v === 'Q') ? '' : 'none';
+                    sem.style.display = (v === 'S') ? '' : 'none';
+                  }
+                  sel.addEventListener('change', update);
+                  update();
+                })();
+                </script>
             </div>
         </div>
         
@@ -368,21 +420,21 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
                         <div>
-                            <div class="font-medium">Rapport Mensuel - Novembre</div>
-                            <div class="text-xs text-muted">Généré le 01/12/2024</div>
+                            <div class="font-medium">Ouvrir la page Rapports</div>
+                            <div class="text-xs text-muted">Filtrer et visualiser les dossiers</div>
                         </div>
-                        <button class="btn btn-secondary btn-sm">
-                            <i class="fas fa-download"></i>
-                        </button>
+                        <a class="btn btn-secondary btn-sm" href="{% url 'pro:reports' %}" target="_blank">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
                     </div>
                     <div class="flex items-center justify-between p-3 border border-gray-200 rounded">
                         <div>
-                            <div class="font-medium">Analyse Sectorielle Q4</div>
-                            <div class="text-xs text-muted">Généré le 28/11/2024</div>
+                            <div class="font-medium">Exporter Excel (filtres de la page Rapports)</div>
+                            <div class="text-xs text-muted">Télécharger le fichier XLSX</div>
                         </div>
-                        <button class="btn btn-secondary btn-sm">
+                        <a class="btn btn-secondary btn-sm" href="{% url 'pro:reports' %}" target="_blank">
                             <i class="fas fa-download"></i>
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -390,76 +442,154 @@
     </div>
 </section>
 
-<!-- Section Outils -->
-<section class="content-section" id="outils-section">
-    <div class="grid md:grid-cols-3 gap-6">
+<!-- Section Rapports (in-dashboard) -->
+<section class="content-section" id="rapports-section">
+    <div class="stats-grid mb-6">
+        <div class="kpi-card">
+            <div class="kpi-value">{{ analyses_completees|default:0 }}</div>
+            <div class="kpi-label">Analyses complétées</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ dossiers|length }}</div>
+            <div class="kpi-label">Dossiers à analyser</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-value">{{ taux_approbation|default:0 }}%</div>
+            <div class="kpi-label">Taux d'approbation</div>
+        </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-6">
         <div class="card">
-            <div class="card-header">
-                <h3 class="text-lg font-semibold">Calculateur de Risque</h3>
-            </div>
+            <div class="card-header"><h3 class="text-lg font-semibold">Répartition par statut (agent)</h3></div>
             <div class="card-body">
-                <p class="text-muted mb-4">Outil d'évaluation rapide du risque crédit</p>
-                <button class="btn btn-primary w-full">
-                    <i class="fas fa-calculator"></i> Ouvrir l'outil
-                </button>
+                <canvas id="chartAnalysteStatut"></canvas>
             </div>
         </div>
-        
         <div class="card">
-            <div class="card-header">
-                <h3 class="text-lg font-semibold">Base de Données Secteur</h3>
-            </div>
+            <div class="card-header"><h3 class="text-lg font-semibold">Volume par produit</h3></div>
             <div class="card-body">
-                <p class="text-muted mb-4">Données de référence par secteur d'activité</p>
-                <button class="btn btn-primary w-full">
-                    <i class="fas fa-database"></i> Consulter
-                </button>
+                <canvas id="chartAnalysteProduit"></canvas>
             </div>
         </div>
-        
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-lg font-semibold">Modèles d'Analyse</h3>
+    </div>
+</section>
+
+<!-- Section Dossiers Traités -->
+<section class="content-section mb-6" id="dossiers-traites-section">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="text-lg font-semibold mb-0"><i class="fas fa-check-circle me-2 text-success"></i>Dossiers Traités</h3>
+            <span class="badge bg-secondary">{{ dossiers_traites|length }}</span>
+        </div>
+        <div class="card-body">
+            {% if dossiers_traites %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Référence</th>
+                            <th>Client</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Date MAJ</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in dossiers_traites %}
+                        <tr>
+                            <td><a href="{% url 'pro:dossier_detail' d.pk %}" class="text-primary fw-semibold">{{ d.reference }}</a></td>
+                            <td>{{ d.client.username }}</td>
+                            <td><strong>{{ d.montant|floatformat:0 }} FCFA</strong></td>
+                            <td>
+                                {% if d.statut_agent == 'FONDS_LIBERE' %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Fonds libéré</span>
+                                {% elif d.statut_agent == 'REFUSE' %}
+                                <span class="badge bg-danger"><i class="fas fa-times"></i> Refusé</span>
+                                {% else %}
+                                <span class="badge bg-secondary">{{ d.get_statut_agent_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td><small>{{ d.date_maj|date:"d/m/Y H:i" }}</small></td>
+                            <td>
+                                <a href="{% url 'pro:dossier_detail' d.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div class="card-body">
-                <p class="text-muted mb-4">Templates et guides d'analyse</p>
-                <button class="btn btn-primary w-full">
-                    <i class="fas fa-file-alt"></i> Accéder
-                </button>
-            </div>
+            {% else %}
+            <p class="text-muted mb-0">Aucun dossier traité pour le moment.</p>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- Section Historique -->
+<section class="content-section" id="historique-section">
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h3 class="text-lg font-semibold mb-0"><i class="fas fa-history me-2 text-info"></i>Historique des Actions</h3>
+            <span class="badge bg-secondary">{{ historique_actions|length }}</span>
+        </div>
+        <div class="card-body">
+            {% if historique_actions %}
+            <ul class="list-group list-group-flush">
+                {% for action in historique_actions %}
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                    <div class="flex-grow-1">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <span class="badge bg-primary">{{ action.action }}</span>
+                            <a href="{% url 'pro:dossier_detail' action.dossier.pk %}" class="text-primary fw-semibold">{{ action.dossier.reference }}</a>
+                        </div>
+                        <div class="small text-muted">
+                            {% if action.de_statut and action.vers_statut %}
+                            {{ action.de_statut }} → {{ action.vers_statut }}
+                            {% endif %}
+                            {% if action.commentaire_systeme %}
+                            <br>{{ action.commentaire_systeme }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="small text-muted">{{ action.timestamp|date:"d/m/Y H:i" }}</div>
+                        <div class="small">{% if action.acteur %}{{ action.acteur.username }}{% else %}Système{% endif %}</div>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p class="text-muted mb-0">Aucune action enregistrée.</p>
+            {% endif %}
         </div>
     </div>
 </section>
 {% endblock %}
 
 {% block extra_js %}
-// JavaScript spécifique au dashboard analyste
-document.addEventListener('DOMContentLoaded', function() {
-    // Animation des métriques
-    const kpiValues = document.querySelectorAll('.kpi-value');
-    kpiValues.forEach(value => {
-        const finalValue = parseInt(value.textContent);
-        let currentValue = 0;
-        const increment = finalValue / 50;
-        
-        const timer = setInterval(() => {
-            currentValue += increment;
-            if (currentValue >= finalValue) {
-                currentValue = finalValue;
-                clearInterval(timer);
-            }
-            value.textContent = Math.floor(currentValue) + (value.textContent.includes('%') ? '%' : value.textContent.includes('j') ? 'j' : '');
-        }, 20);
-    });
-    
-    // Tri des tableaux
-    const tableHeaders = document.querySelectorAll('th');
-    tableHeaders.forEach(header => {
-        header.style.cursor = 'pointer';
-        header.addEventListener('click', function() {
-            // Logique de tri à implémenter
-            console.log('Tri par:', this.textContent);
-        });
-    });
-});
+(function(){
+  try {
+    const ctx1 = document.getElementById('chartAnalysteStatut');
+    if (ctx1 && window.Chart && {{ chart_analyste_statut|default:'{}'|safe }}) {
+      const data1 = {{ chart_analyste_statut|default:'{}'|safe }};
+      new Chart(ctx1, {
+        type: 'doughnut',
+        data: { labels: data1.labels || [], datasets: [{ data: data1.data || [], backgroundColor: ['#F0B015','#E65137','#8ecae6','#219ebc','#023047'] }] },
+        options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+      });
+    }
+    const ctx2 = document.getElementById('chartAnalysteProduit');
+    if (ctx2 && window.Chart && {{ chart_analyste_produit|default:'{}'|safe }}) {
+      const data2 = {{ chart_analyste_produit|default:'{}'|safe }};
+      new Chart(ctx2, {
+        type: 'bar',
+        data: { labels: data2.labels || [], datasets: [{ label: 'Montant', data: data2.data || [], backgroundColor: '#219ebc' }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+  } catch(e) { console.error(e); }
+})();
 {% endblock %}

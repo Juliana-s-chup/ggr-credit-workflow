@@ -2,20 +2,31 @@
 /* Palette officielle Crédit du Congo - Groupe Attijariwafa bank */
 
 :root {
-  --rouge: #6a1919;
-  --rouge-clair: #9e3d3d;
-  --or: #e0c78c;
-  --or-fonce: #d0b574;
-  --clair: #fefaf3;
+  /* NOUVELLE PALETTE DE COULEURS */
+  --sunset-orange: #fd583d;
+  --selective-yellow: #feb806;
+  --bastille: #161219;
+  --cape-honey: #fee4a8;
+  --espresso: #5b2618;
+  --gray: #8b8989;
+  --terracotta: #e17563;
+  --kumera: #8e6e22;
+  --ronchi: #ebc04f;
+  
+  --rouge: var(--espresso);
+  --rouge-clair: var(--sunset-orange);
+  --or: var(--selective-yellow);
+  --or-fonce: var(--kumera);
+  --clair: var(--cape-honey);
   --blanc: #ffffff;
-  --gris: #444;
-  --gris-clair: #666;
-  --gris-fond: #f5f5f5;
-  --border: #e0e0e0;
-  --success: #28a745;
-  --warning: #ffc107;
-  --danger: #dc3545;
-  --info: #17a2b8;
+  --gris: var(--bastille);
+  --gris-clair: var(--gray);
+  --gris-fond: var(--cape-honey);
+  --border: var(--gray);
+  --success: var(--ronchi);
+  --warning: var(--kumera);
+  --danger: var(--espresso);
+  --info: var(--terracotta);
   --radius: 10px;
   --shadow: 0 2px 10px rgba(0,0,0,0.08);
   --shadow-hover: 0 4px 12px rgba(0,0,0,0.12);
@@ -47,7 +58,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: 250px;
-  background: var(--rouge);
+  background: linear-gradient(180deg, var(--rouge) 0%, var(--espresso) 100%);
   color: white;
   padding: 2rem 1rem;
   display: flex;
@@ -123,7 +134,7 @@ body {
 
 .nav-link:hover,
 .nav-link.active {
-  background-color: var(--or);
+  background: var(--gradient-principal);
   color: var(--rouge);
   font-weight: 500;
 }
@@ -185,7 +196,7 @@ body {
 }
 
 .user-profile {
-  background: var(--or);
+  background: linear-gradient(135deg, var(--or) 0%, var(--terracotta) 100%);
   color: var(--rouge);
   padding: 0.5rem 1.2rem;
   border-radius: var(--radius);
@@ -239,6 +250,7 @@ body {
   transition: var(--transition);
   position: relative;
   overflow: hidden;
+  border-left: 4px solid var(--sunset-orange);
 }
 
 .card:hover {
@@ -427,12 +439,12 @@ body {
 }
 
 .btn-primary {
-  background: var(--rouge);
+  background: linear-gradient(135deg, var(--sunset-orange) 0%, var(--selective-yellow) 100%);
   color: white;
 }
 
 .btn-primary:hover {
-  background: var(--rouge-clair);
+  background: linear-gradient(135deg, var(--espresso) 0%, var(--sunset-orange) 100%);
   transform: translateY(-2px);
 }
 

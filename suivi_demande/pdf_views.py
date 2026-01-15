@@ -1,22 +1,19 @@
-# core/pdf_views.py
-from io import BytesIO
+"""
+Vues pour la génération de PDF.
+"""
 from decimal import Decimal
+from io import BytesIO
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.staticfiles import finders
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
-from django.templatetags.static import static
-from django.contrib.staticfiles import finders
 from django.utils import timezone
 from xhtml2pdf import pisa
 
-from .models import (
-    DossierCredit,
-    PieceJointe,
-    UserRoles,
-)
+from .models import DossierCredit, PieceJointe, UserRoles
 
 
 @login_required
