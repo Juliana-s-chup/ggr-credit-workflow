@@ -39,12 +39,20 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y \
+          libcairo2 \
           libcairo2-dev \
           libpango1.0-dev \
+          libgirepository1.0-dev \
           libjpeg-dev \
           libpng-dev \
           libfreetype6-dev \
-          pkg-config
+          pkg-config \
+          python3-cairo \
+          meson \
+          ninja-build \
+          python3-dev \
+          build-essential
+        pkg-config --modversion cairo
     
     - name: Install dependencies
       run: |
