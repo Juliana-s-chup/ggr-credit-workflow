@@ -47,6 +47,8 @@ Thumbs.db
 .env.*
 *.env
 *.env.*
+!env.example
+!.env.example
 
 # Node (if any frontend assets are added later)
 node_modules/
@@ -59,8 +61,18 @@ dist/
 # Static collection artifacts (whitenoise)
 staticfiles.json
 
-# Allow example env files (documentation only)
-!env.example
-!.env.example
+# Backup files
+*.bak
+*.backup
+*~
 
+# Temporary scripts (cleanup, organization)
+NETTOYER_*.ps1
+nettoyer_*.ps1
+nettoyer_*.py
+organiser_*.ps1
+start_*_simple.ps1
+*.bat
 
+# External/personal files
+scripts/Mignon_/
