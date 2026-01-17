@@ -1,14 +1,14 @@
-# GGR Credit Workflow (Projet de fin d’étude)
+﻿# GGR Credit Workflow (Projet de fin dâ€™Ã©tude)
 
-## 🎯 Description
-Application Django de gestion des dossiers de crédit avec deux portails (Client et Professionnel), workflow, rôles (RBAC) et journalisation.
+## ðŸŽ¯ Description
+Application Django de gestion des dossiers de crÃ©dit avec deux portails (Client et Professionnel), workflow, rÃ´les (RBAC) et journalisation.
 
-## 🧱 Stack
+## ðŸ§± Stack
 - Django 5 + Python 3.12
 - PostgreSQL 16
 - Nginx (reverse proxy local) + Gunicorn (prod)
 
-## 🚀 Démarrage rapide (local)
+## ðŸš€ DÃ©marrage rapide (local)
 1. Cloner et entrer dans le dossier
    ```bash
    git clone https://github.com/<votre-compte>/ggr-credit-workflow.git
@@ -20,17 +20,17 @@ Application Django de gestion des dossiers de crédit avec deux portails (Client
    venv\Scripts\activate   # Windows
    # source venv/bin/activate  # Linux/Mac
    ```
-3. Dépendances
+3. DÃ©pendances
    ```bash
    pip install -r requirements.txt
    ```
-4. Variables d’environnement
+4. Variables dâ€™environnement
    ```bash
    copy env.example .env   # Windows
    # cp env.example .env   # Linux/Mac
    # Ouvrir .env et renseigner DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT, SECRET_KEY
    ```
-5. Base de données et migrations
+5. Base de donnÃ©es et migrations
    ```bash
    python manage.py migrate
    python manage.py createsuperuser
@@ -39,24 +39,25 @@ Application Django de gestion des dossiers de crédit avec deux portails (Client
    ```bash
    python manage.py runserver
    ```
-   Accès:
+   AccÃ¨s:
    - Portail Client: http://localhost:8000/client/login/
    - Portail Pro:    http://localhost:8000/pro/login/
 
-## 🐳 Docker (optionnel)
+## ðŸ³ Docker (optionnel)
 ```bash
 docker-compose up -d
 ```
-Nginx est configuré en HTTP local simple.
+Nginx est configurÃ© en HTTP local simple.
 
-## 🔒 Bonnes pratiques de sécurité
-- Les secrets restent dans `.env` (non versionné)
+## ðŸ”’ Bonnes pratiques de sÃ©curitÃ©
+- Les secrets restent dans `.env` (non versionnÃ©)
 - `env.example` fournit un gabarit sans secrets
 
-## 🧪 Tests
+## ðŸ§ª Tests
 ```bash
 python manage.py test
 ```
 
-## 📄 Licence
-Projet académique pour démonstration.
+## ðŸ“„ Licence
+Projet acadÃ©mique pour dÃ©monstration.
+
