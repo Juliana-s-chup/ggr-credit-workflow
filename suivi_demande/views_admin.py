@@ -1,4 +1,4 @@
-"""
+﻿"""
 Vues pour la gestion des utilisateurs et les rapports
 """
 
@@ -26,33 +26,33 @@ User = get_user_model()
 
 @login_required
 def admin_toggle_user_status(request, user_id):
-    """Activer/DÃ©sactiver un utilisateur"""
+    """Activer/Desactiver un utilisateur"""
     profile = getattr(request.user, "profile", None)
     if not profile or profile.role != UserRoles.SUPER_ADMIN:
-        messages.error(request, "AccÃ¨s refusÃ©. RÃ©servÃ© aux Super Administrateurs.")
+        messages.error(request, "Acces refuse. Reserve aux Super Administrateurs.")
         return redirect("pro:dashboard")
 
     user = get_object_or_404(User, pk=user_id)
 
     if user == request.user:
-        messages.error(request, "Vous ne pouvez pas dÃ©sactiver votre propre compte.")
+        messages.error(request, "Vous ne pouvez pas desactiver votre propre compte.")
         return redirect("pro:dashboard")
 
     user.is_active = not user.is_active
     user.save()
 
-    statut = "activÃ©" if user.is_active else "dÃ©sactivÃ©"
-    messages.success(request, f"L'utilisateur {user.username} a Ã©tÃ© {statut}.")
+    statut = "active" if user.is_active else "desactive"
+    messages.success(request, f"L'utilisateur {user.username} a ete {statut}.")
 
     return redirect("pro:dashboard")
 
 
 @login_required
 def admin_change_user_role(request, user_id):
-    """Changer le rÃ´le d'un utilisateur"""
+    """Changer le role d'un utilisateur"""
     profile = getattr(request.user, "profile", None)
     if not profile or profile.role != UserRoles.SUPER_ADMIN:
-        messages.error(request, "AccÃ¨s refusÃ©.")
+        messages.error(request, "Acces refuse.")
         return redirect("pro:dashboard")
 
     user = get_object_or_404(User, pk=user_id)
@@ -61,7 +61,7 @@ def admin_change_user_role(request, user_id):
         new_role = request.POST.get("role")
         valid_roles = [choice[0] for choice in UserRoles.choices]
         if new_role not in valid_roles:
-            messages.error(request, "RÃ´le invalide.")
+            messages.error(request, "Role invalide.")
             return redirect("pro:dashboard")
 
         user_profile, created = UserProfile.objects.get_or_create(
@@ -74,7 +74,7 @@ def admin_change_user_role(request, user_id):
 
         messages.success(
             request,
-            f"Le rÃ´le de {user.username} a Ã©tÃ© changÃ© en {user_profile.get_role_display()}.",
+            f"Le role de {user.username} a ete change en {user_profile.get_role_display()}.",
         )
 
     return redirect("pro:dashboard")
@@ -85,14 +85,14 @@ def admin_edit_user(request, user_id):
     """Modifier un utilisateur existant"""
     profile = getattr(request.user, "profile", None)
     if not profile or profile.role != UserRoles.SUPER_ADMIN:
-        messages.error(request, "AccÃ¨s refusÃ©. RÃ©servÃ© aux Super Administrateurs.")
+        messages.error(request, "Acces refuse. Reserve aux Super Administrateurs.")
         return redirect("pro:dashboard")
 
     user = get_object_or_404(User, pk=user_id)
     user_profile = getattr(user, "profile", None)
 
     if request.method == "POST":
-        # RÃ©cupÃ©rer les donnÃ©es
+        # Recuperer les donnees
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip()
         first_name = request.POST.get("first_name", "").strip()
@@ -110,24 +110,24 @@ def admin_edit_user(request, user_id):
             messages.error(request, "L'email est obligatoire.")
             return redirect("pro:dashboard")
 
-        # VÃ©rifier unicitÃ© (sauf pour l'utilisateur actuel)
+        # Verifier unicite (sauf pour l'utilisateur actuel)
         if User.objects.filter(username=username).exclude(pk=user_id).exists():
-            messages.error(request, f"Le nom d'utilisateur '{username}' est dÃ©jÃ  utilisÃ©.")
+            messages.error(request, f"Le nom d'utilisateur '{username}' est deje  utilise.")
             return redirect("pro:dashboard")
 
         if User.objects.filter(email=email).exclude(pk=user_id).exists():
-            messages.error(request, f"L'email '{email}' est dÃ©jÃ  utilisÃ©.")
+            messages.error(request, f"L'email '{email}' est deje  utilise.")
             return redirect("pro:dashboard")
 
-        # Valider le rÃ´le
+        # Valider le role
         if role:
             valid_roles = [choice[0] for choice in UserRoles.choices]
             if role not in valid_roles:
-                messages.error(request, "RÃ´le invalide.")
+                messages.error(request, "Role invalide.")
                 return redirect("pro:dashboard")
 
         try:
-            # Mettre Ã  jour l'utilisateur
+            # Mettre e  jour l'utilisateur
             user.username = username
             user.email = email
             user.first_name = first_name
@@ -137,20 +137,20 @@ def admin_edit_user(request, user_id):
             # Changer le mot de passe si fourni
             if new_password:
                 if len(new_password) < 8:
-                    messages.error(request, "Le mot de passe doit contenir au moins 8 caractÃ¨res.")
+                    messages.error(request, "Le mot de passe doit contenir au moins 8 caracteres.")
                     return redirect("pro:dashboard")
                 user.set_password(new_password)
 
             user.save()
 
-            # Mettre Ã  jour le profil
+            # Mettre e  jour le profil
             if user_profile:
                 if role:
                     user_profile.role = role
                 user_profile.full_name = f"{first_name} {last_name}".strip() or username
                 user_profile.save()
             elif role:
-                # CrÃ©er le profil s'il n'existe pas
+                # Creer le profil s'il n'existe pas
                 UserProfile.objects.create(
                     user=user,
                     role=role,
@@ -159,9 +159,7 @@ def admin_edit_user(request, user_id):
                     address="",
                 )
 
-            messages.success(
-                request, f"âœ… L'utilisateur '{username}' a Ã©tÃ© modifiÃ© avec succÃ¨s."
-            )
+            messages.success(request, f"âœ… L'utilisateur '{username}' a ete modifie avec succes.")
 
         except Exception as e:
             messages.error(request, f"âŒ Erreur lors de la modification : {str(e)}")
@@ -171,14 +169,14 @@ def admin_edit_user(request, user_id):
 
 @login_required
 def admin_create_user(request):
-    """CrÃ©er un nouvel utilisateur"""
+    """Creer un nouvel utilisateur"""
     profile = getattr(request.user, "profile", None)
     if not profile or profile.role != UserRoles.SUPER_ADMIN:
-        messages.error(request, "AccÃ¨s refusÃ©. RÃ©servÃ© aux Super Administrateurs.")
+        messages.error(request, "Acces refuse. Reserve aux Super Administrateurs.")
         return redirect("pro:dashboard")
 
     if request.method == "POST":
-        # RÃ©cupÃ©rer les donnÃ©es du formulaire
+        # Recuperer les donnees du formulaire
         username = request.POST.get("username", "").strip()
         email = request.POST.get("email", "").strip()
         first_name = request.POST.get("first_name", "").strip()
@@ -206,29 +204,29 @@ def admin_create_user(request):
             return redirect("pro:dashboard")
 
         if len(password) < 8:
-            messages.error(request, "Le mot de passe doit contenir au moins 8 caractÃ¨res.")
+            messages.error(request, "Le mot de passe doit contenir au moins 8 caracteres.")
             return redirect("pro:dashboard")
 
         if not role:
-            messages.error(request, "Le rÃ´le est obligatoire.")
+            messages.error(request, "Le role est obligatoire.")
             return redirect("pro:dashboard")
 
         valid_roles = [choice[0] for choice in UserRoles.choices]
         if role not in valid_roles:
-            messages.error(request, "RÃ´le invalide.")
+            messages.error(request, "Role invalide.")
             return redirect("pro:dashboard")
 
-        # VÃ©rifier si l'utilisateur existe dÃ©jÃ
+        # Verifier si l'utilisateur existe deje
         if User.objects.filter(username=username).exists():
-            messages.error(request, f"Le nom d'utilisateur '{username}' existe dÃ©jÃ .")
+            messages.error(request, f"Le nom d'utilisateur '{username}' existe deje .")
             return redirect("pro:dashboard")
 
         if User.objects.filter(email=email).exists():
-            messages.error(request, f"L'email '{email}' est dÃ©jÃ  utilisÃ©.")
+            messages.error(request, f"L'email '{email}' est deje  utilise.")
             return redirect("pro:dashboard")
 
         try:
-            # CrÃ©er l'utilisateur
+            # Creer l'utilisateur
             user = User.objects.create_user(
                 username=username,
                 email=email,
@@ -238,7 +236,7 @@ def admin_create_user(request):
                 is_active=is_active,
             )
 
-            # CrÃ©er le profil
+            # Creer le profil
             UserProfile.objects.create(
                 user=user,
                 role=role,
@@ -249,11 +247,11 @@ def admin_create_user(request):
 
             messages.success(
                 request,
-                f"âœ… L'utilisateur '{username}' a Ã©tÃ© crÃ©Ã© avec succÃ¨s avec le rÃ´le {dict(UserRoles.choices)[role]}.",
+                f"âœ… L'utilisateur '{username}' a ete cree avec succes avec le role {dict(UserRoles.choices)[role]}.",
             )
 
         except Exception as e:
-            messages.error(request, f"âŒ Erreur lors de la crÃ©ation de l'utilisateur : {str(e)}")
+            messages.error(request, f"âŒ Erreur lors de la creation de l'utilisateur : {str(e)}")
 
     return redirect("pro:dashboard")
 
@@ -265,7 +263,7 @@ def admin_create_user(request):
 
 @login_required
 def generate_report(request):
-    """GÃ©nÃ©rer un rapport selon le rÃ´le"""
+    """Generer un rapport selon le role"""
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", UserRoles.CLIENT) if profile else UserRoles.CLIENT
 
@@ -274,7 +272,7 @@ def generate_report(request):
     statut = request.GET.get("statut")
     periode = request.GET.get("periode")
 
-    # Filtrer selon le rÃ´le
+    # Filtrer selon le role
     if role == UserRoles.CLIENT:
         dossiers = DossierCredit.objects.filter(client=request.user)
         titre = "Mes Dossiers"
@@ -288,7 +286,7 @@ def generate_report(request):
                 DossierStatutAgent.EN_COURS_ANALYSE,
             ]
         )
-        titre = "Dossiers Ã  Analyser"
+        titre = "Dossiers e  Analyser"
     elif role == UserRoles.RESPONSABLE_GGR:
         dossiers = DossierCredit.objects.filter(
             statut_agent__in=[
@@ -296,12 +294,12 @@ def generate_report(request):
                 DossierStatutAgent.EN_ATTENTE_DECISION_DG,
             ]
         )
-        titre = "Dossiers Ã  Valider"
+        titre = "Dossiers e  Valider"
     elif role == UserRoles.BOE:
         dossiers = DossierCredit.objects.filter(
             statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
         )
-        titre = "Dossiers Ã  LibÃ©rer"
+        titre = "Dossiers e  Liberer"
     else:  # SUPER_ADMIN
         dossiers = DossierCredit.objects.all()
         titre = "Tous les Dossiers"
@@ -316,14 +314,14 @@ def generate_report(request):
     if statut:
         dossiers = dossiers.filter(statut_agent=statut)
 
-    # Filtre par pÃ©riode
+    # Filtre par periode
     if periode:
         today = timezone.now().date()
         if periode == "M":  # Mois
             dossiers = dossiers.filter(
                 date_soumission__year=today.year, date_soumission__month=today.month
             )
-        elif periode == "Y":  # AnnÃ©e
+        elif periode == "Y":  # Annee
             dossiers = dossiers.filter(date_soumission__year=today.year)
 
     dossiers = dossiers.order_by("-date_soumission")

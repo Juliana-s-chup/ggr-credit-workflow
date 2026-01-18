@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand
+﻿from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
 from django.db import transaction
 
@@ -12,11 +12,13 @@ from suivi_demande.models import (
 
 
 class Command(BaseCommand):
-    help = "Seed de donnÃ©es de dÃ©monstration: utilisateurs par rÃ´le et dossiers Ã  diffÃ©rents statuts."
+    help = (
+        "Seed de donnees de demonstration: utilisateurs par role et dossiers e  differents statuts."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--reset", action="store_true", help="Supprimer les donnÃ©es demo avant de recrÃ©er"
+            "--reset", action="store_true", help="Supprimer les donnees demo avant de recreer"
         )
 
     @transaction.atomic
@@ -24,11 +26,11 @@ class Command(BaseCommand):
         User = get_user_model()
 
         if options.get("reset"):
-            self.stdout.write("Suppression des dossiers demoâ€¦")
+            self.stdout.write("Suppression des dossiers demo'¦")
             DossierCredit.objects.all().delete()
-            self.stdout.write("Suppression des profils demoâ€¦")
+            self.stdout.write("Suppression des profils demo'¦")
             UserProfile.objects.all().delete()
-            self.stdout.write("Suppression des users demoâ€¦")
+            self.stdout.write("Suppression des users demo'¦")
             User.objects.filter(
                 username__in=["client1", "client2", "gest1", "an1", "resp1", "boe1", "admin"]
             ).delete()
@@ -138,11 +140,11 @@ class Command(BaseCommand):
                 reference=ref,
                 defaults={
                     "client": client,
-                    "produit": "CrÃ©dit conso",
+                    "produit": "Credit conso",
                     "montant": montant,
                     "statut_agent": s_agent,
                     "statut_client": s_client,
                 },
             )
 
-        self.stdout.write(self.style.SUCCESS("Seed de dÃ©mo terminÃ©."))
+        self.stdout.write(self.style.SUCCESS("Seed de demo termine."))

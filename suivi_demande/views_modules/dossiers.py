@@ -1,4 +1,4 @@
-"""
+﻿"""
 Vues de gestion des dossiers (CRUD).
 """
 
@@ -30,7 +30,7 @@ def my_applications(request):
 
 @login_required
 def create_application(request):
-    """CrÃ©er une nouvelle demande."""
+    """Creer une nouvelle demande."""
     return render(request, "suivi_demande/nouveau_dossier.html")
 
 

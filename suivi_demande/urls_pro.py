@@ -1,6 +1,6 @@
-"""
+﻿"""
 URLs pour le Portail PROFESSIONNEL
-Toutes les fonctionnalitÃ©s de gestion et administration
+Toutes les fonctionnalites de gestion et administration
 """
 
 from django.urls import path
@@ -15,13 +15,13 @@ urlpatterns = [
     # Page de connexion professionnelle
     path("login/", views_portals.login_pro_view, name="login"),
     path("logout/", auth_views.LogoutView.as_view(next_page="/login/"), name="logout"),
-    # Dashboard professionnel (par rÃ´le)
+    # Dashboard professionnel (par role)
     path("dashboard/", views.dashboard, name="dashboard"),
     path("", views.dashboard, name="home"),  # Redirection racine
     # Gestion des dossiers (toutes les fonctions)
     path("dossiers/", views_portals.all_dossiers_list, name="all_dossiers"),
     path("dossier/<int:pk>/", views.dossier_detail, name="dossier_detail"),
-    # CrÃ©ation de dossier (gestionnaire)
+    # Creation de dossier (gestionnaire)
     path("nouveau-dossier/", views.create_application, name="create_dossier"),
     path(
         "dossier/<int:pk>/transmettre-analyste/",
@@ -69,14 +69,14 @@ urlpatterns = [
     # path('notifications/', views.notifications_list, name='notifications_list'),  # TODO: Vue manquante
     # path('notifications/marquer-tout-lu/', views.notifications_mark_all_read, name='notifications_mark_all'),  # TODO: Vue manquante
     # path('notifications/<int:pk>/marquer-lu/', views.notifications_mark_read, name='notifications_mark_read'),  # TODO: Vue manquante
-    # Demandes de crÃ©dit (wizard - 4 Ã©tapes pour gestionnaire)
+    # Demandes de credit (wizard - 4 etapes pour gestionnaire)
     path("demande/", views.demande_start, name="demande_start"),
     path("demande/verification/", views.demande_verification, name="demande_verification"),
     path("demande/etape1/", views.demande_step1, name="demande_step1"),
     path("demande/etape2/", views.demande_step2, name="demande_step2"),
     path("demande/etape3/", views.demande_step3, name="demande_step3"),
     path("demande/etape4/", views.demande_step4, name="demande_step4"),
-    # CrÃ©ation de dossier gestionnaire (alias)
+    # Creation de dossier gestionnaire (alias)
     path(
         "gestionnaire/nouveau-dossier/",
         views.create_application,

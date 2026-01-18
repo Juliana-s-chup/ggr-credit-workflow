@@ -1,5 +1,5 @@
-"""
-Tests de sÃ©curitÃ© de l'application.
+﻿"""
+Tests de securite de l'application.
 """
 
 import pytest
@@ -15,13 +15,13 @@ User = get_user_model()
 
 @pytest.mark.security
 class SecurityTestCase(TestCase):
-    """Tests de sÃ©curitÃ©."""
+    """Tests de securite."""
 
     def setUp(self):
-        """PrÃ©paration des donnÃ©es de test."""
+        """Preparation des donnees de test."""
         self.client = Client()
 
-        # CrÃ©er un client
+        # Creer un client
         self.client_user = User.objects.create_user(
             username="client", email="client@test.com", password="testpass123"
         )
@@ -33,15 +33,15 @@ class SecurityTestCase(TestCase):
             role=UserRoles.CLIENT,
         )
 
-        # CrÃ©er un dossier pour ce client
+        # Creer un dossier pour ce client
         self.dossier = DossierCredit.objects.create(
             client=self.client_user,
             reference="DOS-SEC-001",
-            produit="CrÃ©dit",
+            produit="Credit",
             montant=Decimal("1000000.00"),
         )
 
-        # CrÃ©er un autre client
+        # Creer un autre client
         self.other_user = User.objects.create_user(
             username="other", email="other@test.com", password="testpass123"
         )
@@ -54,25 +54,25 @@ class SecurityTestCase(TestCase):
         )
 
     def test_client_ne_peut_pas_voir_dossier_autre_client(self):
-        """Test qu'un client ne peut pas accÃ©der au dossier d'un autre."""
+        """Test qu'un client ne peut pas acceder au dossier d'un autre."""
         self.client.login(username="other", password="testpass123")
         response = self.client.get(f"/dossier/{self.dossier.pk}/")
 
-        # Doit Ãªtre refusÃ© (302 redirect ou 403 forbidden)
+        # Doit etre refuse (302 redirect ou 403 forbidden)
         self.assertIn(response.status_code, [302, 403])
 
     def test_utilisateur_non_connecte_redirige_vers_login(self):
-        """Test qu'un utilisateur non connectÃ© est redirigÃ© vers login."""
+        """Test qu'un utilisateur non connecte est redirige vers login."""
         response = self.client.get("/dashboard/")
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
     def test_csrf_token_present_dans_formulaires(self):
-        """Test que le token CSRF est prÃ©sent dans les formulaires."""
+        """Test que le token CSRF est present dans les formulaires."""
         self.client.login(username="client", password="testpass123")
         response = self.client.get("/profile/")
 
-        # VÃ©rifier que le CSRF token est prÃ©sent
+        # Verifier que le CSRF token est present
         self.assertContains(response, "csrfmiddlewaretoken")
 
     def test_sql_injection_protection(self):
@@ -83,10 +83,10 @@ class SecurityTestCase(TestCase):
         malicious_query = "'; DROP TABLE suivi_demande_dossiercredit; --"
         response = self.client.get(f"/search/?q={malicious_query}")
 
-        # Le systÃ¨me doit gÃ©rer cela sans erreur
+        # Le systeme doit gerer cela sans erreur
         self.assertIn(response.status_code, [200, 302, 404])
 
-        # VÃ©rifier que la table existe toujours
+        # Verifier que la table existe toujours
         self.assertTrue(DossierCredit.objects.exists())
 
     def test_xss_protection_dans_commentaires(self):
@@ -99,29 +99,29 @@ class SecurityTestCase(TestCase):
             f"/dossier/{self.dossier.pk}/comment/", {"commentaire": xss_payload}
         )
 
-        # VÃ©rifier que le script n'est pas exÃ©cutÃ©
-        # Django Ã©chappe automatiquement le HTML
+        # Verifier que le script n'est pas execute
+        # Django echappe automatiquement le HTML
         if response.status_code == 200:
             self.assertNotContains(response, "<script>")
 
     def test_password_hashing(self):
-        """Test que les mots de passe sont hashÃ©s."""
+        """Test que les mots de passe sont hashes."""
         user = User.objects.get(username="client")
 
-        # Le mot de passe ne doit pas Ãªtre stockÃ© en clair
+        # Le mot de passe ne doit pas etre stocke en clair
         self.assertNotEqual(user.password, "testpass123")
 
         # Le mot de passe doit commencer par l'algorithme de hash
         self.assertTrue(user.password.startswith("pbkdf2_sha256$"))
 
     def test_session_security(self):
-        """Test de la sÃ©curitÃ© des sessions."""
+        """Test de la securite des sessions."""
         self.client.login(username="client", password="testpass123")
 
-        # VÃ©rifier que la session est crÃ©Ã©e
+        # Verifier que la session est creee
         self.assertIn("_auth_user_id", self.client.session)
 
-        # VÃ©rifier que l'ID utilisateur est correct
+        # Verifier que l'ID utilisateur est correct
         self.assertEqual(int(self.client.session["_auth_user_id"]), self.client_user.pk)
 
 
@@ -130,10 +130,10 @@ class PermissionsTestCase(TestCase):
     """Tests des permissions RBAC."""
 
     def setUp(self):
-        """PrÃ©paration."""
+        """Preparation."""
         self.client = Client()
 
-        # CrÃ©er un client
+        # Creer un client
         self.client_user = User.objects.create_user(username="client", password="pass")
         UserProfile.objects.create(
             user=self.client_user,
@@ -143,7 +143,7 @@ class PermissionsTestCase(TestCase):
             role=UserRoles.CLIENT,
         )
 
-        # CrÃ©er un gestionnaire
+        # Creer un gestionnaire
         self.gest_user = User.objects.create_user(username="gestionnaire", password="pass")
         UserProfile.objects.create(
             user=self.gest_user,
@@ -154,19 +154,19 @@ class PermissionsTestCase(TestCase):
         )
 
     def test_client_ne_peut_pas_creer_dossier(self):
-        """Test qu'un client ne peut pas crÃ©er de dossier."""
+        """Test qu'un client ne peut pas creer de dossier."""
         self.client.login(username="client", password="pass")
         response = self.client.get("/pro/dossier/create/")
 
-        # Doit Ãªtre refusÃ©
+        # Doit etre refuse
         self.assertIn(response.status_code, [302, 403])
 
     def test_gestionnaire_peut_creer_dossier(self):
-        """Test qu'un gestionnaire peut crÃ©er un dossier."""
+        """Test qu'un gestionnaire peut creer un dossier."""
         self.client.login(username="gestionnaire", password="pass")
         response = self.client.get("/pro/dossier/create/")
 
-        # Doit Ãªtre autorisÃ©
+        # Doit etre autorise
         self.assertEqual(response.status_code, 200)
 
     def test_client_peut_voir_son_dashboard(self):
@@ -179,10 +179,10 @@ class PermissionsTestCase(TestCase):
 
 @pytest.mark.security
 class FileUploadSecurityTestCase(TestCase):
-    """Tests de sÃ©curitÃ© des uploads de fichiers."""
+    """Tests de securite des uploads de fichiers."""
 
     def setUp(self):
-        """PrÃ©paration."""
+        """Preparation."""
         self.client = Client()
         self.user = User.objects.create_user("testuser", password="pass")
         UserProfile.objects.create(
@@ -196,38 +196,38 @@ class FileUploadSecurityTestCase(TestCase):
         self.dossier = DossierCredit.objects.create(
             client=self.user,
             reference="DOS-UPLOAD-001",
-            produit="CrÃ©dit",
+            produit="Credit",
             montant=Decimal("1000000.00"),
         )
 
     def test_upload_fichier_executable_refuse(self):
-        """Test que les fichiers exÃ©cutables sont refusÃ©s."""
+        """Test que les fichiers executables sont refuses."""
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         self.client.login(username="testuser", password="pass")
 
-        # CrÃ©er un faux fichier .exe
+        # Creer un faux fichier .exe
         fake_exe = SimpleUploadedFile(
             "malware.exe", b"MZ\x90\x00", content_type="application/x-msdownload"  # Header EXE
         )
 
         response = self.client.post(f"/dossier/{self.dossier.pk}/upload/", {"fichier": fake_exe})
 
-        # Doit Ãªtre refusÃ©
-        # VÃ©rifier selon votre implÃ©mentation
+        # Doit etre refuse
+        # Verifier selon votre implementation
 
     def test_upload_fichier_trop_gros_refuse(self):
-        """Test que les fichiers trop gros sont refusÃ©s."""
+        """Test que les fichiers trop gros sont refuses."""
         from django.core.files.uploadedfile import SimpleUploadedFile
 
         self.client.login(username="testuser", password="pass")
 
-        # CrÃ©er un fichier de 20MB (si limite est 10MB)
+        # Creer un fichier de 20MB (si limite est 10MB)
         large_file = SimpleUploadedFile(
             "large.pdf", b"0" * (20 * 1024 * 1024), content_type="application/pdf"  # 20MB
         )
 
         response = self.client.post(f"/dossier/{self.dossier.pk}/upload/", {"fichier": large_file})
 
-        # Doit Ãªtre refusÃ©
-        # VÃ©rifier selon votre implÃ©mentation
+        # Doit etre refuse
+        # Verifier selon votre implementation

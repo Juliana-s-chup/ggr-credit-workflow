@@ -1,1 +1,1 @@
-"""Module Machine Learning pour le scoring crÃ©dit."""
+﻿"""Module Machine Learning pour le scoring credit."""

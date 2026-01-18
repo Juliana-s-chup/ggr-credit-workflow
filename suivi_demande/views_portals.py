@@ -1,5 +1,5 @@
-"""
-Vues spÃ©cifiques aux portails Client et Professionnel
+﻿"""
+Vues specifiques aux portails Client et Professionnel
 """
 
 from django.contrib import messages
@@ -18,26 +18,26 @@ from .models import UserRoles
 def login_client_view(request):
     """
     Vue de connexion pour le portail CLIENT
-    Restreint uniquement aux utilisateurs avec rÃ´le CLIENT
+    Restreint uniquement aux utilisateurs avec role CLIENT
     """
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
 
-            # VÃ©rifier que l'utilisateur a le rÃ´le CLIENT
+            # Verifier que l'utilisateur a le role CLIENT
             profile = getattr(user, "profile", None)
             role = getattr(profile, "role", None)
 
             if role != UserRoles.CLIENT:
                 messages.error(
                     request,
-                    "AccÃ¨s refusÃ©. Cet espace est rÃ©servÃ© aux clients. "
+                    "Acces refuse. Cet espace est reserve aux clients. "
                     "Les professionnels doivent utiliser le portail pro.ggr-credit.cg",
                 )
                 return render(request, "portail_client/login.html", {"form": form})
 
-            # Connexion rÃ©ussie
+            # Connexion reussie
             auth_login(request, user)
             messages.success(request, f"Bienvenue {user.get_full_name() or user.username} !")
 
@@ -60,14 +60,14 @@ def login_client_view(request):
 def login_pro_view(request):
     """
     Vue de connexion pour le portail PROFESSIONNEL
-    Restreint aux utilisateurs avec rÃ´les professionnels
+    Restreint aux utilisateurs avec roles professionnels
     """
     if request.method == "POST":
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
 
-            # VÃ©rifier que l'utilisateur a un rÃ´le professionnel
+            # Verifier que l'utilisateur a un role professionnel
             profile = getattr(user, "profile", None)
             role = getattr(profile, "role", None)
 
@@ -82,12 +82,12 @@ def login_pro_view(request):
             if role not in allowed_roles:
                 messages.error(
                     request,
-                    "AccÃ¨s refusÃ©. Cet espace est rÃ©servÃ© aux professionnels. "
+                    "Acces refuse. Cet espace est reserve aux professionnels. "
                     "Les clients doivent utiliser le portail client.ggr-credit.cg",
                 )
                 return render(request, "portail_pro/login.html", {"form": form})
 
-            # Connexion rÃ©ussie
+            # Connexion reussie
             auth_login(request, user)
             messages.success(request, f"Bienvenue {user.get_full_name() or user.username} !")
 
@@ -121,7 +121,7 @@ def view_documents(request, dossier_id):
 
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
 
-    # VÃ©rifier que le client accÃ¨de Ã  son propre dossier
+    # Verifier que le client accede e  son propre dossier
     if dossier.client != request.user:
         messages.error(request, "Vous ne pouvez consulter que vos propres dossiers.")
         return redirect("client:my_applications")
@@ -146,11 +146,11 @@ def all_dossiers_list(request):
     """
     from .models import DossierCredit, UserRoles
 
-    # VÃ©rifier le rÃ´le professionnel
+    # Verifier le role professionnel
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", None)
 
-    # Filtrer selon le rÃ´le
+    # Filtrer selon le role
     if role == UserRoles.GESTIONNAIRE:
         dossiers = DossierCredit.objects.filter(statut_agent__in=["NOUVEAU", "INCOMPLET"])
     elif role == UserRoles.ANALYSTE:
@@ -181,17 +181,17 @@ def all_dossiers_list(request):
 @login_required
 @require_GET
 def reports_view(request):
-    """Vue des rapports pour les professionnels (filtrÃ©s par utilisateur connectÃ©)"""
+    """Vue des rapports pour les professionnels (filtres par utilisateur connecte)"""
     from .models import DossierCredit, UserRoles, JournalAction
     from django.db.models import Count, Sum
 
-    # DÃ©terminer le pÃ©rimÃ¨tre de l'utilisateur selon son rÃ´le
+    # Determiner le perimetre de l'utilisateur selon son role
     def _scope_queryset_par_role(user):
         profile = getattr(user, "profile", None)
         role = getattr(profile, "role", None)
 
         if role == UserRoles.CLIENT:
-            # Interdit cÃ´tÃ© portail pro
+            # Interdit cote portail pro
             return DossierCredit.objects.none()
 
         if role == UserRoles.GESTIONNAIRE:
@@ -208,10 +208,10 @@ def reports_view(request):
                 (models.Q(id__in=dossier_ids)) | (models.Q(acteur_courant=user))
             )
 
-        # RESPONSABLE_GGR / BOE / SUPER_ADMIN -> tout le pÃ©rimÃ¨tre
+        # RESPONSABLE_GGR / BOE / SUPER_ADMIN -> tout le perimetre
         return DossierCredit.objects.all()
 
-    # ContrÃ´le d'accÃ¨s: rÃ´les autorisÃ©s (dÃ©tection robuste du rÃ´le)
+    # Controle d'acces: roles autorises (detection robuste du role)
     def get_user_role(user):
         role = getattr(getattr(user, "profile", None), "role", None)
         if not role:
@@ -227,16 +227,16 @@ def reports_view(request):
         UserRoles.SUPER_ADMIN,
     ]
     if user_role not in allowed_roles:
-        messages.error(request, "AccÃ¨s non autorisÃ© Ã  la page Rapports.")
+        messages.error(request, "Acces non autorise e  la page Rapports.")
         return redirect("pro:dashboard")
 
     qs = _scope_queryset_par_role(request.user)
 
-    # Ajustement de pÃ©rimÃ¨tre spÃ©cifique au rÃ´le BOE: dossiers pertinents pour la libÃ©ration des fonds
+    # Ajustement de perimetre specifique au role BOE: dossiers pertinents pour la liberation des fonds
     if user_role == UserRoles.BOE:
         qs = qs.filter(statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"])
 
-    # Filtrage pÃ©riode (date_debut, date_fin) sur la date de soumission du dossier
+    # Filtrage periode (date_debut, date_fin) sur la date de soumission du dossier
     date_debut = request.GET.get("date_debut")
     date_fin = request.GET.get("date_fin")
     try:
@@ -244,16 +244,16 @@ def reports_view(request):
             dt_start = datetime.fromisoformat(date_debut)
             qs = qs.filter(date_soumission__gte=dt_start)
         if date_fin:
-            # inclure fin de journÃ©e
+            # inclure fin de journee
             dt_end = datetime.fromisoformat(date_fin)
             qs = qs.filter(date_soumission__lte=dt_end)
     except Exception:
         # ignore filtre si format invalide
         pass
 
-    # Statistiques dans le pÃ©rimÃ¨tre (role-aware)
+    # Statistiques dans le perimetre (role-aware)
     if user_role == UserRoles.BOE:
-        # Pour BOE, en_cours = en attente de libÃ©ration; approuves = fonds libÃ©rÃ©s
+        # Pour BOE, en_cours = en attente de liberation; approuves = fonds liberes
         stats = {
             "total_dossiers": qs.count(),
             "en_cours": qs.filter(statut_agent="APPROUVE_ATTENTE_FONDS").count(),
@@ -272,7 +272,7 @@ def reports_view(request):
             "montant_total": qs.aggregate(total=Sum("montant"))["total"] or 0,
         }
 
-    # Par statut dans le pÃ©rimÃ¨tre
+    # Par statut dans le perimetre
     par_statut = qs.values("statut_agent").annotate(count=Count("id")).order_by("-count")
 
     # KPIs additionnels
@@ -338,12 +338,12 @@ def reports_view(request):
         "lead_time_avg_days": lead_time_avg_days,
     }
 
-    # DonnÃ©es pour graphiques Chart.js
+    # Donnees pour graphiques Chart.js
     import json
     from collections import defaultdict
     from django.db.models.functions import TruncMonth
 
-    # 1. Ã‰volution mensuelle (courbe)
+    # 1. e‰volution mensuelle (courbe)
     monthly_data = (
         qs.filter(statut_agent__in=finals)
         .annotate(mois=TruncMonth("date_soumission"))
@@ -356,7 +356,7 @@ def reports_view(request):
         "data": [d["count"] for d in monthly_data],
     }
 
-    # 2. RÃ©partition par statut (camembert)
+    # 2. Repartition par statut (camembert)
     chart_statuts = {
         "labels": [row["statut_agent"] for row in par_statut],
         "data": [row["count"] for row in par_statut],
@@ -367,7 +367,7 @@ def reports_view(request):
         from django.db.models import Avg
 
         lead_by_manager = []
-        # RÃ©cupÃ©rer les gestionnaires avec dossiers
+        # Recuperer les gestionnaires avec dossiers
         managers_qs = (
             qs.exclude(acteur_courant__isnull=True)
             .values("acteur_courant__username")
@@ -415,12 +415,12 @@ def reports_view(request):
 
 @login_required
 def rapports_export_csv(request):
-    """Export CSV des dossiers selon le pÃ©rimÃ¨tre et les filtres de pÃ©riode."""
+    """Export CSV des dossiers selon le perimetre et les filtres de periode."""
     from .models import DossierCredit, UserRoles, JournalAction
     import csv
     from django.http import HttpResponse
 
-    # mÃªme pÃ©rimÃ¨tre que reports_view
+    # meme perimetre que reports_view
     def _scope_queryset_par_role(user):
         profile = getattr(user, "profile", None)
         role = getattr(profile, "role", None)
@@ -441,7 +441,7 @@ def rapports_export_csv(request):
 
     qs = _scope_queryset_par_role(request.user).select_related("client")
 
-    # filtres pÃ©riode
+    # filtres periode
     date_debut = request.GET.get("date_debut")
     date_fin = request.GET.get("date_fin")
     try:
@@ -487,6 +487,6 @@ def rapports_export_csv(request):
 
 @login_required
 def stats_view(request):
-    """Vue des statistiques dÃ©taillÃ©es"""
-    # Ã€ implÃ©menter selon vos besoins
+    """Vue des statistiques detaillees"""
+    # e€ implementer selon vos besoins
     return render(request, "portail_pro/stats.html", {})

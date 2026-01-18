@@ -1,5 +1,5 @@
-"""
-DÃ©corateurs pour la gestion des permissions et des transitions.
+﻿"""
+Decorateurs pour la gestion des permissions et des transitions.
 """
 
 from functools import wraps
@@ -24,7 +24,7 @@ def role_required(roles: Iterable[str]):
             role = getattr(profile, "role", None)
             if role in roles:
                 return view_func(request, *args, **kwargs)
-            messages.error(request, "AccÃ¨s non autorisÃ© pour votre rÃ´le.")
+            messages.error(request, "Acces non autorise pour votre role.")
             return redirect("suivi:dashboard")
 
         return _wrapped
@@ -42,7 +42,7 @@ def transition_allowed(view_func):
         pk = kwargs.get("pk")
         action = kwargs.get("action")
         if pk is None or action is None:
-            messages.error(request, "ParamÃ¨tres de transition manquants.")
+            messages.error(request, "Parametres de transition manquants.")
             return redirect("suivi:dashboard")
 
         dossier = get_object_or_404(DossierCredit, pk=pk)
@@ -90,7 +90,7 @@ def transition_allowed(view_func):
             allowed = False
 
         if not allowed:
-            messages.error(request, "Action non autorisÃ©e pour votre rÃ´le ou l'Ã©tat du dossier.")
+            messages.error(request, "Action non autorisee pour votre role ou l'etat du dossier.")
             return redirect("suivi:dashboard")
 
         return view_func(request, *args, **kwargs)

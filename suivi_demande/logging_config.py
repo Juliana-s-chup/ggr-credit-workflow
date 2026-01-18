@@ -1,24 +1,24 @@
-"""
+﻿"""
 Configuration et helpers pour le logging professionnel de l'application.
 """
 
 import logging
 from functools import wraps
 
-# Loggers spÃ©cialisÃ©s
+# Loggers specialises
 logger = logging.getLogger("suivi_demande")
 security_logger = logging.getLogger("suivi_demande.security")
 workflow_logger = logging.getLogger("suivi_demande.workflow")
 models_logger = logging.getLogger("suivi_demande.models")
 
 
-# LOGS MÃ‰TIER - DOSSIERS
+# LOGS Me‰TIER - DOSSIERS
 def log_dossier_creation(dossier, user):
-    """Log la crÃ©ation d'un nouveau dossier."""
+    """Log la creation d'un nouveau dossier."""
     workflow_logger.info(
-        f"[CRÃ‰ATION DOSSIER] RÃ©fÃ©rence: {dossier.reference} | "
+        f"[CRe‰ATION DOSSIER] Reference: {dossier.reference} | "
         f"Client: {dossier.client.username} | Montant: {dossier.montant} FCFA | "
-        f"CrÃ©Ã© par: {user.username}"
+        f"Cree par: {user.username}"
     )
 
 
@@ -26,7 +26,7 @@ def log_dossier_update(dossier, user, fields_changed=None):
     """Log la modification d'un dossier."""
     fields_info = f" | Champs: {', '.join(fields_changed)}" if fields_changed else ""
     workflow_logger.info(
-        f"[MODIFICATION DOSSIER] RÃ©fÃ©rence: {dossier.reference} | "
+        f"[MODIFICATION DOSSIER] Reference: {dossier.reference} | "
         f"Par: {user.username}{fields_info}"
     )
 
@@ -34,8 +34,8 @@ def log_dossier_update(dossier, user, fields_changed=None):
 def log_dossier_deletion(dossier, user):
     """Log la suppression d'un dossier."""
     workflow_logger.warning(
-        f"[SUPPRESSION DOSSIER] RÃ©fÃ©rence: {dossier.reference} | "
-        f"Client: {dossier.client.username} | SupprimÃ© par: {user.username}"
+        f"[SUPPRESSION DOSSIER] Reference: {dossier.reference} | "
+        f"Client: {dossier.client.username} | Supprime par: {user.username}"
     )
 
 
@@ -46,7 +46,7 @@ def log_transition(dossier, action, user, from_status, to_status, comment=None):
     workflow_logger.info(
         f"[TRANSITION] Dossier: {dossier.reference} | "
         f"{from_status} â†’ {to_status} | Action: {action} | "
-        f"Par: {user.username} | RÃ´le: {getattr(user.profile, 'role', 'N/A')}{comment_info}"
+        f"Par: {user.username} | Role: {getattr(user.profile, 'role', 'N/A')}{comment_info}"
     )
 
 
@@ -58,34 +58,34 @@ def log_workflow_error(dossier, action, user, error):
     )
 
 
-# LOGS SÃ‰CURITÃ‰
+# LOGS Se‰CURITe‰
 def log_login_success(user, ip_address=None):
-    """Log une connexion rÃ©ussie."""
+    """Log une connexion reussie."""
     ip_info = f" | IP: {ip_address}" if ip_address else ""
     security_logger.info(
         f"[LOGIN SUCCESS] User: {user.username} | "
-        f"RÃ´le: {getattr(user.profile, 'role', 'N/A')}{ip_info}"
+        f"Role: {getattr(user.profile, 'role', 'N/A')}{ip_info}"
     )
 
 
 def log_login_failure(username, ip_address=None, reason=None):
-    """Log une tentative de connexion Ã©chouÃ©e."""
+    """Log une tentative de connexion echouee."""
     ip_info = f" | IP: {ip_address}" if ip_address else ""
     reason_info = f" | Raison: {reason}" if reason else ""
     security_logger.warning(f"[LOGIN FAILED] Username: {username}{ip_info}{reason_info}")
 
 
 def log_logout(user):
-    """Log une dÃ©connexion."""
+    """Log une deconnexion."""
     security_logger.info(f"[LOGOUT] User: {user.username}")
 
 
 def log_unauthorized_access(user, resource, action, reason=None):
-    """Log une tentative d'accÃ¨s non autorisÃ©."""
+    """Log une tentative d'acces non autorise."""
     reason_info = f" | Raison: {reason}" if reason else ""
     security_logger.warning(
-        f"[ACCÃˆS REFUSÃ‰] User: {user.username} | "
-        f"RÃ´le: {getattr(user.profile, 'role', 'N/A')} | "
+        f"[ACCeˆS REFUSe‰] User: {user.username} | "
+        f"Role: {getattr(user.profile, 'role', 'N/A')} | "
         f"Ressource: {resource} | Action: {action}{reason_info}"
     )
 
@@ -98,15 +98,15 @@ def log_permission_denied(user, permission, resource=None):
     )
 
 
-# LOGS MODÃˆLES
+# LOGS MODeˆLES
 def log_model_creation(model_name, instance_id, user=None):
-    """Log la crÃ©ation d'une instance."""
+    """Log la creation d'une instance."""
     user_info = f" | Par: {user.username}" if user else ""
     models_logger.debug(f"[CREATE] {model_name} | ID: {instance_id}{user_info}")
 
 
 def log_model_update(model_name, instance_id, fields=None, user=None):
-    """Log la mise Ã  jour d'une instance."""
+    """Log la mise e  jour d'une instance."""
     fields_info = f" | Champs: {', '.join(fields)}" if fields else ""
     user_info = f" | Par: {user.username}" if user else ""
     models_logger.debug(f"[UPDATE] {model_name} | ID: {instance_id}{fields_info}{user_info}")
@@ -120,7 +120,7 @@ def log_model_deletion(model_name, instance_id, user=None):
 
 # LOGS ERREURS
 def log_error(context, error, user=None, extra_info=None):
-    """Log une erreur gÃ©nÃ©rique."""
+    """Log une erreur generique."""
     user_info = f" | User: {user.username}" if user else ""
     extra = f" | Info: {extra_info}" if extra_info else ""
     logger.error(f"[ERREUR] Contexte: {context} | Erreur: {str(error)}{user_info}{extra}")
@@ -154,9 +154,9 @@ def log_email_sent(recipient, subject, success=True):
     level(f"[EMAIL {status}] Destinataire: {recipient} | Sujet: {subject}")
 
 
-# DÃ‰CORATEURS
+# De‰CORATEURS
 def log_view_access(view_name):
-    """DÃ©corateur pour logger l'accÃ¨s Ã  une vue."""
+    """Decorateur pour logger l'acces e  une vue."""
 
     def decorator(func):
         @wraps(func)

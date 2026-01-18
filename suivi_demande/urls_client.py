@@ -1,6 +1,6 @@
-"""
+﻿"""
 URLs pour le Portail CLIENT
-FonctionnalitÃ©s limitÃ©es aux besoins client
+Fonctionnalites limitees aux besoins client
 """
 
 from django.urls import path
@@ -27,7 +27,7 @@ urlpatterns = [
     path("demande/etape2/", views.demande_step2, name="demande_step2"),
     path("demande/etape3/", views.demande_step3, name="demande_step3"),
     path("demande/etape4/", views.demande_step4, name="demande_step4"),
-    # Documents (tÃ©lÃ©chargement uniquement, pas d'upload direct)
+    # Documents (telechargement uniquement, pas d'upload direct)
     path(
         "dossier/<int:dossier_id>/documents/", views_portals.view_documents, name="view_documents"
     ),

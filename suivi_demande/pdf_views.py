@@ -1,5 +1,5 @@
-"""
-Vues pour la gÃ©nÃ©ration de PDF.
+﻿"""
+Vues pour la generation de PDF.
 """
 
 from decimal import Decimal
@@ -25,7 +25,7 @@ def dossier_proposition_pdf(request, pk: int):
 
     # Access control: client owner or staff roles
     if role == UserRoles.CLIENT and dossier.client_id != request.user.id:
-        messages.error(request, "AccÃ¨s refusÃ© au dossier.")
+        messages.error(request, "Acces refuse au dossier.")
         return redirect("dashboard")
 
     pieces = PieceJointe.objects.filter(dossier=dossier).order_by("upload_at")
@@ -52,7 +52,7 @@ def dossier_proposition_pdf(request, pk: int):
     result = BytesIO()
     pdf_status = pisa.CreatePDF(src=html, dest=result)
     if pdf_status.err:
-        messages.error(request, "Impossible de gÃ©nÃ©rer le PDF de la proposition.")
+        messages.error(request, "Impossible de generer le PDF de la proposition.")
         return redirect("dossier_detail", pk=dossier.pk)
 
     response = HttpResponse(result.getvalue(), content_type="application/pdf")

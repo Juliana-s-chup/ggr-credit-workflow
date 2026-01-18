@@ -1,26 +1,26 @@
-"""
+﻿"""
 Settings pour le portail PROFESSIONNEL
 Sous-domaine : pro.ggr-credit.cg
 """
 
 from .base import *
 
-# Portail spÃ©cifique
+# Portail specifique
 PORTAL_TYPE = "PROFESSIONAL"
 
-# Restrictions d'accÃ¨s
+# Restrictions d'acces
 ALLOWED_ROLES = ["GESTIONNAIRE", "ANALYSTE", "RESPONSABLE_GGR", "BOE", "SUPER_ADMIN"]
 
-# URLs: utiliser le routeur principal qui inclut dÃ©jÃ  le namespace `pro`
+# URLs: utiliser le routeur principal qui inclut deje  le namespace `pro`
 ROOT_URLCONF = "core.urls"
 
-# Templates spÃ©cifiques - Chercher d'abord dans portail_pro, puis fallback
+# Templates specifiques - Chercher d'abord dans portail_pro, puis fallback
 TEMPLATES[0]["DIRS"] = [
     BASE_DIR / "templates" / "portail_pro",
     BASE_DIR / "templates",  # Fallback
 ]
 
-# Domaine autorisÃ© - Ne pas utiliser env.list pour Ã©viter les conflits
+# Domaine autorise - Ne pas utiliser env.list pour eviter les conflits
 ALLOWED_HOSTS = [
     "pro.ggr-credit.cg",
     "pro.ggr-credit.local",  # Pour dev local
@@ -29,34 +29,34 @@ ALLOWED_HOSTS = [
 ]
 
 # Garder l'admin Django sur ce portail
-# (dÃ©jÃ  dans INSTALLED_APPS de base.py)
+# (deje  dans INSTALLED_APPS de base.py)
 
-# Ajouter le middleware de contrÃ´le d'accÃ¨s (TEMPORAIREMENT DÃ‰SACTIVÃ‰ POUR DEBUG)
+# Ajouter le middleware de controle d'acces (TEMPORAIREMENT De‰SACTIVe‰ POUR DEBUG)
 # MIDDLEWARE += [
 #     'suivi_demande.middleware_portal.PortalAccessMiddleware',
 # ]
 
-# Session cookies (TEMPORAIREMENT SIMPLIFIÃ‰ POUR DEBUG)
+# Session cookies (TEMPORAIREMENT SIMPLIFIe‰ POUR DEBUG)
 SESSION_COOKIE_NAME = "ggr_pro_session"
-# SESSION_COOKIE_DOMAIN = '.ggr-credit.cg'  # DÃ©sactivÃ© temporairement
-SESSION_COOKIE_DOMAIN = None  # Utiliser le domaine par dÃ©faut
+# SESSION_COOKIE_DOMAIN = '.ggr-credit.cg'  # Desactive temporairement
+SESSION_COOKIE_DOMAIN = None  # Utiliser le domaine par defaut
 
-# Redirect aprÃ¨s login
+# Redirect apres login
 LOGIN_REDIRECT_URL = "/dashboard/"
 LOGIN_URL = "/accounts/login/"
 
-# Redirect aprÃ¨s logout
+# Redirect apres logout
 LOGOUT_REDIRECT_URL = "/accounts/login/"
 
-# SÃ©curitÃ© renforcÃ©e (dÃ©sactivÃ©e en dev local)
+# Securite renforcee (desactivee en dev local)
 SECURE_SSL_REDIRECT = env.bool("SECURE_SSL_REDIRECT", default=False)
 SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=False)
 CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=False)
 
-# Logging Ã©tendu pour auditabilitÃ©
+# Logging etendu pour auditabilite
 import os
 
-os.makedirs(BASE_DIR / "logs", exist_ok=True)  # CrÃ©er le dossier si nÃ©cessaire
+os.makedirs(BASE_DIR / "logs", exist_ok=True)  # Creer le dossier si necessaire
 
 LOGGING = {
     "version": 1,
@@ -91,7 +91,7 @@ LOGGING = {
     },
 }
 
-# Upload constraints (for Demande Ã‰tape 4)
+# Upload constraints (for Demande e‰tape 4)
 # Max size: 20 MB
 UPLOAD_MAX_BYTES = 20 * 1024 * 1024
 # Allowed extensions

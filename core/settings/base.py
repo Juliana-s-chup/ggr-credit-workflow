@@ -1,4 +1,4 @@
-"""
+﻿"""
 Base settings for ggr_credit_workflow Django project.
 Shared by dev and prod.
 """
@@ -58,14 +58,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "core.wsgi.application"
 
-# Configuration PostgreSQL (utilisÃ©e par dÃ©faut)
+# Configuration PostgreSQL (utilisee par defaut)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": env("DB_NAME", default="credit_db"),
         "USER": env("DB_USER", default="credit_user"),
         "PASSWORD": env("DB_PASSWORD", default=""),
-        # En dev local, utiliser localhost par dÃ©faut (au lieu de "db" prÃ©vu pour Docker)
+        # En dev local, utiliser localhost par defaut (au lieu de "db" prevu pour Docker)
         "HOST": env("DB_HOST", default="localhost"),
         "PORT": env("DB_PORT", default="5434"),
     }
@@ -95,7 +95,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Security/hosts (overridden in client.py and pro.py)
 # ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
-# CommentÃ© car dÃ©fini spÃ©cifiquement dans client.py et pro.py
+# Commente car defini specifiquement dans client.py et pro.py
 CSRF_TRUSTED_ORIGINS = env.list(
     "CSRF_TRUSTED_ORIGINS",
     default=[
@@ -162,13 +162,13 @@ LOGGING = {
         },
     },
     "handlers": {
-        # Console - Tous les logs en dÃ©veloppement
+        # Console - Tous les logs en developpement
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
             "formatter": "verbose",
         },
-        # Fichier gÃ©nÃ©ral - INFO et supÃ©rieur
+        # Fichier general - INFO et superieur
         "file_general": {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
@@ -187,7 +187,7 @@ LOGGING = {
             "formatter": "verbose",
             "filters": ["require_debug_true"],
         },
-        # Fichier erreurs - WARNING et supÃ©rieur
+        # Fichier erreurs - WARNING et superieur
         "file_error": {
             "level": "WARNING",
             "class": "logging.handlers.RotatingFileHandler",
@@ -196,7 +196,7 @@ LOGGING = {
             "backupCount": 10,
             "formatter": "verbose",
         },
-        # Fichier sÃ©curitÃ© - Authentification, permissions, accÃ¨s
+        # Fichier securite - Authentification, permissions, acces
         "file_security": {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
@@ -205,7 +205,7 @@ LOGGING = {
             "backupCount": 15,
             "formatter": "verbose",
         },
-        # Fichier workflow - Actions mÃ©tier importantes
+        # Fichier workflow - Actions metier importantes
         "file_workflow": {
             "level": "INFO",
             "class": "logging.handlers.RotatingFileHandler",
@@ -223,19 +223,19 @@ LOGGING = {
         },
     },
     "loggers": {
-        # Logger Django par dÃ©faut
+        # Logger Django par defaut
         "django": {
             "handlers": ["console", "file_general", "file_error"],
             "level": env("DJANGO_LOG_LEVEL", default="INFO"),
             "propagate": False,
         },
-        # Logger pour les requÃªtes Django
+        # Logger pour les requetes Django
         "django.request": {
             "handlers": ["console", "file_error", "mail_admins"],
             "level": "WARNING",
             "propagate": False,
         },
-        # Logger pour la sÃ©curitÃ© Django
+        # Logger pour la securite Django
         "django.security": {
             "handlers": ["console", "file_security"],
             "level": "INFO",
@@ -247,19 +247,19 @@ LOGGING = {
             "level": "DEBUG" if DEBUG else "INFO",
             "propagate": False,
         },
-        # Logger sÃ©curitÃ© application
+        # Logger securite application
         "suivi_demande.security": {
             "handlers": ["console", "file_security"],
             "level": "INFO",
             "propagate": False,
         },
-        # Logger workflow mÃ©tier
+        # Logger workflow metier
         "suivi_demande.workflow": {
             "handlers": ["console", "file_workflow", "file_general"],
             "level": "INFO",
             "propagate": False,
         },
-        # Logger modÃ¨les
+        # Logger modeles
         "suivi_demande.models": {
             "handlers": ["console", "file_general", "file_debug"],
             "level": "DEBUG" if DEBUG else "INFO",

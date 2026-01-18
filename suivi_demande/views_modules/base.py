@@ -1,4 +1,4 @@
-"""
+﻿"""
 Vues de base : home, signup, pending_approval.
 """
 
@@ -22,7 +22,7 @@ def signup(request):
             user = form.save()
             messages.success(
                 request,
-                "Votre compte a Ã©tÃ© crÃ©Ã©. Il sera activÃ© aprÃ¨s approbation par un administrateur.",
+                "Votre compte a ete cree. Il sera active apres approbation par un administrateur.",
             )
             return redirect("login")
     else:

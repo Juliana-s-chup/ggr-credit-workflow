@@ -1,4 +1,4 @@
-"""
+﻿"""
 Vues de gestion du workflow et des transitions de statut.
 """
 
@@ -30,7 +30,7 @@ User = get_user_model()
 @transition_allowed
 def transition_dossier(request, pk, action: str):
     """
-    Effectue une transition d'Ã©tat sur un dossier en fonction du rÃ´le et de l'action.
+    Effectue une transition d'etat sur un dossier en fonction du role et de l'action.
 
     Actions possibles :
     - GESTIONNAIRE : transmettre_analyste, retour_client
@@ -39,7 +39,7 @@ def transition_dossier(request, pk, action: str):
     - BOE : liberer_fonds
     """
     if request.method != "POST":
-        messages.error(request, "MÃ©thode non autorisÃ©e.")
+        messages.error(request, "Methode non autorisee.")
         namespace = get_current_namespace(request)
         return redirect(f"{namespace}:dashboard")
 
@@ -47,7 +47,7 @@ def transition_dossier(request, pk, action: str):
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", None)
 
-    # RÃ©cupÃ©rer le commentaire de retour s'il existe
+    # Recuperer le commentaire de retour s'il existe
     commentaire_retour = request.POST.get("commentaire_retour", "").strip()
 
     allowed = False
@@ -137,9 +137,7 @@ def transition_dossier(request, pk, action: str):
         allowed = False
 
     if not allowed:
-        messages.error(
-            request, "Action non autorisÃ©e pour votre rÃ´le ou l'Ã©tat actuel du dossier."
-        )
+        messages.error(request, "Action non autorisee pour votre role ou l'etat actuel du dossier.")
         namespace = get_current_namespace(request)
         return redirect(f"{namespace}:dashboard")
 
@@ -154,12 +152,12 @@ def transition_dossier(request, pk, action: str):
     # Logger la transition
     log_transition(dossier, action, request.user, de_statut, vers_statut)
 
-    # PrÃ©parer le commentaire systÃ¨me
+    # Preparer le commentaire systeme
     commentaire_systeme = f"Action: {action}"
     if action == "retour_client" and commentaire_retour:
         commentaire_systeme += f" - Motif: {commentaire_retour}"
 
-    # CrÃ©er l'entrÃ©e dans le journal
+    # Creer l'entree dans le journal
     JournalAction.objects.create(
         dossier=dossier,
         action=action_log or "TRANSITION",
@@ -181,39 +179,39 @@ def transition_dossier(request, pk, action: str):
     except Exception as e:
         log_error("notifications_transition", e, request.user)
         messages.warning(
-            request, "Transition effectuÃ©e mais erreur lors de l'envoi des notifications."
+            request, "Transition effectuee mais erreur lors de l'envoi des notifications."
         )
 
-    # Message de succÃ¨s
+    # Message de succes
     if action == "retour_client":
         messages.success(
             request,
-            f"Le dossier {dossier.reference} a Ã©tÃ© retournÃ© au client avec vos commentaires.",
+            f"Le dossier {dossier.reference} a ete retourne au client avec vos commentaires.",
         )
     else:
-        messages.success(request, "Transition effectuÃ©e avec succÃ¨s.")
+        messages.success(request, "Transition effectuee avec succes.")
 
     namespace = get_current_namespace(request)
     return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
 
 def _handle_notifications(request, dossier, action, commentaire_retour):
-    """GÃ¨re les notifications et emails aprÃ¨s une transition."""
+    """Gere les notifications et emails apres une transition."""
     # Notification pour le client
     if action == "retour_client":
         message_notification = (
-            f"ðŸ”” Nouveau message â€¢ Dossier {dossier.reference}\n"
-            f"Votre dossier nÃ©cessite des complÃ©ments. Motif: {commentaire_retour}"
+            f"ðŸ”” Nouveau message '¢ Dossier {dossier.reference}\n"
+            f"Votre dossier necessite des complements. Motif: {commentaire_retour}"
         )
-        titre_notification = f"ðŸ”” Dossier {dossier.reference} â€¢ ComplÃ©ments requis"
+        titre_notification = f"ðŸ”” Dossier {dossier.reference} '¢ Complements requis"
     else:
         message_notification = (
-            f"ðŸ”” Mise Ã  jour â€¢ Dossier {dossier.reference}\n"
-            f"Statut cÃ´tÃ© client: {dossier.get_statut_client_display()}"
+            f"ðŸ”” Mise e  jour '¢ Dossier {dossier.reference}\n"
+            f"Statut cote client: {dossier.get_statut_client_display()}"
         )
-        titre_notification = f"ðŸ”” Dossier {dossier.reference} â€¢ Mise Ã  jour"
+        titre_notification = f"ðŸ”” Dossier {dossier.reference} '¢ Mise e  jour"
 
-    # CrÃ©er la notification pour le client
+    # Creer la notification pour le client
     Notification.objects.create(
         utilisateur_cible=dossier.client,
         type="NOUVEAU_MESSAGE",
@@ -228,8 +226,8 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.ANALYSTE,
-            f"ðŸ”” Nouveau dossier Ã  analyser â€¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nRÃ©fÃ©rence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
+            f"ðŸ”” Nouveau dossier e  analyser '¢ {dossier.reference}",
+            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
         )
 
     elif action == "transmettre_ggr":
@@ -237,8 +235,8 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.RESPONSABLE_GGR,
-            f"ðŸ”” Dossier Ã  valider â€¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nRÃ©fÃ©rence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
+            f"ðŸ”” Dossier e  valider '¢ {dossier.reference}",
+            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
         )
 
     elif action == "approuver":
@@ -246,8 +244,8 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.BOE,
-            f"ðŸ”” Dossier approuvÃ© â€¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nRÃ©fÃ©rence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nApprouvÃ© par: {expediteur}",
+            f"ðŸ”” Dossier approuve '¢ {dossier.reference}",
+            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nApprouve par: {expediteur}",
         )
 
     elif action == "retour_gestionnaire":
@@ -255,8 +253,8 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.GESTIONNAIRE,
-            f"ðŸ”” Dossier retournÃ© â€¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nRÃ©fÃ©rence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nRetournÃ© par: {expediteur}",
+            f"ðŸ”” Dossier retourne '¢ {dossier.reference}",
+            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nRetourne par: {expediteur}",
         )
 
     # Email au client
@@ -265,7 +263,7 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
 
 
 def _notifier_groupe(request, dossier, role_cible, titre, message_template):
-    """Notifie tous les utilisateurs d'un rÃ´le donnÃ©."""
+    """Notifie tous les utilisateurs d'un role donne."""
     utilisateurs = User.objects.filter(profile__role=role_cible, is_active=True)
 
     count = 0
@@ -289,7 +287,7 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
         if user.email:
             try:
                 send_mail(
-                    subject=f"[CrÃ©dit du Congo] {titre}",
+                    subject=f"[Credit du Congo] {titre}",
                     message=message_template.format(
                         user_name=user.get_full_name() or user.username,
                         dossier_ref=dossier.reference,
@@ -307,25 +305,25 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
                 pass
 
     if count > 0:
-        messages.success(request, f"âœ“ {count} utilisateur(s) notifiÃ©(s).")
+        messages.success(request, f"âœ“ {count} utilisateur(s) notifie(s).")
 
 
 def _send_email_to_client(request, dossier, action, commentaire_retour):
     """Envoie un email au client."""
     if action == "retour_client":
-        subject = f"[CrÃ©dit du Congo] Dossier {dossier.reference} - ComplÃ©ments requis"
+        subject = f"[Credit du Congo] Dossier {dossier.reference} - Complements requis"
         text_message = (
             f"Bonjour,\n\n"
-            f"Votre dossier de crÃ©dit {dossier.reference} nÃ©cessite des complÃ©ments.\n\n"
+            f"Votre dossier de credit {dossier.reference} necessite des complements.\n\n"
             f"Motif du retour:\n{commentaire_retour}\n\n"
-            f"Veuillez vous rapprocher de votre gestionnaire pour complÃ©ter votre dossier.\n\n"
-            f"Cordialement,\nL'Ã©quipe CrÃ©dit du Congo"
+            f"Veuillez vous rapprocher de votre gestionnaire pour completer votre dossier.\n\n"
+            f"Cordialement,\nL'equipe Credit du Congo"
         )
     else:
-        subject = f"[CrÃ©dit du Congo] Dossier {dossier.reference} mis Ã  jour"
+        subject = f"[Credit du Congo] Dossier {dossier.reference} mis e  jour"
         text_message = (
-            f"Bonjour,\n\nVotre dossier {dossier.reference} a Ã©tÃ© mis Ã  jour. "
-            f"Nouveau statut cÃ´tÃ© client: {dossier.get_statut_client_display()}.\n\nCeci est un message automatique."
+            f"Bonjour,\n\nVotre dossier {dossier.reference} a ete mis e  jour. "
+            f"Nouveau statut cote client: {dossier.get_statut_client_display()}.\n\nCeci est un message automatique."
         )
 
     # Template HTML pour retour client
@@ -362,7 +360,7 @@ def _send_email_to_client(request, dossier, action, commentaire_retour):
 
 @login_required
 def transmettre_analyste_page(request, pk: int):
-    """Page de transmission d'un dossier Ã  l'analyste."""
+    """Page de transmission d'un dossier e  l'analyste."""
     dossier = get_object_or_404(DossierCredit, pk=pk)
     ctx = {
         "dossier": dossier,

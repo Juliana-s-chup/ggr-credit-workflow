@@ -1,5 +1,5 @@
-"""
-Module Analytics - ModÃ¨les de donnÃ©es pour statistiques et KPIs
+﻿"""
+Module Analytics - Modeles de donnees pour statistiques et KPIs
 Auteur: NGUIMBI Juliana
 Date: Novembre 2025
 """
@@ -12,8 +12,8 @@ from suivi_demande.models import DossierCredit
 
 class StatistiquesDossier(models.Model):
     """
-    Statistiques agrÃ©gÃ©es des dossiers de crÃ©dit
-    CalculÃ©es pÃ©riodiquement pour optimiser les dashboards
+    Statistiques agregees des dossiers de credit
+    Calculees periodiquement pour optimiser les dashboards
     """
 
     date_calcul = models.DateTimeField(auto_now_add=True)
@@ -39,7 +39,7 @@ class StatistiquesDossier(models.Model):
     montant_total_approuve = models.DecimalField(max_digits=15, decimal_places=2, default=0)
     montant_moyen_demande = models.DecimalField(max_digits=15, decimal_places=2, default=0)
 
-    # DÃ©lais (en jours)
+    # Delais (en jours)
     delai_moyen_traitement = models.FloatField(default=0)
     delai_moyen_analyse = models.FloatField(default=0)
     delai_moyen_validation = models.FloatField(default=0)
@@ -71,12 +71,12 @@ class PerformanceActeur(models.Model):
     dossiers_approuves = models.IntegerField(default=0)
     dossiers_rejetes = models.IntegerField(default=0)
 
-    # DÃ©lais
+    # Delais
     delai_moyen_traitement = models.FloatField(default=0)
 
     # Performance
     taux_approbation = models.FloatField(default=0)
-    score_performance = models.FloatField(default=0)  # Score calculÃ©
+    score_performance = models.FloatField(default=0)  # Score calcule
 
     date_calcul = models.DateTimeField(auto_now_add=True)
 
@@ -86,21 +86,21 @@ class PerformanceActeur(models.Model):
         ordering = ["-date_calcul"]
 
     def __str__(self):
-        return f"{self.acteur.get_full_name()} - {self.periode_debut} Ã  {self.periode_fin}"
+        return f"{self.acteur.get_full_name()} - {self.periode_debut} e  {self.periode_fin}"
 
 
 class PredictionRisque(models.Model):
     """
-    PrÃ©dictions de risque crÃ©dit basÃ©es sur ML
+    Predictions de risque credit basees sur ML
     """
 
     dossier = models.OneToOneField(
         DossierCredit, on_delete=models.CASCADE, related_name="prediction"
     )
 
-    # Scores prÃ©dits
-    score_risque = models.FloatField(help_text="Score de 0 (faible risque) Ã  100 (risque Ã©levÃ©)")
-    probabilite_defaut = models.FloatField(help_text="ProbabilitÃ© de dÃ©faut de paiement (0-1)")
+    # Scores predits
+    score_risque = models.FloatField(help_text="Score de 0 (faible risque) e  100 (risque eleve)")
+    probabilite_defaut = models.FloatField(help_text="Probabilite de defaut de paiement (0-1)")
 
     # Classification
     classe_risque = models.CharField(
@@ -108,7 +108,7 @@ class PredictionRisque(models.Model):
         choices=[
             ("FAIBLE", "Risque Faible"),
             ("MOYEN", "Risque Moyen"),
-            ("ELEVE", "Risque Ã‰levÃ©"),
+            ("ELEVE", "Risque e‰leve"),
         ],
     )
 
@@ -118,17 +118,15 @@ class PredictionRisque(models.Model):
     # Recommandation
     recommandation = models.TextField(blank=True)
 
-    # MÃ©tadonnÃ©es
+    # Metadonnees
     modele_version = models.CharField(max_length=50, default="v1.0")
     date_prediction = models.DateTimeField(auto_now_add=True)
-    confiance = models.FloatField(
-        default=0, help_text="Niveau de confiance de la prÃ©diction (0-1)"
-    )
+    confiance = models.FloatField(default=0, help_text="Niveau de confiance de la prediction (0-1)")
 
     class Meta:
-        verbose_name = "PrÃ©diction Risque"
-        verbose_name_plural = "PrÃ©dictions Risques"
+        verbose_name = "Prediction Risque"
+        verbose_name_plural = "Predictions Risques"
         ordering = ["-date_prediction"]
 
     def __str__(self):
-        return f"PrÃ©diction {self.dossier.reference} - {self.classe_risque}"
+        return f"Prediction {self.dossier.reference} - {self.classe_risque}"

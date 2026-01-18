@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Analytics - Configuration Admin Django
 """
 
@@ -20,7 +20,7 @@ class StatistiquesDossierAdmin(admin.ModelAdmin):
     readonly_fields = ("date_calcul",)
 
     fieldsets = (
-        ("PÃ©riode", {"fields": ("periode", "date_calcul")}),
+        ("Periode", {"fields": ("periode", "date_calcul")}),
         (
             "Compteurs",
             {
@@ -44,7 +44,7 @@ class StatistiquesDossierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "DÃ©lais et Taux",
+            "Delais et Taux",
             {"fields": ("delai_moyen_traitement", "taux_approbation", "taux_rejet")},
         ),
     )
@@ -81,11 +81,11 @@ class PredictionRisqueAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Dossier", {"fields": ("dossier",)}),
         (
-            "PrÃ©diction",
+            "Prediction",
             {"fields": ("score_risque", "probabilite_defaut", "classe_risque", "confiance")},
         ),
         (
-            "DÃ©tails",
+            "Details",
             {"fields": ("facteurs_risque", "recommandation", "modele_version", "date_prediction")},
         ),
     )

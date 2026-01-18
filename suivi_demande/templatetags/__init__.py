@@ -1,1 +1,1 @@
-# Templatetags pour les filtres personnalisÃ©s
+﻿# Templatetags pour les filtres personnalises

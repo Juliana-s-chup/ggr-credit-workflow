@@ -1,6 +1,6 @@
-"""
+﻿"""
 Utilitaires pour la gestion des utilisateurs.
-Centralise la logique de rÃ©cupÃ©ration du rÃ´le utilisateur.
+Centralise la logique de recuperation du role utilisateur.
 """
 
 from typing import Optional
@@ -10,13 +10,13 @@ from .models import UserRoles
 
 def get_user_role(user: User) -> Optional[str]:
     """
-    RÃ©cupÃ¨re le rÃ´le d'un utilisateur de maniÃ¨re robuste.
+    Recupere le role d'un utilisateur de maniere robuste.
 
     Args:
         user: Instance de User Django
 
     Returns:
-        str: Le rÃ´le de l'utilisateur (CLIENT, GESTIONNAIRE, etc.)
+        str: Le role de l'utilisateur (CLIENT, GESTIONNAIRE, etc.)
         None: Si l'utilisateur n'a pas de profil
 
     Examples:
@@ -40,14 +40,14 @@ def get_user_role(user: User) -> Optional[str]:
 
 def user_has_role(user: User, role: str) -> bool:
     """
-    VÃ©rifie si un utilisateur a un rÃ´le spÃ©cifique.
+    Verifie si un utilisateur a un role specifique.
 
     Args:
         user: Instance de User Django
-        role: RÃ´le Ã  vÃ©rifier (ex: UserRoles.GESTIONNAIRE)
+        role: Role e  verifier (ex: UserRoles.GESTIONNAIRE)
 
     Returns:
-        bool: True si l'utilisateur a ce rÃ´le
+        bool: True si l'utilisateur a ce role
 
     Examples:
         >>> if user_has_role(request.user, UserRoles.SUPER_ADMIN):
@@ -59,14 +59,14 @@ def user_has_role(user: User, role: str) -> bool:
 
 def user_has_any_role(user: User, roles: list) -> bool:
     """
-    VÃ©rifie si un utilisateur a l'un des rÃ´les spÃ©cifiÃ©s.
+    Verifie si un utilisateur a l'un des roles specifies.
 
     Args:
         user: Instance de User Django
-        roles: Liste de rÃ´les acceptÃ©s
+        roles: Liste de roles acceptes
 
     Returns:
-        bool: True si l'utilisateur a l'un de ces rÃ´les
+        bool: True si l'utilisateur a l'un de ces roles
 
     Examples:
         >>> if user_has_any_role(request.user, [UserRoles.GESTIONNAIRE, UserRoles.ANALYSTE]):
@@ -78,7 +78,7 @@ def user_has_any_role(user: User, roles: list) -> bool:
 
 def is_professional_user(user: User) -> bool:
     """
-    VÃ©rifie si un utilisateur est un professionnel (non-client).
+    Verifie si un utilisateur est un professionnel (non-client).
 
     Args:
         user: Instance de User Django
@@ -98,7 +98,7 @@ def is_professional_user(user: User) -> bool:
 
 def is_client_user(user: User) -> bool:
     """
-    VÃ©rifie si un utilisateur est un client.
+    Verifie si un utilisateur est un client.
 
     Args:
         user: Instance de User Django

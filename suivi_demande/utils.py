@@ -1,4 +1,4 @@
-"""
+﻿"""
 Utilitaires pour l'application suivi_demande.
 Fonctions de notification et helpers.
 """
@@ -52,9 +52,9 @@ def notify(
 
 
 def get_current_namespace(request):
-    """DÃ©termine le namespace actuel basÃ© sur la configuration du portail"""
+    """Determine le namespace actuel base sur la configuration du portail"""
     if hasattr(request, "resolver_match") and request.resolver_match:
         return request.resolver_match.namespace or "pro"
-    # Fallback basÃ© sur les settings
+    # Fallback base sur les settings
     portal_type = getattr(settings, "PORTAL_TYPE", "PROFESSIONAL")
     return "client" if portal_type == "CLIENT" else "pro"

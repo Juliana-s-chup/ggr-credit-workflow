@@ -1,4 +1,4 @@
-"""
+﻿"""
 URL configuration for ggr_credit_workflow project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
@@ -38,7 +38,7 @@ urlpatterns = [
     path("pro/", include(("suivi_demande.urls_pro", "pro"), namespace="pro")),
     # Portail client
     path("client/", include(("suivi_demande.urls_client", "client"), namespace="client")),
-    # URLs principales (minimal: redirections/entrÃ©es gÃ©nÃ©riques)
+    # URLs principales (minimal: redirections/entrees generiques)
     path("", include(("suivi_demande.urls", "suivi"), namespace="suivi")),
 ]
 

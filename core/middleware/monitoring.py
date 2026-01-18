@@ -1,6 +1,6 @@
-"""
+﻿"""
 Middleware de Monitoring
-Mesure les performances et log les requÃªtes
+Mesure les performances et log les requetes
 """
 
 import time
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class PerformanceMonitoringMiddleware(MiddlewareMixin):
     """
-    Mesure le temps de rÃ©ponse de chaque requÃªte
+    Mesure le temps de reponse de chaque requete
     """
 
     def process_request(self, request):
@@ -23,7 +23,7 @@ class PerformanceMonitoringMiddleware(MiddlewareMixin):
         if hasattr(request, "_start_time"):
             duration = time.time() - request._start_time
 
-            # Log si la requÃªte est lente (> 1s)
+            # Log si la requete est lente (> 1s)
             if duration > 1.0:
                 logger.warning(
                     f"Slow request: {request.method} {request.path}",
@@ -44,7 +44,7 @@ class PerformanceMonitoringMiddleware(MiddlewareMixin):
 
 class RequestLoggingMiddleware(MiddlewareMixin):
     """
-    Log toutes les requÃªtes avec contexte
+    Log toutes les requetes avec contexte
     """
 
     def process_request(self, request):
@@ -62,7 +62,7 @@ class RequestLoggingMiddleware(MiddlewareMixin):
 
     @staticmethod
     def get_client_ip(request):
-        """RÃ©cupÃ¨re l'IP rÃ©elle du client"""
+        """Recupere l'IP reelle du client"""
         x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
         if x_forwarded_for:
             ip = x_forwarded_for.split(",")[0]

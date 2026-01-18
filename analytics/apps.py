@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Analytics - Configuration de l'application Django
 """
 
@@ -12,8 +12,8 @@ class AnalyticsConfig(AppConfig):
 
     def ready(self):
         """
-        Code exÃ©cutÃ© au dÃ©marrage de l'application
+        Code execute au demarrage de l'application
         """
-        # Import des signaux si nÃ©cessaire
+        # Import des signaux si necessaire
         # import analytics.signals
         pass

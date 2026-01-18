@@ -1,5 +1,5 @@
-"""
-Commande de Backup de la Base de DonnÃ©es
+﻿"""
+Commande de Backup de la Base de Donnees
 Usage: python manage.py backup_db
 """
 
@@ -13,7 +13,7 @@ from django.core.management import call_command
 
 
 class Command(BaseCommand):
-    help = "CrÃ©e un backup de la base de donnÃ©es"
+    help = "Cree un backup de la base de donnees"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -28,7 +28,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # CrÃ©er le dossier backups
+        # Creer le dossier backups
         backup_dir = os.path.join(settings.BASE_DIR, "backups")
         os.makedirs(backup_dir, exist_ok=True)
 
@@ -37,9 +37,9 @@ class Command(BaseCommand):
         filename = f"backup_{timestamp}.json"
         filepath = os.path.join(backup_dir, filename)
 
-        self.stdout.write(self.style.SUCCESS(f"ðŸ”„ CrÃ©ation du backup..."))
+        self.stdout.write(self.style.SUCCESS(f"ðŸ”„ Creation du backup..."))
 
-        # CrÃ©er le backup avec dumpdata
+        # Creer le backup avec dumpdata
         with open(filepath, "w") as f:
             call_command(
                 "dumpdata",
@@ -51,29 +51,29 @@ class Command(BaseCommand):
                 stdout=f,
             )
 
-        self.stdout.write(self.style.SUCCESS(f"âœ… Backup crÃ©Ã©: {filepath}"))
+        self.stdout.write(self.style.SUCCESS(f"âœ… Backup cree: {filepath}"))
 
-        # Compresser si demandÃ©
+        # Compresser si demande
         if options["compress"]:
             compressed_path = f"{filepath}.gz"
             with open(filepath, "rb") as f_in:
                 with gzip.open(compressed_path, "wb") as f_out:
                     shutil.copyfileobj(f_in, f_out)
 
-            # Supprimer le fichier non compressÃ©
+            # Supprimer le fichier non compresse
             os.remove(filepath)
             filepath = compressed_path
 
-            self.stdout.write(self.style.SUCCESS(f"âœ… Backup compressÃ©: {compressed_path}"))
+            self.stdout.write(self.style.SUCCESS(f"âœ… Backup compresse: {compressed_path}"))
 
-        # Upload S3 si demandÃ©
+        # Upload S3 si demande
         if options["upload_s3"]:
             self.upload_to_s3(filepath)
 
         # Nettoyer les vieux backups (garder 30 jours)
         self.cleanup_old_backups(backup_dir, days=30)
 
-        self.stdout.write(self.style.SUCCESS(f"âœ… Backup terminÃ© avec succÃ¨s"))
+        self.stdout.write(self.style.SUCCESS(f"âœ… Backup termine avec succes"))
 
     def upload_to_s3(self, filepath):
         """Upload le backup sur S3"""
@@ -92,7 +92,7 @@ class Command(BaseCommand):
 
             s3_client.upload_file(filepath, bucket_name, s3_key)
 
-            self.stdout.write(self.style.SUCCESS(f"âœ… Backup uploadÃ© sur S3: {s3_key}"))
+            self.stdout.write(self.style.SUCCESS(f"âœ… Backup uploade sur S3: {s3_key}"))
 
         except (ImportError, ClientError, AttributeError) as e:
             self.stdout.write(self.style.ERROR(f"âŒ Erreur upload S3: {e}"))
@@ -112,4 +112,4 @@ class Command(BaseCommand):
 
                 if file_time < cutoff:
                     os.remove(filepath)
-                    self.stdout.write(self.style.WARNING(f"ðŸ—‘ï¸  Backup supprimÃ©: {filename}"))
+                    self.stdout.write(self.style.WARNING(f"ðŸ—‘ï¸  Backup supprime: {filename}"))

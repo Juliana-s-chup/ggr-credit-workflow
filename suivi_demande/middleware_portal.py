@@ -1,6 +1,6 @@
-"""
-Middleware de contrÃ´le d'accÃ¨s par portail
-EmpÃªche les clients d'accÃ©der au portail pro et vice-versa
+﻿"""
+Middleware de controle d'acces par portail
+Empeche les clients d'acceder au portail pro et vice-versa
 """
 
 from django.conf import settings
@@ -14,11 +14,11 @@ from .models import UserRoles
 
 class PortalAccessMiddleware:
     """
-    Middleware qui contrÃ´le l'accÃ¨s selon le type de portail et le rÃ´le utilisateur.
+    Middleware qui controle l'acces selon le type de portail et le role utilisateur.
 
-    RÃ¨gles :
-    - Portail CLIENT : Seuls les utilisateurs avec rÃ´le CLIENT
-    - Portail PRO : Tous les rÃ´les sauf CLIENT
+    Regles :
+    - Portail CLIENT : Seuls les utilisateurs avec role CLIENT
+    - Portail PRO : Tous les roles sauf CLIENT
     """
 
     def __init__(self, get_response):
@@ -27,13 +27,13 @@ class PortalAccessMiddleware:
         self.allowed_roles = getattr(settings, "ALLOWED_ROLES", [])
 
     def __call__(self, request):
-        # Ignorer pour statiques, mÃ©dias et endpoints d'auth
+        # Ignorer pour statiques, medias et endpoints d'auth
         if request.path.startswith(
             ("/static/", "/media/", "/accounts/login/", "/accounts/logout/", "/login/", "/logout/")
         ):
             return self.get_response(request)
 
-        # DÃ©terminer le type de portail en fonction du host ou du chemin
+        # Determiner le type de portail en fonction du host ou du chemin
         host = request.get_host().split(":")[0]
         path = request.path
         inferred_portal = None
@@ -42,7 +42,7 @@ class PortalAccessMiddleware:
         elif "client." in host or path.startswith("/client/"):
             inferred_portal = "CLIENT"
 
-        # VÃ©rifier uniquement pour les utilisateurs authentifiÃ©s et si portail dÃ©duit
+        # Verifier uniquement pour les utilisateurs authentifies et si portail deduit
         if inferred_portal and request.user.is_authenticated:
             profile = getattr(request.user, "profile", None)
             user_role = getattr(profile, "role", None)
@@ -54,9 +54,9 @@ class PortalAccessMiddleware:
 
             if not role_autorise:
                 messages.error(
-                    request, "AccÃ¨s refusÃ©: votre rÃ´le n'est pas autorisÃ© sur ce portail."
+                    request, "Acces refuse: votre role n'est pas autorise sur ce portail."
                 )
-                # Option: dÃ©connexion douce
+                # Option: deconnexion douce
                 try:
                     from django.contrib.auth import logout
 
@@ -64,14 +64,14 @@ class PortalAccessMiddleware:
                 except Exception:
                     pass
 
-                # Si on peut dÃ©duire l'autre portail, rediriger vers sa page de login locale
+                # Si on peut deduire l'autre portail, rediriger vers sa page de login locale
                 if inferred_portal == "CLIENT":
                     # Utilisateur pro tentant le portail client
-                    return HttpResponseForbidden("AccÃ¨s refusÃ© au portail client pour ce rÃ´le.")
+                    return HttpResponseForbidden("Acces refuse au portail client pour ce role.")
                 else:
                     # Utilisateur client tentant le portail pro
                     return HttpResponseForbidden(
-                        "AccÃ¨s refusÃ© au portail professionnel pour ce rÃ´le."
+                        "Acces refuse au portail professionnel pour ce role."
                     )
 
         return self.get_response(request)
@@ -80,17 +80,17 @@ class PortalAccessMiddleware:
 class PortalRedirectMiddleware:
     """
     Middleware qui redirige automatiquement vers le bon portail
-    selon le domaine d'accÃ¨s initial
+    selon le domaine d'acces initial
     """
 
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
-        # DÃ©tecter le sous-domaine
-        host = request.get_host().split(":")[0]  # Enlever le port si prÃ©sent
+        # Detecter le sous-domaine
+        host = request.get_host().split(":")[0]  # Enlever le port si present
 
-        # Si accÃ¨s depuis le domaine principal, rediriger vers page de choix
+        # Si acces depuis le domaine principal, rediriger vers page de choix
         if host in ["ggr-credit.cg", "www.ggr-credit.cg", "localhost", "127.0.0.1"]:
             if request.path == "/" and not request.user.is_authenticated:
                 # Afficher la page de choix de portail

@@ -1,6 +1,6 @@
-"""
-ModÃ¨le de Machine Learning pour le scoring crÃ©dit.
-PrÃ©dit la probabilitÃ© d'approbation d'un dossier de crÃ©dit.
+﻿"""
+Modele de Machine Learning pour le scoring credit.
+Predit la probabilite d'approbation d'un dossier de credit.
 """
 
 import os
@@ -10,7 +10,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# VÃ©rifier si scikit-learn est disponible
+# Verifier si scikit-learn est disponible
 try:
     import joblib
     import pandas as pd
@@ -21,18 +21,18 @@ try:
     ML_AVAILABLE = True
 except ImportError:
     ML_AVAILABLE = False
-    logger.warning("scikit-learn non installÃ©. FonctionnalitÃ©s ML dÃ©sactivÃ©es.")
+    logger.warning("scikit-learn non installe. Fonctionnalites ML desactivees.")
 
 
 class CreditScoringModel:
-    """ModÃ¨le de scoring crÃ©dit basÃ© sur Random Forest."""
+    """Modele de scoring credit base sur Random Forest."""
 
     def __init__(self, model_path=None):
         """
-        Initialise le modÃ¨le de scoring.
+        Initialise le modele de scoring.
 
         Args:
-            model_path: Chemin vers le modÃ¨le sauvegardÃ© (optionnel)
+            model_path: Chemin vers le modele sauvegarde (optionnel)
         """
         if not ML_AVAILABLE:
             raise ImportError("scikit-learn requis pour le scoring ML")
@@ -48,7 +48,7 @@ class CreditScoringModel:
         ]
 
     def _get_default_model_path(self):
-        """Retourne le chemin par dÃ©faut du modÃ¨le."""
+        """Retourne le chemin par defaut du modele."""
         base_dir = Path(__file__).resolve().parent.parent.parent
         models_dir = base_dir / "ml_models"
         models_dir.mkdir(exist_ok=True)
@@ -56,7 +56,7 @@ class CreditScoringModel:
 
     def prepare_features(self, dossier):
         """
-        PrÃ©pare les features pour la prÃ©diction.
+        Prepare les features pour la prediction.
 
         Args:
             dossier: Instance de DossierCredit
@@ -71,28 +71,28 @@ class CreditScoringModel:
             salaire = float(canevas.salaire_net_moyen_fcfa)
             capacite = float(canevas.capacite_endettement_nette_fcfa)
 
-            # Ratio d'endettement = montant demandÃ© / capacitÃ© nette
+            # Ratio d'endettement = montant demande / capacite nette
             ratio = (montant / capacite) if capacite > 0 else 999
 
             return [montant, duree, salaire, capacite, ratio]
         except Exception as e:
-            logger.error(f"Erreur prÃ©paration features: {e}")
+            logger.error(f"Erreur preparation features: {e}")
             return None
 
     def train(self, dossiers_queryset):
         """
-        EntraÃ®ne le modÃ¨le sur l'historique des dossiers.
+        Entraine le modele sur l'historique des dossiers.
 
         Args:
             dossiers_queryset: QuerySet de DossierCredit avec statuts finaux
 
         Returns:
-            dict: MÃ©triques d'entraÃ®nement (accuracy, report)
+            dict: Metriques d'entrainement (accuracy, report)
         """
         if not ML_AVAILABLE:
             return None
 
-        # PrÃ©parer les donnÃ©es
+        # Preparer les donnees
         X = []
         y = []
 
@@ -104,37 +104,37 @@ class CreditScoringModel:
             if features is None:
                 continue
 
-            # Label: 1 = approuvÃ©, 0 = refusÃ©
+            # Label: 1 = approuve, 0 = refuse
             label = 1 if dossier.statut_agent in ["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"] else 0
 
             X.append(features)
             y.append(label)
 
         if len(X) < 10:
-            logger.warning(f"Pas assez de donnÃ©es pour entraÃ®ner (seulement {len(X)} dossiers)")
+            logger.warning(f"Pas assez de donnees pour entrainer (seulement {len(X)} dossiers)")
             return None
 
         # Split train/test
         X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-        # EntraÃ®ner Random Forest
+        # Entrainer Random Forest
         self.model = RandomForestClassifier(
             n_estimators=100,
             max_depth=10,
             random_state=42,
-            class_weight="balanced",  # GÃ©rer dÃ©sÃ©quilibre classes
+            class_weight="balanced",  # Gerer desequilibre classes
         )
 
         self.model.fit(X_train, y_train)
 
-        # Ã‰valuer
+        # e‰valuer
         y_pred = self.model.predict(X_test)
         accuracy = accuracy_score(y_test, y_pred)
         report = classification_report(y_test, y_pred, output_dict=True)
 
         # Sauvegarder
         joblib.dump(self.model, self.model_path)
-        logger.info(f"ModÃ¨le entraÃ®nÃ© et sauvegardÃ©: accuracy={accuracy:.2%}")
+        logger.info(f"Modele entraine et sauvegarde: accuracy={accuracy:.2%}")
 
         return {
             "accuracy": accuracy,
@@ -144,31 +144,31 @@ class CreditScoringModel:
         }
 
     def load(self):
-        """Charge le modÃ¨le depuis le disque."""
+        """Charge le modele depuis le disque."""
         if not ML_AVAILABLE:
             return False
 
         if not os.path.exists(self.model_path):
-            logger.warning(f"ModÃ¨le non trouvÃ©: {self.model_path}")
+            logger.warning(f"Modele non trouve: {self.model_path}")
             return False
 
         try:
             self.model = joblib.load(self.model_path)
-            logger.info(f"ModÃ¨le chargÃ© depuis {self.model_path}")
+            logger.info(f"Modele charge depuis {self.model_path}")
             return True
         except Exception as e:
-            logger.error(f"Erreur chargement modÃ¨le: {e}")
+            logger.error(f"Erreur chargement modele: {e}")
             return False
 
     def predict_probability(self, dossier):
         """
-        PrÃ©dit la probabilitÃ© d'approbation d'un dossier.
+        Predit la probabilite d'approbation d'un dossier.
 
         Args:
             dossier: Instance de DossierCredit
 
         Returns:
-            float: ProbabilitÃ© d'approbation (0-100%)
+            float: Probabilite d'approbation (0-100%)
         """
         if not ML_AVAILABLE or self.model is None:
             return None
@@ -178,11 +178,11 @@ class CreditScoringModel:
             return None
 
         try:
-            # PrÃ©dire probabilitÃ© classe 1 (approuvÃ©)
+            # Predire probabilite classe 1 (approuve)
             proba = self.model.predict_proba([features])[0][1]
             return round(proba * 100, 2)
         except Exception as e:
-            logger.error(f"Erreur prÃ©diction: {e}")
+            logger.error(f"Erreur prediction: {e}")
             return None
 
     def get_feature_importance(self):
@@ -194,12 +194,12 @@ class CreditScoringModel:
         return dict(zip(self.feature_names, importances))
 
 
-# Instance globale du modÃ¨le
+# Instance globale du modele
 _scoring_model = None
 
 
 def get_scoring_model():
-    """Retourne l'instance globale du modÃ¨le de scoring."""
+    """Retourne l'instance globale du modele de scoring."""
     global _scoring_model
     if _scoring_model is None and ML_AVAILABLE:
         _scoring_model = CreditScoringModel()
@@ -209,13 +209,13 @@ def get_scoring_model():
 
 def predict_approval_probability(dossier):
     """
-    Fonction helper pour prÃ©dire la probabilitÃ© d'approbation.
+    Fonction helper pour predire la probabilite d'approbation.
 
     Args:
         dossier: Instance de DossierCredit
 
     Returns:
-        float: ProbabilitÃ© d'approbation (0-100%) ou None si erreur
+        float: Probabilite d'approbation (0-100%) ou None si erreur
     """
     model = get_scoring_model()
     if model is None:

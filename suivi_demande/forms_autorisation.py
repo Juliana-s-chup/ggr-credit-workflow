@@ -1,4 +1,4 @@
-"""
+﻿"""
 Formulaires pour les autorisations ponctuelles.
 """
 
@@ -7,7 +7,7 @@ from django.forms import formset_factory
 
 
 class AutorisationPonctuelleForm(forms.Form):
-    # En-tÃªte
+    # En-tete
     date = forms.DateField(label="Date", widget=forms.DateInput(attrs={"type": "date"}))
     fdc = forms.CharField(label="FDC", max_length=50)
     gestionnaire = forms.CharField(label="Gest", max_length=100)
@@ -16,10 +16,10 @@ class AutorisationPonctuelleForm(forms.Form):
     radical = forms.CharField(label="Radical", max_length=50)
     segment = forms.CharField(label="Segment", max_length=50, initial="PARTICULIER")
 
-    # DonnÃ©es en FCFA
+    # Donnees en FCFA
     salaire_moyen = forms.DecimalField(label="Salaire moyen (A)", max_digits=12, decimal_places=2)
     montant_echeance = forms.DecimalField(
-        label="Montant Ã©chÃ©ance (B)", max_digits=12, decimal_places=2
+        label="Montant echeance (B)", max_digits=12, decimal_places=2
     )
     disponible_ab = forms.DecimalField(
         label="Disponible (A-B)", max_digits=12, decimal_places=2, required=False
@@ -30,12 +30,12 @@ class AutorisationPonctuelleForm(forms.Form):
 
     # Section 2 - Garanties
     garanties_deja_formalisees = forms.CharField(
-        label="Garanties dÃ©jÃ  formalisÃ©es",
+        label="Garanties deje  formalisees",
         widget=forms.Textarea(attrs={"rows": 2}),
         required=False,
     )
 
-    # Section 3 - Mouvement et rentabilitÃ© (DonnÃ©es en M XAF)
+    # Section 3 - Mouvement et rentabilite (Donnees en M XAF)
     mouvement_2022 = forms.DecimalField(
         label="Mouvement 2022", max_digits=12, decimal_places=2, required=False
     )
@@ -51,7 +51,7 @@ class AutorisationPonctuelleForm(forms.Form):
         label="Objet de la demande", widget=forms.Textarea(attrs={"rows": 2})
     )
 
-    # Section 5 - Avis motivÃ©s
+    # Section 5 - Avis motives
     avis_gestionnaire = forms.CharField(
         label="Gestionnaire", widget=forms.Textarea(attrs={"rows": 3}), required=False
     )
@@ -59,12 +59,12 @@ class AutorisationPonctuelleForm(forms.Form):
         label="Responsable Succursale", widget=forms.Textarea(attrs={"rows": 3}), required=False
     )
     avis_analyste_credit = forms.CharField(
-        label="Analyste CrÃ©dit", widget=forms.Textarea(attrs={"rows": 3}), required=False
+        label="Analyste Credit", widget=forms.Textarea(attrs={"rows": 3}), required=False
     )
 
-    # Section 6 - DÃ©cision
-    decision_ggr = forms.CharField(label="DÃ©cision GGR", required=False)
-    decision_dg = forms.CharField(label="DÃ©cision DG", required=False)
+    # Section 6 - Decision
+    decision_ggr = forms.CharField(label="Decision GGR", required=False)
+    decision_dg = forms.CharField(label="Decision DG", required=False)
 
     def clean(self):
         cleaned = super().clean()
@@ -81,33 +81,33 @@ class AutorisationPonctuelleForm(forms.Form):
 class EngagementLigneForm(forms.Form):
     NATURE_CHOICES = [
         ("NOKI NOKI", "NOKI NOKI"),
-        ("DECOUVERT", "DÃ©couvert"),
+        ("DECOUVERT", "Decouvert"),
         ("AUTRE", "Autre"),
     ]
     nature = forms.ChoiceField(label="Nature", choices=NATURE_CHOICES)
     lignes_credit = forms.DecimalField(
-        label="Lignes de crÃ©dit", max_digits=12, decimal_places=2, required=False
+        label="Lignes de credit", max_digits=12, decimal_places=2, required=False
     )
     validite = forms.DateField(
-        label="ValiditÃ©", required=False, widget=forms.DateInput(attrs={"type": "date"})
+        label="Validite", required=False, widget=forms.DateInput(attrs={"type": "date"})
     )
     utilisation = forms.DecimalField(
         label="Utilisation", max_digits=12, decimal_places=2, required=False
     )
     depassement_en_cours = forms.DecimalField(
-        label="DÃ©passement en cours", max_digits=12, decimal_places=2, required=False
+        label="Depassement en cours", max_digits=12, decimal_places=2, required=False
     )
     montant_sollicite = forms.DecimalField(
-        label="Montant sollicitÃ©", max_digits=12, decimal_places=2, required=False
+        label="Montant sollicite", max_digits=12, decimal_places=2, required=False
     )
     depassement_accord = forms.DecimalField(
-        label="DÃ©passement (en cas d'accord)", max_digits=12, decimal_places=2, required=False
+        label="Depassement (en cas d'accord)", max_digits=12, decimal_places=2, required=False
     )
     engagement_accord = forms.DecimalField(
         label="Engagement (en cas d'accord)", max_digits=12, decimal_places=2, required=False
     )
     validite_depassement = forms.DateField(
-        label="ValiditÃ© dÃ©passement",
+        label="Validite depassement",
         required=False,
         widget=forms.DateInput(attrs={"type": "date"}),
     )

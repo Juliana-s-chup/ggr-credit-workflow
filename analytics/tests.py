@@ -1,4 +1,4 @@
-"""
+﻿"""
 Module Analytics - Tests Unitaires
 Auteur: NGUIMBI Juliana
 Date: Novembre 2025
@@ -20,7 +20,7 @@ class StatistiquesServiceTest(TestCase):
     """
 
     def setUp(self):
-        # CrÃ©er un utilisateur client
+        # Creer un utilisateur client
         self.user = User.objects.create_user(
             username="client_test", password="test123", email="client@test.com"
         )
@@ -28,7 +28,7 @@ class StatistiquesServiceTest(TestCase):
             user=self.user, role="CLIENT", full_name="Client Test"
         )
 
-        # CrÃ©er des dossiers de test
+        # Creer des dossiers de test
         for i in range(5):
             DossierCredit.objects.create(
                 reference=f"TEST-2025-{i:03d}",
@@ -53,7 +53,7 @@ class StatistiquesServiceTest(TestCase):
 
     def test_obtenir_kpis_dashboard(self):
         """
-        Test de rÃ©cupÃ©ration des KPIs
+        Test de recuperation des KPIs
         """
         kpis = AnalyticsService.obtenir_kpis_dashboard()
 
@@ -63,7 +63,7 @@ class StatistiquesServiceTest(TestCase):
 
     def test_obtenir_donnees_graphiques(self):
         """
-        Test de rÃ©cupÃ©ration des donnÃ©es pour graphiques
+        Test de recuperation des donnees pour graphiques
         """
         graphiques = AnalyticsService.obtenir_donnees_graphiques()
 
@@ -71,22 +71,22 @@ class StatistiquesServiceTest(TestCase):
         self.assertIn("repartition_statuts", graphiques)
         self.assertIn("repartition_types", graphiques)
 
-        # VÃ©rifier la structure
+        # Verifier la structure
         self.assertIn("labels", graphiques["evolution_mensuelle"])
         self.assertIn("data", graphiques["evolution_mensuelle"])
 
 
 class MLPredictionServiceTest(TestCase):
     """
-    Tests pour le service de prÃ©diction ML
+    Tests pour le service de prediction ML
     """
 
     def setUp(self):
-        # CrÃ©er un utilisateur
+        # Creer un utilisateur
         self.user = User.objects.create_user(username="client_ml", password="test123")
         UserProfile.objects.create(user=self.user, role="CLIENT", full_name="Client ML")
 
-        # CrÃ©er des dossiers pour entraÃ®nement (minimum 10)
+        # Creer des dossiers pour entrainement (minimum 10)
         for i in range(15):
             DossierCredit.objects.create(
                 reference=f"ML-TEST-{i:03d}",
@@ -99,21 +99,21 @@ class MLPredictionServiceTest(TestCase):
 
     def test_entrainement_modele(self):
         """
-        Test de l'entraÃ®nement du modÃ¨le ML
+        Test de l'entrainement du modele ML
         """
         model = MLPredictionService.entrainer_modele()
 
-        # VÃ©rifier que le modÃ¨le est crÃ©Ã©
+        # Verifier que le modele est cree
         self.assertIsNotNone(model)
 
     def test_prediction_risque(self):
         """
-        Test de prÃ©diction de risque sur un dossier
+        Test de prediction de risque sur un dossier
         """
-        # EntraÃ®ner le modÃ¨le d'abord
+        # Entrainer le modele d'abord
         MLPredictionService.entrainer_modele()
 
-        # CrÃ©er un nouveau dossier pour prÃ©diction
+        # Creer un nouveau dossier pour prediction
         dossier = DossierCredit.objects.create(
             reference="PRED-TEST-001",
             client=self.user,
@@ -123,10 +123,10 @@ class MLPredictionServiceTest(TestCase):
             statut_agent="NOUVEAU",
         )
 
-        # PrÃ©dire le risque
+        # Predire le risque
         prediction = MLPredictionService.predire_risque(dossier)
 
-        # VÃ©rifications
+        # Verifications
         self.assertIsNotNone(prediction)
         self.assertIn(prediction.classe_risque, ["FAIBLE", "MOYEN", "ELEVE"])
         self.assertGreaterEqual(prediction.score_risque, 0)
@@ -141,7 +141,7 @@ class AnalyticsDashboardViewTest(TestCase):
     """
 
     def setUp(self):
-        # CrÃ©er un utilisateur admin
+        # Creer un utilisateur admin
         self.user = User.objects.create_user(
             username="admin_test", password="test123", is_staff=True
         )
@@ -154,11 +154,11 @@ class AnalyticsDashboardViewTest(TestCase):
 
     def test_dashboard_analytics_access(self):
         """
-        Test d'accÃ¨s au dashboard analytics
+        Test d'acces au dashboard analytics
         """
         response = self.client.get("/analytics/dashboard/")
 
-        # VÃ©rifier que la page est accessible
+        # Verifier que la page est accessible
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Analytics")
 
@@ -171,7 +171,7 @@ class AnalyticsDashboardViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
 
-        # VÃ©rifier la structure JSON
+        # Verifier la structure JSON
         data = response.json()
         self.assertIn("total_dossiers", data)
         self.assertIn("taux_approbation", data)
@@ -179,12 +179,12 @@ class AnalyticsDashboardViewTest(TestCase):
 
 class StatistiquesDossierModelTest(TestCase):
     """
-    Tests pour le modÃ¨le StatistiquesDossier
+    Tests pour le modele StatistiquesDossier
     """
 
     def test_creation_statistiques(self):
         """
-        Test de crÃ©ation d'une entrÃ©e statistique
+        Test de creation d'une entree statistique
         """
         stats = StatistiquesDossier.objects.create(
             periode="MOIS",
@@ -198,13 +198,13 @@ class StatistiquesDossierModelTest(TestCase):
         self.assertEqual(stats.total_dossiers, 100)
         self.assertEqual(stats.taux_approbation, 75.0)
 
-        # VÃ©rifier le __str__
+        # Verifier le __str__
         self.assertIn("MOIS", str(stats))
 
 
 class PredictionRisqueModelTest(TestCase):
     """
-    Tests pour le modÃ¨le PredictionRisque
+    Tests pour le modele PredictionRisque
     """
 
     def setUp(self):
@@ -221,14 +221,14 @@ class PredictionRisqueModelTest(TestCase):
 
     def test_creation_prediction(self):
         """
-        Test de crÃ©ation d'une prÃ©diction
+        Test de creation d'une prediction
         """
         prediction = PredictionRisque.objects.create(
             dossier=self.dossier,
             score_risque=45.5,
             probabilite_defaut=0.455,
             classe_risque="MOYEN",
-            recommandation="Analyse approfondie recommandÃ©e.",
+            recommandation="Analyse approfondie recommandee.",
             confiance=0.85,
         )
 

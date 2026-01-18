@@ -1,8 +1,8 @@
-"""
+﻿"""
 Views modulaires pour l'application suivi_demande.
-Structure professionnelle avec sÃ©paration des responsabilitÃ©s.
+Structure professionnelle avec separation des responsabilites.
 
-Ce module centralise tous les imports pour compatibilitÃ© avec urls.py.
+Ce module centralise tous les imports pour compatibilite avec urls.py.
 """
 
 # Vues de base
@@ -46,7 +46,7 @@ from .workflow import (
 )
 
 # Note : Les autres modules (wizard, etc.)
-# seront ajoutÃ©s progressivement pour Ã©viter les erreurs.
+# seront ajoutes progressivement pour eviter les erreurs.
 # Pour l'instant, on importe depuis l'ancien views.py
 
 __all__ = [

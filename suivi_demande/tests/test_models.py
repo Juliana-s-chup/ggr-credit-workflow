@@ -1,5 +1,5 @@
-"""
-Tests unitaires pour les modÃ¨les de l'application suivi_demande.
+﻿"""
+Tests unitaires pour les modeles de l'application suivi_demande.
 """
 
 from decimal import Decimal
@@ -24,16 +24,16 @@ User = get_user_model()
 
 
 class UserProfileTestCase(TestCase):
-    """Tests pour le modÃ¨le UserProfile."""
+    """Tests pour le modele UserProfile."""
 
     def setUp(self):
-        """PrÃ©paration des donnÃ©es de test."""
+        """Preparation des donnees de test."""
         self.user = User.objects.create_user(
             username="testuser", email="test@example.com", password="testpass123"
         )
 
     def test_create_profile(self):
-        """Test crÃ©ation d'un profil utilisateur."""
+        """Test creation d'un profil utilisateur."""
         profile = UserProfile.objects.create(
             user=self.user,
             full_name="Test User",
@@ -47,7 +47,7 @@ class UserProfileTestCase(TestCase):
         self.assertEqual(str(profile), f"Profil de {self.user.username}")
 
     def test_profile_roles(self):
-        """Test des diffÃ©rents rÃ´les."""
+        """Test des differents roles."""
         roles = [
             UserRoles.CLIENT,
             UserRoles.GESTIONNAIRE,
@@ -68,10 +68,10 @@ class UserProfileTestCase(TestCase):
 
 
 class DossierCreditTestCase(TestCase):
-    """Tests pour le modÃ¨le DossierCredit."""
+    """Tests pour le modele DossierCredit."""
 
     def setUp(self):
-        """PrÃ©paration des donnÃ©es de test."""
+        """Preparation des donnees de test."""
         self.client_user = User.objects.create_user(
             username="client", email="client@example.com", password="pass123"
         )
@@ -84,11 +84,11 @@ class DossierCreditTestCase(TestCase):
         )
 
     def test_create_dossier(self):
-        """Test crÃ©ation d'un dossier de crÃ©dit."""
+        """Test creation d'un dossier de credit."""
         dossier = DossierCredit.objects.create(
             client=self.client_user,
             reference="DOS-TEST-001",
-            produit="CrÃ©dit Personnel",
+            produit="Credit Personnel",
             montant=Decimal("1000000.00"),
         )
 
@@ -100,52 +100,52 @@ class DossierCreditTestCase(TestCase):
         self.assertFalse(dossier.wizard_completed)
 
     def test_dossier_str(self):
-        """Test de la reprÃ©sentation string."""
+        """Test de la representation string."""
         dossier = DossierCredit.objects.create(
             client=self.client_user,
             reference="DOS-TEST-002",
-            produit="CrÃ©dit",
+            produit="Credit",
             montant=Decimal("500000.00"),
         )
 
         self.assertEqual(str(dossier), f"DOS-TEST-002 - {self.client_user}")
 
     def test_dossier_montant_positif(self):
-        """Test que le montant doit Ãªtre positif."""
+        """Test que le montant doit etre positif."""
         dossier = DossierCredit(
             client=self.client_user,
             reference="DOS-TEST-003",
-            produit="CrÃ©dit",
-            montant=Decimal("-1000.00"),  # Montant nÃ©gatif
+            produit="Credit",
+            montant=Decimal("-1000.00"),  # Montant negatif
         )
 
-        # Le validator devrait empÃªcher cela
+        # Le validator devrait empecher cela
         with self.assertRaises(ValidationError):
             dossier.full_clean()
 
 
 class CanevasPropositionTestCase(TestCase):
-    """Tests pour le modÃ¨le CanevasProposition."""
+    """Tests pour le modele CanevasProposition."""
 
     def setUp(self):
-        """PrÃ©paration des donnÃ©es de test."""
+        """Preparation des donnees de test."""
         self.user = User.objects.create_user(username="testclient", password="pass123")
         self.dossier = DossierCredit.objects.create(
             client=self.user,
             reference="DOS-CAN-001",
-            produit="CrÃ©dit",
+            produit="Credit",
             montant=Decimal("2000000.00"),
         )
 
     def test_create_canevas(self):
-        """Test crÃ©ation d'un canevas."""
+        """Test creation d'un canevas."""
         canevas = CanevasProposition.objects.create(
             dossier=self.dossier,
             nom_prenom="Test User",
             date_naissance=timezone.now().date(),
             adresse_exacte="123 Test St",
             numero_telephone="+242 06 000 00 00",
-            emploi_occupe="DÃ©veloppeur",
+            emploi_occupe="Developpeur",
             nom_employeur="Test Corp",
             lieu_emploi="Brazzaville",
             salaire_net_moyen_fcfa=Decimal("500000.00"),
@@ -158,7 +158,7 @@ class CanevasPropositionTestCase(TestCase):
         self.assertEqual(canevas.nom_prenom, "Test User")
 
     def test_calcul_capacite_endettement(self):
-        """Test du calcul de capacitÃ© d'endettement."""
+        """Test du calcul de capacite d'endettement."""
         canevas = CanevasProposition.objects.create(
             dossier=self.dossier,
             nom_prenom="Test User",
@@ -186,27 +186,27 @@ class CanevasPropositionTestCase(TestCase):
 
 
 class JournalActionTestCase(TestCase):
-    """Tests pour le modÃ¨le JournalAction."""
+    """Tests pour le modele JournalAction."""
 
     def setUp(self):
-        """PrÃ©paration des donnÃ©es de test."""
+        """Preparation des donnees de test."""
         self.user = User.objects.create_user(username="testuser", password="pass")
         self.dossier = DossierCredit.objects.create(
             client=self.user,
             reference="DOS-JOUR-001",
-            produit="CrÃ©dit",
+            produit="Credit",
             montant=Decimal("1000000.00"),
         )
 
     def test_create_journal_entry(self):
-        """Test crÃ©ation d'une entrÃ©e de journal."""
+        """Test creation d'une entree de journal."""
         journal = JournalAction.objects.create(
             dossier=self.dossier,
             action="CREATION",
             de_statut=None,
             vers_statut=DossierStatutAgent.NOUVEAU,
             acteur=self.user,
-            commentaire_systeme="Dossier crÃ©Ã©",
+            commentaire_systeme="Dossier cree",
         )
 
         self.assertEqual(journal.dossier, self.dossier)
@@ -216,14 +216,14 @@ class JournalActionTestCase(TestCase):
 
 
 class NotificationTestCase(TestCase):
-    """Tests pour le modÃ¨le Notification."""
+    """Tests pour le modele Notification."""
 
     def setUp(self):
-        """PrÃ©paration des donnÃ©es de test."""
+        """Preparation des donnees de test."""
         self.user = User.objects.create_user(username="testuser", password="pass")
 
     def test_create_notification(self):
-        """Test crÃ©ation d'une notification."""
+        """Test creation d'une notification."""
         notif = Notification.objects.create(
             utilisateur_cible=self.user,
             type="TEST",
@@ -237,7 +237,7 @@ class NotificationTestCase(TestCase):
         self.assertEqual(notif.canal, "INTERNE")
 
     def test_notification_str(self):
-        """Test de la reprÃ©sentation string."""
+        """Test de la representation string."""
         notif = Notification.objects.create(
             utilisateur_cible=self.user,
             type="INFO",

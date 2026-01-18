@@ -1,4 +1,4 @@
-"""
+﻿"""
 Development settings.
 """
 
@@ -20,7 +20,7 @@ DATABASES = {
 
 # Hosts / CSRF suitable for local dev (can be overridden via .env)
 # En mode DEBUG, accepter tous les domaines
-ALLOWED_HOSTS = ["*"]  # Accepte tous les domaines en dÃ©veloppement
+ALLOWED_HOSTS = ["*"]  # Accepte tous les domaines en developpement
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

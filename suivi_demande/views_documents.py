@@ -1,5 +1,5 @@
-"""
-Vues pour la gestion des documents d'un dossier de crÃ©dit
+﻿"""
+Vues pour la gestion des documents d'un dossier de credit
 """
 
 from django.contrib import messages
@@ -10,17 +10,17 @@ from django.http import JsonResponse
 from .models import DossierCredit, PieceJointe, UserRoles
 
 
-# CatÃ©gories de documents requis
+# Categories de documents requis
 CATEGORIES_DOCUMENTS = {
     "JURIDIQUE": {
         "label": "Documents Juridiques",
         "icon": "fas fa-gavel",
         "color": "primary",
         "documents": [
-            {"type": "BILLET_ORDRE", "label": "Billet Ã  ordre", "obligatoire": True},
+            {"type": "BILLET_ORDRE", "label": "Billet e  ordre", "obligatoire": True},
             {
                 "type": "DOMICILIATION",
-                "label": "Attestation de domiciliation irrÃ©vocable",
+                "label": "Attestation de domiciliation irrevocable",
                 "obligatoire": True,
             },
         ],
@@ -45,12 +45,12 @@ CATEGORIES_DOCUMENTS = {
         "icon": "fas fa-shield-alt",
         "color": "warning",
         "documents": [
-            {"type": "ASSURANCE_DECES", "label": "Assurance dÃ©cÃ¨s", "obligatoire": True},
-            {"type": "ASSURANCE_INVALIDITE", "label": "Assurance invaliditÃ©", "obligatoire": True},
+            {"type": "ASSURANCE_DECES", "label": "Assurance deces", "obligatoire": True},
+            {"type": "ASSURANCE_INVALIDITE", "label": "Assurance invalidite", "obligatoire": True},
         ],
     },
     "IDENTITE": {
-        "label": "Documents d'IdentitÃ©",
+        "label": "Documents d'Identite",
         "icon": "fas fa-id-card",
         "color": "info",
         "documents": [
@@ -63,28 +63,28 @@ CATEGORIES_DOCUMENTS = {
 
 @login_required
 def upload_documents(request, dossier_id):
-    """Page d'upload des documents par catÃ©gorie."""
+    """Page d'upload des documents par categorie."""
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
 
-    # VÃ©rifier les permissions (Gestionnaire ou Admin)
+    # Verifier les permissions (Gestionnaire ou Admin)
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", None)
     if role not in (UserRoles.GESTIONNAIRE, UserRoles.SUPER_ADMIN):
-        messages.error(request, "AccÃ¨s refusÃ©. RÃ©servÃ© aux gestionnaires.")
+        messages.error(request, "Acces refuse. Reserve aux gestionnaires.")
         return redirect("suivi:dossier_detail", pk=dossier_id)
 
-    # VÃ©rifier que le canevas existe
+    # Verifier que le canevas existe
     try:
         canevas = dossier.canevas
     except:
         messages.warning(request, "Veuillez d'abord remplir le canevas de proposition.")
         return redirect("suivi:canevas_form", dossier_id=dossier_id)
 
-    # RÃ©cupÃ©rer les documents dÃ©jÃ  uploadÃ©s
+    # Recuperer les documents deje  uploades
     documents_existants = PieceJointe.objects.filter(dossier=dossier)
     docs_par_type = {doc.type_piece: doc for doc in documents_existants}
 
-    # Calculer la complÃ©tude
+    # Calculer la completude
     total_obligatoires = 0
     total_fournis = 0
 
@@ -140,26 +140,26 @@ def upload_documents(request, dossier_id):
 def upload_document_ajax(request, dossier_id):
     """Upload d'un document via AJAX."""
     if request.method != "POST":
-        return JsonResponse({"success": False, "error": "MÃ©thode non autorisÃ©e"}, status=405)
+        return JsonResponse({"success": False, "error": "Methode non autorisee"}, status=405)
 
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
 
-    # VÃ©rifier les permissions
+    # Verifier les permissions
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", None)
     if role not in (UserRoles.GESTIONNAIRE, UserRoles.SUPER_ADMIN):
-        return JsonResponse({"success": False, "error": "AccÃ¨s refusÃ©"}, status=403)
+        return JsonResponse({"success": False, "error": "Acces refuse"}, status=403)
 
     type_piece = request.POST.get("type_piece")
     fichier = request.FILES.get("fichier")
 
     if not type_piece or not fichier:
-        return JsonResponse({"success": False, "error": "DonnÃ©es manquantes"}, status=400)
+        return JsonResponse({"success": False, "error": "Donnees manquantes"}, status=400)
 
-    # Supprimer l'ancien document du mÃªme type s'il existe
+    # Supprimer l'ancien document du meme type s'il existe
     PieceJointe.objects.filter(dossier=dossier, type_piece=type_piece).delete()
 
-    # CrÃ©er le nouveau document
+    # Creer le nouveau document
     piece = PieceJointe.objects.create(
         dossier=dossier,
         fichier=fichier,
@@ -171,7 +171,7 @@ def upload_document_ajax(request, dossier_id):
     return JsonResponse(
         {
             "success": True,
-            "message": "Document uploadÃ© avec succÃ¨s",
+            "message": "Document uploade avec succes",
             "piece_id": piece.id,
             "filename": fichier.name,
         }
@@ -182,22 +182,22 @@ def upload_document_ajax(request, dossier_id):
 def delete_document_ajax(request, dossier_id, piece_id):
     """Supprimer un document via AJAX."""
     if request.method != "POST":
-        return JsonResponse({"success": False, "error": "MÃ©thode non autorisÃ©e"}, status=405)
+        return JsonResponse({"success": False, "error": "Methode non autorisee"}, status=405)
 
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
     piece = get_object_or_404(PieceJointe, pk=piece_id, dossier=dossier)
 
-    # VÃ©rifier les permissions
+    # Verifier les permissions
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", None)
     if role not in (UserRoles.GESTIONNAIRE, UserRoles.SUPER_ADMIN):
-        return JsonResponse({"success": False, "error": "AccÃ¨s refusÃ©"}, status=403)
+        return JsonResponse({"success": False, "error": "Acces refuse"}, status=403)
 
     piece.delete()
 
     return JsonResponse(
         {
             "success": True,
-            "message": "Document supprimÃ© avec succÃ¨s",
+            "message": "Document supprime avec succes",
         }
     )

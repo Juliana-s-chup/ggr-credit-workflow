@@ -1,4 +1,4 @@
-"""
+﻿"""
 Formulaires pour l'application suivi_demande.
 """
 
@@ -13,17 +13,17 @@ class SignupForm(UserCreationForm):
 
     full_name = forms.CharField(label="Nom complet", max_length=200)
     email = forms.EmailField(label="Adresse e-mail")
-    phone = forms.CharField(label="NumÃ©ro de tÃ©lÃ©phone", max_length=30)
+    phone = forms.CharField(label="Numero de telephone", max_length=30)
     birth_date = forms.DateField(
         label="Date de naissance", required=False, widget=forms.DateInput(attrs={"type": "date"})
     )
-    address = forms.CharField(label="Adresse complÃ¨te", max_length=255)
-    accept_terms = forms.BooleanField(label="J'accepte les conditions gÃ©nÃ©rales")
+    address = forms.CharField(label="Adresse complete", max_length=255)
+    accept_terms = forms.BooleanField(label="J'accepte les conditions generales")
     role = forms.ChoiceField(
-        label="RÃ´le professionnel",
+        label="Role professionnel",
         choices=[
             (UserRoles.GESTIONNAIRE, "Gestionnaire"),
-            (UserRoles.ANALYSTE, "Analyste crÃ©dit"),
+            (UserRoles.ANALYSTE, "Analyste credit"),
             (UserRoles.RESPONSABLE_GGR, "Responsable GGR"),
             (UserRoles.BOE, "Back Office Engagement"),
             (UserRoles.SUPER_ADMIN, "Super administrateur"),
@@ -47,7 +47,7 @@ class SignupForm(UserCreationForm):
         )
 
     def save(self, commit=True):
-        # CrÃ©er l'utilisateur inactif (Option A) et son profil
+        # Creer l'utilisateur inactif (Option A) et son profil
         user = super().save(commit=False)
         user.email = self.cleaned_data["email"]
         user.is_active = False

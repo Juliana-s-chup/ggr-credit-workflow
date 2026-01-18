@@ -1,6 +1,6 @@
-"""
+﻿"""
 Monitoring et Error Tracking
-Sentry + Logging structurÃ©
+Sentry + Logging structure
 """
 
 import logging
@@ -38,7 +38,7 @@ def init_sentry():
                 sentry_logging,
             ],
             traces_sample_rate=0.1,  # 10% des transactions
-            send_default_pii=False,  # Pas de donnÃ©es personnelles
+            send_default_pii=False,  # Pas de donnees personnelles
             environment=getattr(settings, "ENVIRONMENT", "development"),
             release=getattr(settings, "VERSION", "1.0.0"),
         )
@@ -50,12 +50,12 @@ def init_sentry():
 
 def log_business_event(event_type: str, user_id: int, data: dict):
     """
-    Log un Ã©vÃ©nement mÃ©tier important
+    Log un evenement metier important
 
     Args:
-        event_type: Type d'Ã©vÃ©nement (DOSSIER_CREATED, STATUS_CHANGED, etc.)
+        event_type: Type d'evenement (DOSSIER_CREATED, STATUS_CHANGED, etc.)
         user_id: ID de l'utilisateur
-        data: DonnÃ©es de l'Ã©vÃ©nement
+        data: Donnees de l'evenement
     """
     logger.info(
         f"Business Event: {event_type}",
@@ -69,14 +69,14 @@ def log_business_event(event_type: str, user_id: int, data: dict):
 
 def log_security_event(event_type: str, user=None, ip: str = None, details: dict = None, **kwargs):
     """
-    Log un Ã©vÃ©nement de sÃ©curitÃ©
+    Log un evenement de securite
 
     Args:
         event_type: Type (LOGIN_FAILED, UNAUTHORIZED_ACCESS, etc.)
         user: Objet User Django (optionnel)
         ip: Adresse IP (optionnel)
-        details: DÃ©tails de l'Ã©vÃ©nement (optionnel)
-        **kwargs: Arguments supplÃ©mentaires
+        details: Details de l'evenement (optionnel)
+        **kwargs: Arguments supplementaires
     """
     user_id = user.id if user else kwargs.get("user_id", None)
 
