@@ -144,7 +144,9 @@ class PermissionsTestCase(TestCase):
         )
 
         # Creer un gestionnaire
-        self.gest_user = User.objects.create_user(username="gestionnaire", password="pass")
+        self.gest_user = User.objects.create_user(
+            username="gestionnaire", password="pass"
+        )
         UserProfile.objects.create(
             user=self.gest_user,
             full_name="Gestionnaire",
@@ -208,10 +210,14 @@ class FileUploadSecurityTestCase(TestCase):
 
         # Creer un faux fichier .exe
         fake_exe = SimpleUploadedFile(
-            "malware.exe", b"MZ\x90\x00", content_type="application/x-msdownload"  # Header EXE
+            "malware.exe",
+            b"MZ\x90\x00",
+            content_type="application/x-msdownload",  # Header EXE
         )
 
-        response = self.client.post(f"/dossier/{self.dossier.pk}/upload/", {"fichier": fake_exe})
+        response = self.client.post(
+            f"/dossier/{self.dossier.pk}/upload/", {"fichier": fake_exe}
+        )
 
         # Doit etre refuse
         # Verifier selon votre implementation
@@ -224,10 +230,14 @@ class FileUploadSecurityTestCase(TestCase):
 
         # Creer un fichier de 20MB (si limite est 10MB)
         large_file = SimpleUploadedFile(
-            "large.pdf", b"0" * (20 * 1024 * 1024), content_type="application/pdf"  # 20MB
+            "large.pdf",
+            b"0" * (20 * 1024 * 1024),
+            content_type="application/pdf",  # 20MB
         )
 
-        response = self.client.post(f"/dossier/{self.dossier.pk}/upload/", {"fichier": large_file})
+        response = self.client.post(
+            f"/dossier/{self.dossier.pk}/upload/", {"fichier": large_file}
+        )
 
         # Doit etre refuse
         # Verifier selon votre implementation

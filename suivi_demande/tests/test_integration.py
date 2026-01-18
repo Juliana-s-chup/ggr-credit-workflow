@@ -119,7 +119,9 @@ class WorkflowCompletTestCase(TestCase):
             acteur=self.analyste_user,
         )
 
-        self.assertEqual(dossier.statut_agent, DossierStatutAgent.EN_COURS_VALIDATION_GGR)
+        self.assertEqual(
+            dossier.statut_agent, DossierStatutAgent.EN_COURS_VALIDATION_GGR
+        )
         self.assertEqual(dossier.journal.count(), 2)
 
         # 4. GGR approuve
@@ -135,7 +137,9 @@ class WorkflowCompletTestCase(TestCase):
             acteur=self.resp_ggr_user,
         )
 
-        self.assertEqual(dossier.statut_agent, DossierStatutAgent.APPROUVE_ATTENTE_FONDS)
+        self.assertEqual(
+            dossier.statut_agent, DossierStatutAgent.APPROUVE_ATTENTE_FONDS
+        )
         self.assertEqual(dossier.journal.count(), 3)
 
         # 5. BOE libere les fonds
@@ -258,7 +262,9 @@ class NotificationIntegrationTestCase(TestCase):
         )
 
         # Verifier que la notification existe
-        self.assertEqual(Notification.objects.filter(utilisateur_cible=self.user).count(), 1)
+        self.assertEqual(
+            Notification.objects.filter(utilisateur_cible=self.user).count(), 1
+        )
         self.assertFalse(notif.lu)
 
     def test_notification_marquee_lue_lors_acces_dossier(self):

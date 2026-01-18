@@ -39,7 +39,9 @@ def login_client_view(request):
 
             # Connexion reussie
             auth_login(request, user)
-            messages.success(request, f"Bienvenue {user.get_full_name() or user.username} !")
+            messages.success(
+                request, f"Bienvenue {user.get_full_name() or user.username} !"
+            )
 
             # Redirection vers le dashboard client
             next_url = request.GET.get("next", "/dashboard/")
@@ -89,7 +91,9 @@ def login_pro_view(request):
 
             # Connexion reussie
             auth_login(request, user)
-            messages.success(request, f"Bienvenue {user.get_full_name() or user.username} !")
+            messages.success(
+                request, f"Bienvenue {user.get_full_name() or user.username} !"
+            )
 
             # Redirection vers le dashboard pro
             next_url = request.GET.get("next", "/dashboard/")
@@ -152,7 +156,9 @@ def all_dossiers_list(request):
 
     # Filtrer selon le role
     if role == UserRoles.GESTIONNAIRE:
-        dossiers = DossierCredit.objects.filter(statut_agent__in=["NOUVEAU", "INCOMPLET"])
+        dossiers = DossierCredit.objects.filter(
+            statut_agent__in=["NOUVEAU", "INCOMPLET"]
+        )
     elif role == UserRoles.ANALYSTE:
         dossiers = DossierCredit.objects.filter(
             statut_agent__in=["TRANSMIS_ANALYSTE", "EN_COURS_ANALYSE"]
@@ -273,12 +279,16 @@ def reports_view(request):
         }
 
     # Par statut dans le perimetre
-    par_statut = qs.values("statut_agent").annotate(count=Count("id")).order_by("-count")
+    par_statut = (
+        qs.values("statut_agent").annotate(count=Count("id")).order_by("-count")
+    )
 
     # KPIs additionnels
     finals = ["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REFUSE"]
     processed_count = qs.filter(statut_agent__in=finals).count()
-    approved_count = qs.filter(statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]).count()
+    approved_count = qs.filter(
+        statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]
+    ).count()
     refused_count = qs.filter(statut_agent="REFUSE").count()
     denom = processed_count or 1
     acceptance_rate = round((approved_count / denom) * 100, 2)
@@ -352,7 +362,9 @@ def reports_view(request):
         .order_by("mois")
     )
     chart_monthly = {
-        "labels": [d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_data],
+        "labels": [
+            d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_data
+        ],
         "data": [d["count"] for d in monthly_data],
     }
 
@@ -379,7 +391,9 @@ def reports_view(request):
 
         # Calculer lead time moyen par gestionnaire (approximation simple)
         for mgr in manager_names:
-            mgr_dossiers = qs.filter(acteur_courant__username=mgr, statut_agent__in=finals)
+            mgr_dossiers = qs.filter(
+                acteur_courant__username=mgr, statut_agent__in=finals
+            )
             if mgr_dossiers.exists():
                 # Approximation: utiliser date_maj - date_soumission
                 avg_days = 0
@@ -390,7 +404,9 @@ def reports_view(request):
                         avg_days += delta
                         count += 1
                 if count > 0:
-                    lead_by_manager.append({"manager": mgr, "avg_days": round(avg_days / count, 1)})
+                    lead_by_manager.append(
+                        {"manager": mgr, "avg_days": round(avg_days / count, 1)}
+                    )
 
         chart_lead_time = {
             "labels": [m["manager"] for m in lead_by_manager],
@@ -399,7 +415,11 @@ def reports_view(request):
     except Exception:
         chart_lead_time = {"labels": [], "data": []}
 
-    charts_data = {"monthly": chart_monthly, "statuts": chart_statuts, "lead_time": chart_lead_time}
+    charts_data = {
+        "monthly": chart_monthly,
+        "statuts": chart_statuts,
+        "lead_time": chart_lead_time,
+    }
 
     return render(
         request,

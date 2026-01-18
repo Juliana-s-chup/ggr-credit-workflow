@@ -83,7 +83,12 @@ def _dashboard_client(request, debug_info):
     # Dossiers en cours (non termines)
     dossiers_en_cours = (
         DossierCredit.objects.filter(client=request.user)
-        .exclude(statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE])
+        .exclude(
+            statut_agent__in=[
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
+        )
         .select_related("acteur_courant")
         .order_by("-date_soumission")
     )
@@ -92,7 +97,10 @@ def _dashboard_client(request, debug_info):
     dossiers_traites = (
         DossierCredit.objects.filter(
             client=request.user,
-            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE],
+            statut_agent__in=[
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ],
         )
         .select_related("acteur_courant")
         .order_by("-date_maj")[:20]
@@ -136,7 +144,10 @@ def _dashboard_gestionnaire(request, debug_info):
     # Dossiers en attente
     dossiers_pending = (
         DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]
+            statut_agent__in=[
+                DossierStatutAgent.NOUVEAU,
+                DossierStatutAgent.TRANSMIS_RESP_GEST,
+            ]
         )
         .select_related("client", "acteur_courant")
         .order_by("-date_soumission")
@@ -157,12 +168,17 @@ def _dashboard_gestionnaire(request, debug_info):
     nouveaux_today = nouveaux_qs.filter(date_soumission__date=today).count()
 
     complets_qs = DossierCredit.objects.filter(
-        statut_agent__in=[DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]
+        statut_agent__in=[
+            DossierStatutAgent.TRANSMIS_ANALYSTE,
+            DossierStatutAgent.EN_COURS_ANALYSE,
+        ]
     )
     complets_total = complets_qs.count()
     complets_today = complets_qs.filter(date_soumission__date=today).count()
 
-    retournes_qs = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.TRANSMIS_RESP_GEST)
+    retournes_qs = DossierCredit.objects.filter(
+        statut_agent=DossierStatutAgent.TRANSMIS_RESP_GEST
+    )
     retournes_total = retournes_qs.count()
     retournes_today = retournes_qs.filter(date_soumission__date=today).count()
 
@@ -227,9 +243,9 @@ def _dashboard_gestionnaire(request, debug_info):
     )
 
     # Historique
-    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
-        "-timestamp"
-    )[:20]
+    historique_actions = JournalAction.objects.select_related(
+        "dossier", "acteur"
+    ).order_by("-timestamp")[:20]
 
     # Statistiques supplementaires
     total_dossiers = DossierCredit.objects.count()
@@ -242,11 +258,17 @@ def _dashboard_gestionnaire(request, debug_info):
     approuves = DossierCredit.objects.filter(
         statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
     ).count()
-    refuses = DossierCredit.objects.filter(statut_agent=DossierStatutAgent.REFUSE).count()
+    refuses = DossierCredit.objects.filter(
+        statut_agent=DossierStatutAgent.REFUSE
+    ).count()
     total_decides = approuves + refuses
-    taux_validation = round((approuves / total_decides) * 100, 1) if total_decides else 0
+    taux_validation = (
+        round((approuves / total_decides) * 100, 1) if total_decides else 0
+    )
 
-    portefeuille_total = DossierCredit.objects.aggregate(total=Sum("montant"))["total"] or 0
+    portefeuille_total = (
+        DossierCredit.objects.aggregate(total=Sum("montant"))["total"] or 0
+    )
 
     dossiers_urgents = list(dossiers_pending[:5])
     mes_clients = []
@@ -265,9 +287,13 @@ def _dashboard_gestionnaire(request, debug_info):
     if total_dossiers == 0:
         messages.warning(request, "ðŸ” Aucun dossier n'existe en base de donnees.")
     elif dossiers_en_cours.count() == 0:
-        messages.info(request, f"ðŸ” {total_dossiers} dossier(s) en base, mais aucun actif.")
+        messages.info(
+            request, f"ðŸ” {total_dossiers} dossier(s) en base, mais aucun actif."
+        )
     else:
-        messages.success(request, f"âœ“ {dossiers_en_cours.count()} dossier(s) en cours.")
+        messages.success(
+            request, f"âœ“ {dossiers_en_cours.count()} dossier(s) en cours."
+        )
 
     ctx = {
         "dossiers_pending": dossiers_pending,
@@ -301,26 +327,32 @@ def _dashboard_analyste(request, debug_info):
         .order_by("-date_soumission")
     )
 
-    dossiers_en_attente = dossiers.filter(statut_agent=DossierStatutAgent.TRANSMIS_ANALYSTE)
+    dossiers_en_attente = dossiers.filter(
+        statut_agent=DossierStatutAgent.TRANSMIS_ANALYSTE
+    )
     dossiers_a_analyser = dossiers
     dossiers_prioritaires = dossiers[:5]
 
     total_dossiers = dossiers.count()
     dossiers_ce_mois = dossiers.filter(
-        date_soumission__year=timezone.now().year, date_soumission__month=timezone.now().month
+        date_soumission__year=timezone.now().year,
+        date_soumission__month=timezone.now().month,
     ).count()
 
     dossiers_traites = (
         DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            statut_agent__in=[
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
         )
         .select_related("client")
         .order_by("-date_maj")[:20]
     )
 
-    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
-        "-timestamp"
-    )[:20]
+    historique_actions = JournalAction.objects.select_related(
+        "dossier", "acteur"
+    ).order_by("-timestamp")[:20]
 
     context = {
         "dossiers": dossiers,
@@ -350,15 +382,18 @@ def _dashboard_responsable_ggr(request, debug_info):
 
     dossiers_traites = (
         DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            statut_agent__in=[
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
         )
         .select_related("client")
         .order_by("-date_maj")[:20]
     )
 
-    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
-        "-timestamp"
-    )[:20]
+    historique_actions = JournalAction.objects.select_related(
+        "dossier", "acteur"
+    ).order_by("-timestamp")[:20]
 
     return render(
         request,
@@ -374,7 +409,9 @@ def _dashboard_responsable_ggr(request, debug_info):
 def _dashboard_boe(request, debug_info):
     """Dashboard pour le BOE (Back Office Engagement)."""
     dossiers = (
-        DossierCredit.objects.filter(statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS)
+        DossierCredit.objects.filter(
+            statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
+        )
         .select_related("client", "acteur_courant")
         .order_by("-date_soumission")
     )
@@ -386,15 +423,18 @@ def _dashboard_boe(request, debug_info):
 
     dossiers_traites = (
         DossierCredit.objects.filter(
-            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            statut_agent__in=[
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
         )
         .select_related("client")
         .order_by("-date_maj")[:20]
     )
 
-    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
-        "-timestamp"
-    )[:20]
+    historique_actions = JournalAction.objects.select_related(
+        "dossier", "acteur"
+    ).order_by("-timestamp")[:20]
 
     context = {
         "dossiers": dossiers,
@@ -473,7 +513,8 @@ def dossier_detail(request, pk):
             utilisateur_cible=request.user,
             lu=False,
         ).filter(
-            Q(titre__icontains=dossier.reference) | Q(message__icontains=dossier.reference)
+            Q(titre__icontains=dossier.reference)
+            | Q(message__icontains=dossier.reference)
         ).update(lu=True)
     except Exception:
         pass
@@ -506,7 +547,9 @@ def dossier_detail(request, pk):
 
         elif action == "upload_piece":
             if not can_upload:
-                messages.error(request, "Vous ne pouvez pas deposer de piece e  ce stade.")
+                messages.error(
+                    request, "Vous ne pouvez pas deposer de piece e  ce stade."
+                )
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
@@ -522,14 +565,18 @@ def dossier_detail(request, pk):
             max_size = getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024)
             if file_size > max_size:
                 max_mb = round(max_size / (1024 * 1024), 2)
-                messages.error(request, f"Fichier trop volumineux. Taille max: {max_mb} Mo.")
+                messages.error(
+                    request, f"Fichier trop volumineux. Taille max: {max_mb} Mo."
+                )
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
             # Validation extension
             filename = getattr(f, "name", "")
             ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-            allowed_exts = getattr(settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"})
+            allowed_exts = getattr(
+                settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"}
+            )
             if ext not in allowed_exts:
                 messages.error(
                     request,
@@ -557,7 +604,9 @@ def dossier_detail(request, pk):
         .order_by("-upload_at")
     )
     commentaires = (
-        Commentaire.objects.filter(dossier=dossier).select_related("auteur").order_by("-created_at")
+        Commentaire.objects.filter(dossier=dossier)
+        .select_related("auteur")
+        .order_by("-created_at")
     )
     journal = (
         JournalAction.objects.filter(dossier=dossier)

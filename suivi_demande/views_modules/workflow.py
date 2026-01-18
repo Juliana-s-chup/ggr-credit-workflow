@@ -137,7 +137,9 @@ def transition_dossier(request, pk, action: str):
         allowed = False
 
     if not allowed:
-        messages.error(request, "Action non autorisee pour votre role ou l'etat actuel du dossier.")
+        messages.error(
+            request, "Action non autorisee pour votre role ou l'etat actuel du dossier."
+        )
         namespace = get_current_namespace(request)
         return redirect(f"{namespace}:dashboard")
 
@@ -169,7 +171,9 @@ def transition_dossier(request, pk, action: str):
             "ancien_statut_client": ancien_statut_client,
             "nouveau_statut_client": dossier.statut_client,
             "role": role,
-            "commentaire_retour": commentaire_retour if action == "retour_client" else None,
+            "commentaire_retour": (
+                commentaire_retour if action == "retour_client" else None
+            ),
         },
     )
 
@@ -179,7 +183,8 @@ def transition_dossier(request, pk, action: str):
     except Exception as e:
         log_error("notifications_transition", e, request.user)
         messages.warning(
-            request, "Transition effectuee mais erreur lors de l'envoi des notifications."
+            request,
+            "Transition effectuee mais erreur lors de l'envoi des notifications.",
         )
 
     # Message de succes
@@ -291,10 +296,12 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
                     message=message_template.format(
                         user_name=user.get_full_name() or user.username,
                         dossier_ref=dossier.reference,
-                        client_name=dossier.client.get_full_name() or dossier.client.username,
+                        client_name=dossier.client.get_full_name()
+                        or dossier.client.username,
                         montant=dossier.montant,
                         produit=dossier.produit,
-                        expediteur=request.user.get_full_name() or request.user.username,
+                        expediteur=request.user.get_full_name()
+                        or request.user.username,
                     ),
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
@@ -330,7 +337,9 @@ def _send_email_to_client(request, dossier, action, commentaire_retour):
     html_message = None
     if action == "retour_client":
         try:
-            logo_url = request.build_absolute_uri(static("suivi_demande/img/Credit_Du_Congo.png"))
+            logo_url = request.build_absolute_uri(
+                static("suivi_demande/img/Credit_Du_Congo.png")
+            )
             site_url = request.build_absolute_uri("/")
 
             html_message = render_to_string(

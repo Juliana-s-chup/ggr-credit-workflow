@@ -11,20 +11,31 @@ class DemandeStep1Form(forms.Form):
     date_naissance = forms.DateField(
         label="Date de naissance", widget=forms.DateInput(attrs={"type": "date"})
     )
-    nationalite = forms.CharField(label="Nationalite", max_length=100, initial="CONGOLAISE")
+    nationalite = forms.CharField(
+        label="Nationalite", max_length=100, initial="CONGOLAISE"
+    )
 
     adresse_exacte = forms.CharField(
         label="Adresse exacte", max_length=255, widget=forms.Textarea(attrs={"rows": 2})
     )
-    telephone_travail = forms.CharField(label="NÂ° de tel Travail", max_length=30, required=False)
-    telephone_domicile = forms.CharField(label="NÂ° de tel Domicile", max_length=30, required=False)
+    telephone_travail = forms.CharField(
+        label="NÂ° de tel Travail", max_length=30, required=False
+    )
+    telephone_domicile = forms.CharField(
+        label="NÂ° de tel Domicile", max_length=30, required=False
+    )
     numero_telephone = forms.CharField(label="NÂ° de tel portable", max_length=30)
 
     emploi_occupe = forms.CharField(label="Emploi occupe", max_length=200)
     STATUT_EMPLOI = [("PRIVE", "Prive"), ("PUBLIC", "Public")]
     statut_emploi = forms.ChoiceField(label="Statut d'emploi", choices=STATUT_EMPLOI)
     anciennete_emploi = forms.CharField(label="Anciennete emploi", max_length=100)
-    TYPE_CONTRAT = [("CDI", "CDI"), ("CDD", "CDD"), ("STAGE", "Stage"), ("AUTRE", "Autre")]
+    TYPE_CONTRAT = [
+        ("CDI", "CDI"),
+        ("CDD", "CDD"),
+        ("STAGE", "Stage"),
+        ("AUTRE", "Autre"),
+    ]
     type_contrat = forms.ChoiceField(
         label="Type de contrat", widget=forms.RadioSelect, choices=TYPE_CONTRAT
     )
@@ -34,7 +45,9 @@ class DemandeStep1Form(forms.Form):
     employeur_client_banque = forms.BooleanField(
         label="Employeur client de la banque", required=False
     )
-    radical_employeur = forms.CharField(label="Radical employeur", max_length=50, required=False)
+    radical_employeur = forms.CharField(
+        label="Radical employeur", max_length=50, required=False
+    )
 
     # Situation familiale (revient e  l'etape 1)
     SITUATION_FAM = [
@@ -70,9 +83,15 @@ class DemandeStep1Form(forms.Form):
 
     # Conjoint & logement
     salaire_conjoint = forms.DecimalField(
-        label="Salaire conjoint (FCFA)", max_digits=12, decimal_places=2, required=False, initial=0
+        label="Salaire conjoint (FCFA)",
+        max_digits=12,
+        decimal_places=2,
+        required=False,
+        initial=0,
     )
-    emploi_conjoint = forms.CharField(label="Emploi conjoint", max_length=200, required=False)
+    emploi_conjoint = forms.CharField(
+        label="Emploi conjoint", max_length=200, required=False
+    )
     statut_logement = forms.ChoiceField(
         label="Logement / habitation",
         required=False,
@@ -88,7 +107,9 @@ class DemandeStep1Form(forms.Form):
     )
 
     # (Portail PRO) Selection d'un client existant (optionnel)
-    client_identifier = forms.CharField(label="Client (email ou nom d'utilisateur)", required=False)
+    client_identifier = forms.CharField(
+        label="Client (email ou nom d'utilisateur)", required=False
+    )
     permettre_suivi_client = forms.BooleanField(
         label="Permettre au client selectionne de suivre ce dossier", required=False
     )
@@ -108,8 +129,12 @@ class DemandeStep1Form(forms.Form):
     def clean(self):
         data = super().clean()
         try:
-            if data.get("situation_famille") == "MARIE" and not data.get("regime_matrimonial"):
-                self.add_error("regime_matrimonial", "Ce champ est requis pour un(e) marie(e).")
+            if data.get("situation_famille") == "MARIE" and not data.get(
+                "regime_matrimonial"
+            ):
+                self.add_error(
+                    "regime_matrimonial", "Ce champ est requis pour un(e) marie(e)."
+                )
             # Validation optionnelle: client existant via identifiant (username/email)
             ident = (data.get("client_identifier") or "").strip()
             if ident:

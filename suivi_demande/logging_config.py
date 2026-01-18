@@ -72,7 +72,9 @@ def log_login_failure(username, ip_address=None, reason=None):
     """Log une tentative de connexion echouee."""
     ip_info = f" | IP: {ip_address}" if ip_address else ""
     reason_info = f" | Raison: {reason}" if reason else ""
-    security_logger.warning(f"[LOGIN FAILED] Username: {username}{ip_info}{reason_info}")
+    security_logger.warning(
+        f"[LOGIN FAILED] Username: {username}{ip_info}{reason_info}"
+    )
 
 
 def log_logout(user):
@@ -94,7 +96,8 @@ def log_permission_denied(user, permission, resource=None):
     """Log un refus de permission."""
     resource_info = f" | Ressource: {resource}" if resource else ""
     security_logger.warning(
-        f"[PERMISSION DENIED] User: {user.username} | " f"Permission: {permission}{resource_info}"
+        f"[PERMISSION DENIED] User: {user.username} | "
+        f"Permission: {permission}{resource_info}"
     )
 
 
@@ -109,7 +112,9 @@ def log_model_update(model_name, instance_id, fields=None, user=None):
     """Log la mise e  jour d'une instance."""
     fields_info = f" | Champs: {', '.join(fields)}" if fields else ""
     user_info = f" | Par: {user.username}" if user else ""
-    models_logger.debug(f"[UPDATE] {model_name} | ID: {instance_id}{fields_info}{user_info}")
+    models_logger.debug(
+        f"[UPDATE] {model_name} | ID: {instance_id}{fields_info}{user_info}"
+    )
 
 
 def log_model_deletion(model_name, instance_id, user=None):
@@ -123,7 +128,9 @@ def log_error(context, error, user=None, extra_info=None):
     """Log une erreur generique."""
     user_info = f" | User: {user.username}" if user else ""
     extra = f" | Info: {extra_info}" if extra_info else ""
-    logger.error(f"[ERREUR] Contexte: {context} | Erreur: {str(error)}{user_info}{extra}")
+    logger.error(
+        f"[ERREUR] Contexte: {context} | Erreur: {str(error)}{user_info}{extra}"
+    )
 
 
 def log_exception(context, exception, user=None):
@@ -135,7 +142,9 @@ def log_exception(context, exception, user=None):
 def log_validation_error(form_name, errors, user=None):
     """Log une erreur de validation."""
     user_info = f" | User: {user.username}" if user else ""
-    logger.warning(f"[VALIDATION ERROR] Formulaire: {form_name} | Erreurs: {errors}{user_info}")
+    logger.warning(
+        f"[VALIDATION ERROR] Formulaire: {form_name} | Erreurs: {errors}{user_info}"
+    )
 
 
 # LOGS NOTIFICATIONS

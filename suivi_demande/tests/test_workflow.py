@@ -25,7 +25,9 @@ class WorkflowTestCase(TestCase):
     def setUp(self):
         """Preparation des donnees de test."""
         # Creer les utilisateurs
-        self.client_user = User.objects.create_user(username="client", password="pass123")
+        self.client_user = User.objects.create_user(
+            username="client", password="pass123"
+        )
         UserProfile.objects.create(
             user=self.client_user,
             full_name="Client Test",
@@ -34,7 +36,9 @@ class WorkflowTestCase(TestCase):
             role=UserRoles.CLIENT,
         )
 
-        self.gest_user = User.objects.create_user(username="gestionnaire", password="pass123")
+        self.gest_user = User.objects.create_user(
+            username="gestionnaire", password="pass123"
+        )
         UserProfile.objects.create(
             user=self.gest_user,
             full_name="Gestionnaire Test",
@@ -43,7 +47,9 @@ class WorkflowTestCase(TestCase):
             role=UserRoles.GESTIONNAIRE,
         )
 
-        self.analyste_user = User.objects.create_user(username="analyste", password="pass123")
+        self.analyste_user = User.objects.create_user(
+            username="analyste", password="pass123"
+        )
         UserProfile.objects.create(
             user=self.analyste_user,
             full_name="Analyste Test",
@@ -114,7 +120,9 @@ class WorkflowTestCase(TestCase):
         )
 
         # Verifier
-        self.assertEqual(self.dossier.statut_agent, DossierStatutAgent.TRANSMIS_ANALYSTE)
+        self.assertEqual(
+            self.dossier.statut_agent, DossierStatutAgent.TRANSMIS_ANALYSTE
+        )
         self.assertEqual(self.dossier.acteur_courant, self.analyste_user)
         self.assertEqual(self.dossier.journal.count(), 1)
 
@@ -155,10 +163,14 @@ class WorkflowTestCase(TestCase):
 
         # Verifier l'historique
         self.assertEqual(self.dossier.journal.count(), 3)
-        self.assertEqual(self.dossier.statut_agent, DossierStatutAgent.EN_COURS_VALIDATION_GGR)
+        self.assertEqual(
+            self.dossier.statut_agent, DossierStatutAgent.EN_COURS_VALIDATION_GGR
+        )
 
         # Verifier l'ordre chronologique
         actions = list(self.dossier.journal.order_by("timestamp"))
         self.assertEqual(actions[0].vers_statut, DossierStatutAgent.TRANSMIS_ANALYSTE)
         self.assertEqual(actions[1].vers_statut, DossierStatutAgent.EN_COURS_ANALYSE)
-        self.assertEqual(actions[2].vers_statut, DossierStatutAgent.EN_COURS_VALIDATION_GGR)
+        self.assertEqual(
+            actions[2].vers_statut, DossierStatutAgent.EN_COURS_VALIDATION_GGR
+        )

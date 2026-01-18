@@ -32,7 +32,9 @@ class PerformanceMonitoringMiddleware(MiddlewareMixin):
                         "method": request.method,
                         "path": request.path,
                         "status_code": response.status_code,
-                        "user_id": request.user.id if request.user.is_authenticated else None,
+                        "user_id": (
+                            request.user.id if request.user.is_authenticated else None
+                        ),
                     },
                 )
 

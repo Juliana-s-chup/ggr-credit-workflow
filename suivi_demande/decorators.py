@@ -85,12 +85,16 @@ def transition_allowed(view_func):
                     DossierStatutAgent.EN_COURS_ANALYSE,
                 ]
             elif role == UserRoles.BOE and action == "liberer_fonds":
-                allowed = dossier.statut_agent == DossierStatutAgent.APPROUVE_ATTENTE_FONDS
+                allowed = (
+                    dossier.statut_agent == DossierStatutAgent.APPROUVE_ATTENTE_FONDS
+                )
         except Exception:
             allowed = False
 
         if not allowed:
-            messages.error(request, "Action non autorisee pour votre role ou l'etat du dossier.")
+            messages.error(
+                request, "Action non autorisee pour votre role ou l'etat du dossier."
+            )
             return redirect("suivi:dashboard")
 
         return view_func(request, *args, **kwargs)

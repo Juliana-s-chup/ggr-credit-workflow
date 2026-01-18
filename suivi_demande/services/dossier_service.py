@@ -29,7 +29,10 @@ class DossierService:
 
     @staticmethod
     def get_dossiers_for_user(
-        user: User, page: int = 1, per_page: int = 20, filters: Optional[Dict[str, Any]] = None
+        user: User,
+        page: int = 1,
+        per_page: int = 20,
+        filters: Optional[Dict[str, Any]] = None,
     ) -> Page:
         """
         Recupere les dossiers accessibles par un utilisateur avec pagination.
@@ -193,7 +196,10 @@ class DossierService:
 
     @staticmethod
     def transition_statut(
-        dossier: DossierCredit, nouveau_statut: str, acteur: User, commentaire: Optional[str] = None
+        dossier: DossierCredit,
+        nouveau_statut: str,
+        acteur: User,
+        commentaire: Optional[str] = None,
     ) -> bool:
         """
         Effectue une transition de statut avec validation.
@@ -221,7 +227,8 @@ class DossierService:
             de_statut=ancien_statut,
             vers_statut=nouveau_statut,
             acteur=acteur,
-            commentaire_systeme=commentaire or f"Transition {ancien_statut} â†’ {nouveau_statut}",
+            commentaire_systeme=commentaire
+            or f"Transition {ancien_statut} â†’ {nouveau_statut}",
         )
 
         # Creer notification pour le client
@@ -262,13 +269,17 @@ class DossierService:
         stats = {
             "total": queryset.count(),
             "en_cours": queryset.exclude(
-                statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+                statut_agent__in=[
+                    DossierStatutAgent.FONDS_LIBERE,
+                    DossierStatutAgent.REFUSE,
+                ]
             ).count(),
             "approuves": queryset.filter(
                 statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
             ).count(),
             "refuses": queryset.filter(statut_agent=DossierStatutAgent.REFUSE).count(),
-            "montant_total": queryset.aggregate(total=Sum("montant"))["total"] or Decimal("0"),
+            "montant_total": queryset.aggregate(total=Sum("montant"))["total"]
+            or Decimal("0"),
         }
 
         return stats

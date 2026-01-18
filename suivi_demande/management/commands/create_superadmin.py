@@ -13,9 +13,14 @@ class Command(BaseCommand):
             "--username", type=str, default="admin", help="Username (default: admin)"
         )
         parser.add_argument(
-            "--password", type=str, default="admin123", help="Password (default: admin123)"
+            "--password",
+            type=str,
+            default="admin123",
+            help="Password (default: admin123)",
         )
-        parser.add_argument("--email", type=str, default="admin@creditducongo.com", help="Email")
+        parser.add_argument(
+            "--email", type=str, default="admin@creditducongo.com", help="Email"
+        )
 
     def handle(self, *args, **options):
         username = options["username"]
@@ -38,10 +43,14 @@ class Command(BaseCommand):
         )
 
         if created:
-            self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Created new user: {username}"))
+            self.stdout.write(
+                self.style.SUCCESS(f"Ã¢Å“â€œ Created new user: {username}")
+            )
         else:
             self.stdout.write(
-                self.style.WARNING(f'Ã¢Å¡Â  User "{username}" already exists, updating...')
+                self.style.WARNING(
+                    f'Ã¢Å¡Â  User "{username}" already exists, updating...'
+                )
             )
             user.is_staff = True
             user.is_superuser = True
@@ -69,9 +78,13 @@ class Command(BaseCommand):
             profile.role = UserRoles.SUPER_ADMIN
             profile.full_name = "Super Administrateur"
             profile.save()
-            self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Profile updated to SUPER_ADMIN"))
+            self.stdout.write(
+                self.style.SUCCESS(f"Ã¢Å“â€œ Profile updated to SUPER_ADMIN")
+            )
         elif profile_created:
-            self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Profile created with SUPER_ADMIN role"))
+            self.stdout.write(
+                self.style.SUCCESS(f"Ã¢Å“â€œ Profile created with SUPER_ADMIN role")
+            )
         else:
             self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Profile already configured"))
 
@@ -82,5 +95,7 @@ class Command(BaseCommand):
         self.stdout.write(f"Password: {self.style.SUCCESS(password)}")
         self.stdout.write(f"Email:    {email}")
         self.stdout.write(f'Role:     {self.style.SUCCESS("SUPER_ADMIN")}')
-        self.stdout.write(f"\nYou can now log in at: http://localhost:8000/accounts/login/")
+        self.stdout.write(
+            f"\nYou can now log in at: http://localhost:8000/accounts/login/"
+        )
         self.stdout.write(f'{"="*60}\n')

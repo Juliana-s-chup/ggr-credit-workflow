@@ -28,7 +28,9 @@ class Command(BaseCommand):
 
         if count < 10:
             self.stdout.write(
-                self.style.WARNING(f"âš ï¸  Pas assez de donnees (minimum 10, trouves {count})")
+                self.style.WARNING(
+                    f"âš ï¸  Pas assez de donnees (minimum 10, trouves {count})"
+                )
             )
             return
 
@@ -50,5 +52,7 @@ class Command(BaseCommand):
         importance = model.get_feature_importance()
         if importance:
             self.stdout.write("\nðŸ“ˆ Importance des features:")
-            for feature, score in sorted(importance.items(), key=lambda x: x[1], reverse=True):
+            for feature, score in sorted(
+                importance.items(), key=lambda x: x[1], reverse=True
+            ):
                 self.stdout.write(f"   {feature}: {score:.3f}")

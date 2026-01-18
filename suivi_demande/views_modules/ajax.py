@@ -14,9 +14,9 @@ def test_notification_api(request):
         return JsonResponse({"error": "Non authentifie"}, status=401)
 
     # Recuperer les notifications recentes
-    notifications = Notification.objects.filter(utilisateur_cible=request.user).order_by(
-        "-created_at"
-    )[:5]
+    notifications = Notification.objects.filter(
+        utilisateur_cible=request.user
+    ).order_by("-created_at")[:5]
 
     data = {
         "notifications": [

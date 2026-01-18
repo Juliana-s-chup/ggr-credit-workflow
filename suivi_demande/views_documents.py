@@ -30,9 +30,21 @@ CATEGORIES_DOCUMENTS = {
         "icon": "fas fa-building",
         "color": "success",
         "documents": [
-            {"type": "BULLETIN_1", "label": "Bulletin de salaire (Mois -1)", "obligatoire": True},
-            {"type": "BULLETIN_2", "label": "Bulletin de salaire (Mois -2)", "obligatoire": True},
-            {"type": "BULLETIN_3", "label": "Bulletin de salaire (Mois -3)", "obligatoire": True},
+            {
+                "type": "BULLETIN_1",
+                "label": "Bulletin de salaire (Mois -1)",
+                "obligatoire": True,
+            },
+            {
+                "type": "BULLETIN_2",
+                "label": "Bulletin de salaire (Mois -2)",
+                "obligatoire": True,
+            },
+            {
+                "type": "BULLETIN_3",
+                "label": "Bulletin de salaire (Mois -3)",
+                "obligatoire": True,
+            },
             {
                 "type": "ATTESTATION_EMPLOYEUR",
                 "label": "Attestation de l'employeur",
@@ -45,8 +57,16 @@ CATEGORIES_DOCUMENTS = {
         "icon": "fas fa-shield-alt",
         "color": "warning",
         "documents": [
-            {"type": "ASSURANCE_DECES", "label": "Assurance deces", "obligatoire": True},
-            {"type": "ASSURANCE_INVALIDITE", "label": "Assurance invalidite", "obligatoire": True},
+            {
+                "type": "ASSURANCE_DECES",
+                "label": "Assurance deces",
+                "obligatoire": True,
+            },
+            {
+                "type": "ASSURANCE_INVALIDITE",
+                "label": "Assurance invalidite",
+                "obligatoire": True,
+            },
         ],
     },
     "IDENTITE": {
@@ -55,7 +75,11 @@ CATEGORIES_DOCUMENTS = {
         "color": "info",
         "documents": [
             {"type": "CNI", "label": "CNI ou Passeport", "obligatoire": True},
-            {"type": "JUSTIF_DOMICILE", "label": "Justificatif de domicile", "obligatoire": False},
+            {
+                "type": "JUSTIF_DOMICILE",
+                "label": "Justificatif de domicile",
+                "obligatoire": False,
+            },
         ],
     },
 }
@@ -92,7 +116,9 @@ def upload_documents(request, dossier_id):
     for cat_key, cat_data in CATEGORIES_DOCUMENTS.items():
         cat_obligatoires = sum(1 for d in cat_data["documents"] if d["obligatoire"])
         cat_fournis = sum(
-            1 for d in cat_data["documents"] if d["obligatoire"] and d["type"] in docs_par_type
+            1
+            for d in cat_data["documents"]
+            if d["obligatoire"] and d["type"] in docs_par_type
         )
 
         total_obligatoires += cat_obligatoires
@@ -140,7 +166,9 @@ def upload_documents(request, dossier_id):
 def upload_document_ajax(request, dossier_id):
     """Upload d'un document via AJAX."""
     if request.method != "POST":
-        return JsonResponse({"success": False, "error": "Methode non autorisee"}, status=405)
+        return JsonResponse(
+            {"success": False, "error": "Methode non autorisee"}, status=405
+        )
 
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
 
@@ -154,7 +182,9 @@ def upload_document_ajax(request, dossier_id):
     fichier = request.FILES.get("fichier")
 
     if not type_piece or not fichier:
-        return JsonResponse({"success": False, "error": "Donnees manquantes"}, status=400)
+        return JsonResponse(
+            {"success": False, "error": "Donnees manquantes"}, status=400
+        )
 
     # Supprimer l'ancien document du meme type s'il existe
     PieceJointe.objects.filter(dossier=dossier, type_piece=type_piece).delete()
@@ -182,7 +212,9 @@ def upload_document_ajax(request, dossier_id):
 def delete_document_ajax(request, dossier_id, piece_id):
     """Supprimer un document via AJAX."""
     if request.method != "POST":
-        return JsonResponse({"success": False, "error": "Methode non autorisee"}, status=405)
+        return JsonResponse(
+            {"success": False, "error": "Methode non autorisee"}, status=405
+        )
 
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
     piece = get_object_or_404(PieceJointe, pk=piece_id, dossier=dossier)

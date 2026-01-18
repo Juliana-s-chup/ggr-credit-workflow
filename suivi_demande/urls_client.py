@@ -22,14 +22,18 @@ urlpatterns = [
     path("dossier/<int:pk>/", views.dossier_detail, name="dossier_detail"),
     # Nouvelle demande (wizard client)
     path("nouvelle-demande/", views.demande_start, name="demande_start"),
-    path("demande/verification/", views.demande_verification, name="demande_verification"),
+    path(
+        "demande/verification/", views.demande_verification, name="demande_verification"
+    ),
     path("demande/etape1/", views.demande_step1, name="demande_step1"),
     path("demande/etape2/", views.demande_step2, name="demande_step2"),
     path("demande/etape3/", views.demande_step3, name="demande_step3"),
     path("demande/etape4/", views.demande_step4, name="demande_step4"),
     # Documents (telechargement uniquement, pas d'upload direct)
     path(
-        "dossier/<int:dossier_id>/documents/", views_portals.view_documents, name="view_documents"
+        "dossier/<int:dossier_id>/documents/",
+        views_portals.view_documents,
+        name="view_documents",
     ),
     # Notifications
     path("notifications/", views.notifications_list, name="notifications_list"),

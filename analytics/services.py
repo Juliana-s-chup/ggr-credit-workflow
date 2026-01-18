@@ -60,14 +60,18 @@ class AnalyticsService:
         archives = dossiers.filter(is_archived=True).count()
 
         # Montants
-        montant_total = dossiers.aggregate(Sum("montant_demande"))["montant_demande__sum"] or 0
+        montant_total = (
+            dossiers.aggregate(Sum("montant_demande"))["montant_demande__sum"] or 0
+        )
         montant_approuve = (
-            dossiers.filter(statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]).aggregate(
-                Sum("montant_demande")
-            )["montant_demande__sum"]
+            dossiers.filter(
+                statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]
+            ).aggregate(Sum("montant_demande"))["montant_demande__sum"]
             or 0
         )
-        montant_moyen = dossiers.aggregate(Avg("montant_demande"))["montant_demande__avg"] or 0
+        montant_moyen = (
+            dossiers.aggregate(Avg("montant_demande"))["montant_demande__avg"] or 0
+        )
 
         # Delais (calcul simplifie)
         delai_moyen = AnalyticsService._calculer_delai_moyen(dossiers)
@@ -101,10 +105,16 @@ class AnalyticsService:
         """
         delais = []
         for dossier in dossiers:
-            if dossier.statut_agent in ["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REJETE"]:
+            if dossier.statut_agent in [
+                "APPROUVE_ATTENTE_FONDS",
+                "FONDS_LIBERE",
+                "REJETE",
+            ]:
                 # Calculer le delai entre creation et decision finale
                 derniere_action = (
-                    JournalAction.objects.filter(dossier=dossier).order_by("-created_at").first()
+                    JournalAction.objects.filter(dossier=dossier)
+                    .order_by("-created_at")
+                    .first()
                 )
 
                 if derniere_action:
@@ -140,11 +150,16 @@ class AnalyticsService:
         approuves = dossiers_termines.filter(
             statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]
         ).count()
-        taux_approbation = (approuves / total_termines * 100) if total_termines > 0 else 0
+        taux_approbation = (
+            (approuves / total_termines * 100) if total_termines > 0 else 0
+        )
 
         # Montant total
         montant_total = (
-            DossierCredit.objects.aggregate(Sum("montant_demande"))["montant_demande__sum"] or 0
+            DossierCredit.objects.aggregate(Sum("montant_demande"))[
+                "montant_demande__sum"
+            ]
+            or 0
         )
 
         return {
@@ -173,7 +188,9 @@ class AnalyticsService:
             mois_data.append(count)
 
         # Repartition par statut
-        statuts = DossierCredit.objects.values("statut_agent").annotate(count=Count("id"))
+        statuts = DossierCredit.objects.values("statut_agent").annotate(
+            count=Count("id")
+        )
         statuts_labels = [s["statut_agent"] for s in statuts]
         statuts_data = [s["count"] for s in statuts]
 
@@ -256,7 +273,11 @@ class MLPredictionService:
         return [
             float(dossier.montant_demande or 0),
             float(dossier.duree_mois or 0),
-            float(dossier.revenu_mensuel or 0) if hasattr(dossier, "revenu_mensuel") else 0,
+            (
+                float(dossier.revenu_mensuel or 0)
+                if hasattr(dossier, "revenu_mensuel")
+                else 0
+            ),
             1 if dossier.type_credit == "IMMOBILIER" else 0,
             1 if dossier.type_credit == "CONSOMMATION" else 0,
             1 if dossier.type_credit == "PROFESSIONNEL" else 0,
@@ -292,7 +313,9 @@ class MLPredictionService:
             recommandation = "Dossier e  faible risque. Approbation recommandee."
         elif score_risque < 60:
             classe_risque = "MOYEN"
-            recommandation = "Dossier e  risque modere. Analyse approfondie recommandee."
+            recommandation = (
+                "Dossier e  risque modere. Analyse approfondie recommandee."
+            )
         else:
             classe_risque = "ELEVE"
             recommandation = "Dossier e  risque eleve. Prudence recommandee."

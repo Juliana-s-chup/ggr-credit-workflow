@@ -15,20 +15,28 @@ class CanevasPropositionForm(forms.ModelForm):
 
         widgets = {
             # EN-TeŠTE
-            "agence": forms.TextInput(attrs={"class": "form-control", "placeholder": "PNBR"}),
-            "code_agence": forms.TextInput(attrs={"class": "form-control", "placeholder": "10"}),
+            "agence": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "PNBR"}
+            ),
+            "code_agence": forms.TextInput(
+                attrs={"class": "form-control", "placeholder": "10"}
+            ),
             "nom_exploitant": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "YOBA"}
             ),
             "matricule_exploitant": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "101"}
             ),
-            "date_proposition": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "date_proposition": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
             # SECTION 1: IDENTITe‰
             "nom_prenom": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Nom complet"}
             ),
-            "date_naissance": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
+            "date_naissance": forms.DateInput(
+                attrs={"class": "form-control", "type": "date"}
+            ),
             "nationalite": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "CONGOLAISE"}
             ),
@@ -63,7 +71,9 @@ class CanevasPropositionForm(forms.ModelForm):
             "lieu_emploi": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Lieu de travail"}
             ),
-            "employeur_client_banque": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "employeur_client_banque": forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
+            ),
             "radical_employeur": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Radical employeur"}
             ),
@@ -131,7 +141,9 @@ class CanevasPropositionForm(forms.ModelForm):
             "demande_montant_fcfa": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "min": "0"}
             ),
-            "demande_duree_mois": forms.NumberInput(attrs={"class": "form-control", "min": "1"}),
+            "demande_duree_mois": forms.NumberInput(
+                attrs={"class": "form-control", "min": "1"}
+            ),
             "demande_taux_pourcent": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "min": "0"}
             ),
@@ -162,12 +174,18 @@ class CanevasPropositionForm(forms.ModelForm):
             # SECTION 4: AVIS
             "avis_conseiller_commercial": forms.Select(attrs={"class": "form-select"}),
             "avis_responsable_agence": forms.TextInput(attrs={"class": "form-control"}),
-            "avis_risque_contrepartie": forms.Textarea(attrs={"class": "form-control", "rows": 3}),
+            "avis_risque_contrepartie": forms.Textarea(
+                attrs={"class": "form-control", "rows": 3}
+            ),
             # SECTION 4: DOCUMENTS & VALIDATION
             "doc_cni_ok": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "doc_fiche_paie_ok": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "doc_fiche_paie_ok": forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
+            ),
             "doc_releve_ok": forms.CheckboxInput(attrs={"class": "form-check-input"}),
-            "doc_billet_ordre_ok": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "doc_billet_ordre_ok": forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
+            ),
             "doc_attestation_employeur_ok": forms.CheckboxInput(
                 attrs={"class": "form-check-input"}
             ),
@@ -177,7 +195,9 @@ class CanevasPropositionForm(forms.ModelForm):
             "doc_assurance_deces_invalidite_ok": forms.CheckboxInput(
                 attrs={"class": "form-check-input"}
             ),
-            "validation_consentement": forms.CheckboxInput(attrs={"class": "form-check-input"}),
+            "validation_consentement": forms.CheckboxInput(
+                attrs={"class": "form-check-input"}
+            ),
         }
 
         labels = {
@@ -273,7 +293,9 @@ class CanevasPropositionForm(forms.ModelForm):
             cleaned_data["capacite_endettement_brute_fcfa"] = salaire_net * 0.40
 
             # Salaire net avant endettement
-            cleaned_data["salaire_net_avant_endettement_fcfa"] = salaire_net - echeances_relevees
+            cleaned_data["salaire_net_avant_endettement_fcfa"] = (
+                salaire_net - echeances_relevees
+            )
 
             # Capacite nette
             cleaned_data["capacite_endettement_nette_fcfa"] = (

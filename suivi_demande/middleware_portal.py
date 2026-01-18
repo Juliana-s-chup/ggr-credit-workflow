@@ -29,7 +29,14 @@ class PortalAccessMiddleware:
     def __call__(self, request):
         # Ignorer pour statiques, medias et endpoints d'auth
         if request.path.startswith(
-            ("/static/", "/media/", "/accounts/login/", "/accounts/logout/", "/login/", "/logout/")
+            (
+                "/static/",
+                "/media/",
+                "/accounts/login/",
+                "/accounts/logout/",
+                "/login/",
+                "/logout/",
+            )
         ):
             return self.get_response(request)
 
@@ -54,7 +61,8 @@ class PortalAccessMiddleware:
 
             if not role_autorise:
                 messages.error(
-                    request, "Acces refuse: votre role n'est pas autorise sur ce portail."
+                    request,
+                    "Acces refuse: votre role n'est pas autorise sur ce portail.",
                 )
                 # Option: deconnexion douce
                 try:
@@ -67,7 +75,9 @@ class PortalAccessMiddleware:
                 # Si on peut deduire l'autre portail, rediriger vers sa page de login locale
                 if inferred_portal == "CLIENT":
                     # Utilisateur pro tentant le portail client
-                    return HttpResponseForbidden("Acces refuse au portail client pour ce role.")
+                    return HttpResponseForbidden(
+                        "Acces refuse au portail client pour ce role."
+                    )
                 else:
                     # Utilisateur client tentant le portail pro
                     return HttpResponseForbidden(

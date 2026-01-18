@@ -64,7 +64,9 @@ class Command(BaseCommand):
             os.remove(filepath)
             filepath = compressed_path
 
-            self.stdout.write(self.style.SUCCESS(f"âœ… Backup compresse: {compressed_path}"))
+            self.stdout.write(
+                self.style.SUCCESS(f"âœ… Backup compresse: {compressed_path}")
+            )
 
         # Upload S3 si demande
         if options["upload_s3"]:
@@ -92,7 +94,9 @@ class Command(BaseCommand):
 
             s3_client.upload_file(filepath, bucket_name, s3_key)
 
-            self.stdout.write(self.style.SUCCESS(f"âœ… Backup uploade sur S3: {s3_key}"))
+            self.stdout.write(
+                self.style.SUCCESS(f"âœ… Backup uploade sur S3: {s3_key}")
+            )
 
         except (ImportError, ClientError, AttributeError) as e:
             self.stdout.write(self.style.ERROR(f"âŒ Erreur upload S3: {e}"))
@@ -112,4 +116,6 @@ class Command(BaseCommand):
 
                 if file_time < cutoff:
                     os.remove(filepath)
-                    self.stdout.write(self.style.WARNING(f"ðŸ—‘ï¸  Backup supprime: {filename}"))
+                    self.stdout.write(
+                        self.style.WARNING(f"ðŸ—‘ï¸  Backup supprime: {filename}")
+                    )

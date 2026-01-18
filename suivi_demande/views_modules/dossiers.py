@@ -41,7 +41,9 @@ def test_dossiers_list(request):
     total_dossiers = all_dossiers.count()
 
     statuts_stats = (
-        DossierCredit.objects.values("statut_agent").annotate(count=Count("id")).order_by("-count")
+        DossierCredit.objects.values("statut_agent")
+        .annotate(count=Count("id"))
+        .order_by("-count")
     )
 
     context = {

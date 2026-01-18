@@ -182,7 +182,9 @@ class CanevasPropositionTestCase(TestCase):
         # 400000 - 100000 = 300000
         self.assertEqual(canevas.capacite_endettement_nette_fcfa, Decimal("300000.00"))
         # 1000000 - 100000 = 900000
-        self.assertEqual(canevas.salaire_net_avant_endettement_fcfa, Decimal("900000.00"))
+        self.assertEqual(
+            canevas.salaire_net_avant_endettement_fcfa, Decimal("900000.00")
+        )
 
 
 class JournalActionTestCase(TestCase):

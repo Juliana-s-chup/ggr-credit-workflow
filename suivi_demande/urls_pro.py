@@ -5,7 +5,14 @@ Toutes les fonctionnalites de gestion et administration
 
 from django.urls import path
 from django.contrib.auth import views as auth_views
-from . import views, views_canevas, views_documents, views_portals, views_admin, views_autorisation
+from . import (
+    views,
+    views_canevas,
+    views_documents,
+    views_portals,
+    views_admin,
+    views_autorisation,
+)
 
 # from .pdf_views import dossier_proposition_pdf  # TODO: Vue manquante
 
@@ -62,7 +69,9 @@ urlpatterns = [
         name="admin_change_role",
     ),
     path(
-        "utilisateur/<int:user_id>/modifier/", views_admin.admin_edit_user, name="admin_edit_user"
+        "utilisateur/<int:user_id>/modifier/",
+        views_admin.admin_edit_user,
+        name="admin_edit_user",
     ),
     path("utilisateur/creer/", views_admin.admin_create_user, name="admin_create_user"),
     # Notifications
@@ -71,7 +80,9 @@ urlpatterns = [
     # path('notifications/<int:pk>/marquer-lu/', views.notifications_mark_read, name='notifications_mark_read'),  # TODO: Vue manquante
     # Demandes de credit (wizard - 4 etapes pour gestionnaire)
     path("demande/", views.demande_start, name="demande_start"),
-    path("demande/verification/", views.demande_verification, name="demande_verification"),
+    path(
+        "demande/verification/", views.demande_verification, name="demande_verification"
+    ),
     path("demande/etape1/", views.demande_step1, name="demande_step1"),
     path("demande/etape2/", views.demande_step2, name="demande_step2"),
     path("demande/etape3/", views.demande_step3, name="demande_step3"),

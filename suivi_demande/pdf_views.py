@@ -56,5 +56,7 @@ def dossier_proposition_pdf(request, pk: int):
         return redirect("dossier_detail", pk=dossier.pk)
 
     response = HttpResponse(result.getvalue(), content_type="application/pdf")
-    response["Content-Disposition"] = f"inline; filename=proposition_{dossier.reference}.pdf"
+    response["Content-Disposition"] = (
+        f"inline; filename=proposition_{dossier.reference}.pdf"
+    )
     return response

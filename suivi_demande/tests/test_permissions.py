@@ -26,7 +26,9 @@ class PermissionsTestCase(TestCase):
     def setUp(self):
         """Preparation des donnees de test."""
         # Creer un client
-        self.client_user = User.objects.create_user(username="client", password="pass123")
+        self.client_user = User.objects.create_user(
+            username="client", password="pass123"
+        )
         self.client_profile = UserProfile.objects.create(
             user=self.client_user,
             full_name="Client Test",
@@ -36,7 +38,9 @@ class PermissionsTestCase(TestCase):
         )
 
         # Creer un gestionnaire
-        self.gest_user = User.objects.create_user(username="gestionnaire", password="pass123")
+        self.gest_user = User.objects.create_user(
+            username="gestionnaire", password="pass123"
+        )
         self.gest_profile = UserProfile.objects.create(
             user=self.gest_user,
             full_name="Gestionnaire Test",
@@ -46,7 +50,9 @@ class PermissionsTestCase(TestCase):
         )
 
         # Creer un analyste
-        self.analyste_user = User.objects.create_user(username="analyste", password="pass123")
+        self.analyste_user = User.objects.create_user(
+            username="analyste", password="pass123"
+        )
         self.analyste_profile = UserProfile.objects.create(
             user=self.analyste_user,
             full_name="Analyste Test",
@@ -57,7 +63,10 @@ class PermissionsTestCase(TestCase):
 
         # Creer un dossier
         self.dossier = DossierCredit.objects.create(
-            client=self.client_user, reference="DOS-PERM-001", produit="Credit", montant=1000000
+            client=self.client_user,
+            reference="DOS-PERM-001",
+            produit="Credit",
+            montant=1000000,
         )
 
     def test_get_user_role(self):

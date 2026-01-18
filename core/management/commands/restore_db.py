@@ -32,7 +32,9 @@ class Command(BaseCommand):
             raise CommandError(f"âŒ Fichier non trouve: {backup_file}")
 
         self.stdout.write(
-            self.style.WARNING("âš ï¸  ATTENTION: Cette operation va modifier la base de donnees")
+            self.style.WARNING(
+                "âš ï¸  ATTENTION: Cette operation va modifier la base de donnees"
+            )
         )
 
         # Confirmation
@@ -43,7 +45,9 @@ class Command(BaseCommand):
 
         # Flush si demande
         if options["flush"]:
-            self.stdout.write(self.style.WARNING("ðŸ—‘ï¸  Vidage de la base de donnees..."))
+            self.stdout.write(
+                self.style.WARNING("ðŸ—‘ï¸  Vidage de la base de donnees...")
+            )
             call_command("flush", "--no-input")
 
         # Decompresser si necessaire

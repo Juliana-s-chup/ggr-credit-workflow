@@ -105,17 +105,25 @@ class CreditScoringModel:
                 continue
 
             # Label: 1 = approuve, 0 = refuse
-            label = 1 if dossier.statut_agent in ["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"] else 0
+            label = (
+                1
+                if dossier.statut_agent in ["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]
+                else 0
+            )
 
             X.append(features)
             y.append(label)
 
         if len(X) < 10:
-            logger.warning(f"Pas assez de donnees pour entrainer (seulement {len(X)} dossiers)")
+            logger.warning(
+                f"Pas assez de donnees pour entrainer (seulement {len(X)} dossiers)"
+            )
             return None
 
         # Split train/test
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y, test_size=0.2, random_state=42
+        )
 
         # Entrainer Random Forest
         self.model = RandomForestClassifier(

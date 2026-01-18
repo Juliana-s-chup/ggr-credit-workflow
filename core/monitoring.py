@@ -29,7 +29,9 @@ def init_sentry():
         return
 
     if not settings.DEBUG and hasattr(settings, "SENTRY_DSN"):
-        sentry_logging = LoggingIntegration(level=logging.INFO, event_level=logging.ERROR)
+        sentry_logging = LoggingIntegration(
+            level=logging.INFO, event_level=logging.ERROR
+        )
 
         sentry_sdk.init(
             dsn=settings.SENTRY_DSN,
@@ -67,7 +69,9 @@ def log_business_event(event_type: str, user_id: int, data: dict):
     )
 
 
-def log_security_event(event_type: str, user=None, ip: str = None, details: dict = None, **kwargs):
+def log_security_event(
+    event_type: str, user=None, ip: str = None, details: dict = None, **kwargs
+):
     """
     Log un evenement de securite
 

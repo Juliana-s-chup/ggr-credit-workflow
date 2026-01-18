@@ -51,7 +51,9 @@ def rate_limit(key_prefix: str, limit: int, period: int):
                     get_client_ip(request),
                     {"key_prefix": key_prefix, "count": count},
                 )
-                return HttpResponseForbidden(f"Trop de requetes. Reessayez dans {period} secondes.")
+                return HttpResponseForbidden(
+                    f"Trop de requetes. Reessayez dans {period} secondes."
+                )
 
             # Incrementer le compteur
             cache.set(cache_key, count + 1, period)
@@ -89,7 +91,9 @@ def sanitize_html(text: str) -> str:
     allowed_tags = ["p", "br", "strong", "em", "u", "a"]
     allowed_attributes = {"a": ["href", "title"]}
 
-    return bleach.clean(text, tags=allowed_tags, attributes=allowed_attributes, strip=True)
+    return bleach.clean(
+        text, tags=allowed_tags, attributes=allowed_attributes, strip=True
+    )
 
 
 def sanitize_filename(filename: str) -> str:
@@ -244,7 +248,9 @@ def role_required(*roles):
                     user=request.user,
                     details=f"Role {user_role} non autorise pour {view_func.__name__}",
                 )
-                return HttpResponseForbidden(f"Acces refuse. Role requis: {', '.join(roles)}")
+                return HttpResponseForbidden(
+                    f"Acces refuse. Role requis: {', '.join(roles)}"
+                )
 
             return view_func(request, *args, **kwargs)
 

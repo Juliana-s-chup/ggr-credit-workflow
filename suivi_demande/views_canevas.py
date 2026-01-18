@@ -69,7 +69,9 @@ def canevas_create_or_edit(request, dossier_id):
             else:
                 return redirect("suivi:dossier_detail", pk=dossier_id)
         else:
-            messages.error(request, "Erreur dans le formulaire. Veuillez corriger les champs.")
+            messages.error(
+                request, "Erreur dans le formulaire. Veuillez corriger les champs."
+            )
     else:
         # Pre-remplir avec les donnees du dossier et du client
         initial_data = {}
@@ -82,7 +84,9 @@ def canevas_create_or_edit(request, dossier_id):
                 "proposition_montant_fcfa": dossier.montant,
                 "objet_pret": dossier.produit,
             }
-        form = CanevasPropositionForm(instance=canevas, initial=initial_data if is_new else None)
+        form = CanevasPropositionForm(
+            instance=canevas, initial=initial_data if is_new else None
+        )
 
     context = {
         "form": form,
@@ -113,7 +117,9 @@ def canevas_view_pdf(request, dossier_id):
 
     # Creer le PDF
     response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = f'inline; filename="canevas_{dossier.reference}.pdf"'
+    response["Content-Disposition"] = (
+        f'inline; filename="canevas_{dossier.reference}.pdf"'
+    )
 
     template = render_to_string(template_path, context)
     pisa_status = pisa.CreatePDF(template, dest=response)

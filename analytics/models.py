@@ -35,9 +35,15 @@ class StatistiquesDossier(models.Model):
     dossiers_archives = models.IntegerField(default=0)
 
     # Montants
-    montant_total_demande = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    montant_total_approuve = models.DecimalField(max_digits=15, decimal_places=2, default=0)
-    montant_moyen_demande = models.DecimalField(max_digits=15, decimal_places=2, default=0)
+    montant_total_demande = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0
+    )
+    montant_total_approuve = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0
+    )
+    montant_moyen_demande = models.DecimalField(
+        max_digits=15, decimal_places=2, default=0
+    )
 
     # Delais (en jours)
     delai_moyen_traitement = models.FloatField(default=0)
@@ -99,8 +105,12 @@ class PredictionRisque(models.Model):
     )
 
     # Scores predits
-    score_risque = models.FloatField(help_text="Score de 0 (faible risque) e  100 (risque eleve)")
-    probabilite_defaut = models.FloatField(help_text="Probabilite de defaut de paiement (0-1)")
+    score_risque = models.FloatField(
+        help_text="Score de 0 (faible risque) e  100 (risque eleve)"
+    )
+    probabilite_defaut = models.FloatField(
+        help_text="Probabilite de defaut de paiement (0-1)"
+    )
 
     # Classification
     classe_risque = models.CharField(
@@ -113,7 +123,9 @@ class PredictionRisque(models.Model):
     )
 
     # Facteurs de risque
-    facteurs_risque = models.JSONField(default=dict, help_text="Facteurs contribuant au risque")
+    facteurs_risque = models.JSONField(
+        default=dict, help_text="Facteurs contribuant au risque"
+    )
 
     # Recommandation
     recommandation = models.TextField(blank=True)
@@ -121,7 +133,9 @@ class PredictionRisque(models.Model):
     # Metadonnees
     modele_version = models.CharField(max_length=50, default="v1.0")
     date_prediction = models.DateTimeField(auto_now_add=True)
-    confiance = models.FloatField(default=0, help_text="Niveau de confiance de la prediction (0-1)")
+    confiance = models.FloatField(
+        default=0, help_text="Niveau de confiance de la prediction (0-1)"
+    )
 
     class Meta:
         verbose_name = "Prediction Risque"

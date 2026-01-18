@@ -25,4 +25,6 @@ ALLOWED_HOSTS = ["*"]  # Accepte tous les domaines en developpement
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # In development, avoid WhiteNoise manifest storage to prevent missing manifest errors
-STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}
+STORAGES["staticfiles"] = {
+    "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
+}

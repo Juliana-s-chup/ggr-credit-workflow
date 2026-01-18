@@ -28,7 +28,9 @@ class UserProfile(models.Model):
     phone = models.CharField(max_length=30)
     birth_date = models.DateField(null=True, blank=True)
     address = models.CharField(max_length=255)
-    role = models.CharField(max_length=32, choices=UserRoles.choices, default=UserRoles.CLIENT)
+    role = models.CharField(
+        max_length=32, choices=UserRoles.choices, default=UserRoles.CLIENT
+    )
 
     def __str__(self):
         return f"Profil de {self.user.username}"
@@ -80,7 +82,9 @@ class DossierCredit(models.Model):
         db_index=True,
     )
     statut_client = models.CharField(
-        max_length=40, choices=DossierStatutClient.choices, default=DossierStatutClient.EN_ATTENTE
+        max_length=40,
+        choices=DossierStatutClient.choices,
+        default=DossierStatutClient.EN_ATTENTE,
     )
     acteur_courant = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -132,10 +136,14 @@ class DossierCredit(models.Model):
         from .constants import MONTANT_MINIMUM_CREDIT, MONTANT_MAXIMUM_CREDIT
 
         if self.montant < MONTANT_MINIMUM_CREDIT:
-            raise ValidationError(f"Le montant minimum est de {MONTANT_MINIMUM_CREDIT} FCFA")
+            raise ValidationError(
+                f"Le montant minimum est de {MONTANT_MINIMUM_CREDIT} FCFA"
+            )
 
         if self.montant > MONTANT_MAXIMUM_CREDIT:
-            raise ValidationError(f"Le montant maximum est de {MONTANT_MAXIMUM_CREDIT} FCFA")
+            raise ValidationError(
+                f"Le montant maximum est de {MONTANT_MAXIMUM_CREDIT} FCFA"
+            )
 
 
 class PieceJointe(models.Model):
@@ -149,7 +157,9 @@ class PieceJointe(models.Model):
         ("ASSURANCE_DECES_INVALIDITE", "Assurance deces-invalidite"),
         ("AUTRE", "Autre"),
     ]
-    dossier = models.ForeignKey(DossierCredit, on_delete=models.CASCADE, related_name="pieces")
+    dossier = models.ForeignKey(
+        DossierCredit, on_delete=models.CASCADE, related_name="pieces"
+    )
     fichier = models.FileField(upload_to=piece_upload_to)
     type_piece = models.CharField(max_length=30, choices=TYPE_PIECE_CHOICES)
     taille = models.PositiveIntegerField(default=0)
@@ -183,7 +193,9 @@ class CanevasProposition(models.Model):
     """Canevas de proposition de credit NOKI NOKI."""
 
     # Relation avec le dossier
-    dossier = models.OneToOneField(DossierCredit, on_delete=models.CASCADE, related_name="canevas")
+    dossier = models.OneToOneField(
+        DossierCredit, on_delete=models.CASCADE, related_name="canevas"
+    )
 
     # === EN-TeŠTE ===
     agence = models.CharField(max_length=100, default="PNBR")
@@ -283,15 +295,23 @@ class CanevasProposition(models.Model):
             ("AUTRE", "Autre"),
         ],
     )
-    montant_origine_fcfa = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    montant_origine_fcfa = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0
+    )
     date_derniere_echeance = models.DateField(null=True, blank=True)
-    montant_echeance_fcfa = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    montant_echeance_fcfa = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0
+    )
     k_restant_du_fcfa = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
     # === SECTION 2: CAPACITe‰ D'ENDETTEMENT ===
     salaire_net_moyen_fcfa = models.DecimalField(max_digits=12, decimal_places=2)
-    echeances_prets_relevees = models.DecimalField(max_digits=12, decimal_places=2, default=0)
-    total_echeances_credits_cours = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    echeances_prets_relevees = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0
+    )
+    total_echeances_credits_cours = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0
+    )
     salaire_net_avant_endettement_fcfa = models.DecimalField(
         max_digits=12, decimal_places=2, default=0
     )
@@ -328,7 +348,9 @@ class CanevasProposition(models.Model):
             ("A", "Annuelle"),
         ],
     )
-    demande_montant_echeance_fcfa = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    demande_montant_echeance_fcfa = models.DecimalField(
+        max_digits=12, decimal_places=2, default=0
+    )
     demande_date_1ere_echeance = models.DateField(null=True, blank=True)
 
     # Proposition
@@ -384,11 +406,14 @@ class CanevasProposition(models.Model):
             raise ValueError("Le salaire net moyen doit etre positif")
 
         # Capacite brute = 40% du salaire net moyen
-        self.capacite_endettement_brute_fcfa = self.salaire_net_moyen_fcfa * TAUX_ENDETTEMENT_MAX
+        self.capacite_endettement_brute_fcfa = (
+            self.salaire_net_moyen_fcfa * TAUX_ENDETTEMENT_MAX
+        )
 
         # Capacite nette = Capacite brute - echeances en cours
         self.capacite_endettement_nette_fcfa = max(
-            Decimal("0"), self.capacite_endettement_brute_fcfa - self.total_echeances_credits_cours
+            Decimal("0"),
+            self.capacite_endettement_brute_fcfa - self.total_echeances_credits_cours,
         )
 
         # Salaire net avant endettement
@@ -421,9 +446,13 @@ class Commentaire(models.Model):
     dossier = models.ForeignKey(
         DossierCredit, on_delete=models.CASCADE, related_name="commentaires"
     )
-    auteur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    auteur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
     message = models.TextField()
-    cible_role = models.CharField(max_length=32, choices=UserRoles.choices, null=True, blank=True)
+    cible_role = models.CharField(
+        max_length=32, choices=UserRoles.choices, null=True, blank=True
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -441,7 +470,9 @@ class JournalAction(models.Model):
         ("REFUS", "Refus"),
         ("LIBERATION_FONDS", "Liberation des fonds"),
     ]
-    dossier = models.ForeignKey(DossierCredit, on_delete=models.CASCADE, related_name="journal")
+    dossier = models.ForeignKey(
+        DossierCredit, on_delete=models.CASCADE, related_name="journal"
+    )
     action = models.CharField(max_length=30, choices=ACTIONS)
     de_statut = models.CharField(
         max_length=40, choices=DossierStatutAgent.choices, null=True, blank=True
@@ -449,7 +480,9 @@ class JournalAction(models.Model):
     vers_statut = models.CharField(
         max_length=40, choices=DossierStatutAgent.choices, null=True, blank=True
     )
-    acteur = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
+    acteur = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
+    )
     commentaire_systeme = models.TextField(null=True, blank=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     meta = models.JSONField(default=dict, blank=True)

@@ -164,6 +164,9 @@ def validate_comment_length(comment: str, max_length: int = 1000) -> Tuple[bool,
         return False, "Le commentaire ne peut pas etre vide"
 
     if len(comment) > max_length:
-        return False, f"Commentaire trop long ({len(comment)} caracteres). Maximum: {max_length}"
+        return (
+            False,
+            f"Commentaire trop long ({len(comment)} caracteres). Maximum: {max_length}",
+        )
 
     return True, ""

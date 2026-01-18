@@ -46,7 +46,9 @@ urlpatterns = [
     # Portail professionnel
     path("pro/", include(("suivi_demande.urls_pro", "pro"), namespace="pro")),
     # Portail client
-    path("client/", include(("suivi_demande.urls_client", "client"), namespace="client")),
+    path(
+        "client/", include(("suivi_demande.urls_client", "client"), namespace="client")
+    ),
     # URLs principales (minimal: redirections/entrees generiques)
     path("", include(("suivi_demande.urls", "suivi"), namespace="suivi")),
 ]

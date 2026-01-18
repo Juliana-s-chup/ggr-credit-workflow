@@ -15,7 +15,9 @@ class SignupForm(UserCreationForm):
     email = forms.EmailField(label="Adresse e-mail")
     phone = forms.CharField(label="Numero de telephone", max_length=30)
     birth_date = forms.DateField(
-        label="Date de naissance", required=False, widget=forms.DateInput(attrs={"type": "date"})
+        label="Date de naissance",
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date"}),
     )
     address = forms.CharField(label="Adresse complete", max_length=255)
     accept_terms = forms.BooleanField(label="J'accepte les conditions generales")

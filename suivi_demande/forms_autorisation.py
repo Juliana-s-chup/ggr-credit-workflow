@@ -17,7 +17,9 @@ class AutorisationPonctuelleForm(forms.Form):
     segment = forms.CharField(label="Segment", max_length=50, initial="PARTICULIER")
 
     # Donnees en FCFA
-    salaire_moyen = forms.DecimalField(label="Salaire moyen (A)", max_digits=12, decimal_places=2)
+    salaire_moyen = forms.DecimalField(
+        label="Salaire moyen (A)", max_digits=12, decimal_places=2
+    )
     montant_echeance = forms.DecimalField(
         label="Montant echeance (B)", max_digits=12, decimal_places=2
     )
@@ -56,10 +58,14 @@ class AutorisationPonctuelleForm(forms.Form):
         label="Gestionnaire", widget=forms.Textarea(attrs={"rows": 3}), required=False
     )
     avis_responsable_succursale = forms.CharField(
-        label="Responsable Succursale", widget=forms.Textarea(attrs={"rows": 3}), required=False
+        label="Responsable Succursale",
+        widget=forms.Textarea(attrs={"rows": 3}),
+        required=False,
     )
     avis_analyste_credit = forms.CharField(
-        label="Analyste Credit", widget=forms.Textarea(attrs={"rows": 3}), required=False
+        label="Analyste Credit",
+        widget=forms.Textarea(attrs={"rows": 3}),
+        required=False,
     )
 
     # Section 6 - Decision
@@ -101,10 +107,16 @@ class EngagementLigneForm(forms.Form):
         label="Montant sollicite", max_digits=12, decimal_places=2, required=False
     )
     depassement_accord = forms.DecimalField(
-        label="Depassement (en cas d'accord)", max_digits=12, decimal_places=2, required=False
+        label="Depassement (en cas d'accord)",
+        max_digits=12,
+        decimal_places=2,
+        required=False,
     )
     engagement_accord = forms.DecimalField(
-        label="Engagement (en cas d'accord)", max_digits=12, decimal_places=2, required=False
+        label="Engagement (en cas d'accord)",
+        max_digits=12,
+        decimal_places=2,
+        required=False,
     )
     validite_depassement = forms.DateField(
         label="Validite depassement",

@@ -19,7 +19,9 @@ class DemandeStep3Form(forms.Form):
         label="Montant souhaite (FCFA)", max_digits=12, decimal_places=2
     )
     demande_duree_mois = forms.IntegerField(label="Duree (mois)")
-    demande_taux_pourcent = forms.DecimalField(label="Taux %", max_digits=5, decimal_places=2)
+    demande_taux_pourcent = forms.DecimalField(
+        label="Taux %", max_digits=5, decimal_places=2
+    )
     PERIODICITE = [
         ("M", "Mensuelle"),
         ("T", "Trimestrielle"),
@@ -31,7 +33,9 @@ class DemandeStep3Form(forms.Form):
         label="Montant echeance (FCFA)", max_digits=12, decimal_places=2, required=False
     )
     demande_date_1ere_echeance = forms.DateField(
-        label="Date 1re echeance", widget=forms.DateInput(attrs={"type": "date"}), required=False
+        label="Date 1re echeance",
+        widget=forms.DateInput(attrs={"type": "date"}),
+        required=False,
     )
 
 

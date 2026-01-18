@@ -20,7 +20,9 @@ class JSONDateDecimalSerializer:
             if isinstance(o, decimal.Decimal):
                 return str(o)
             # Fallback: raise TypeError to surface unexpected types
-            raise TypeError(f"Object of type {o.__class__.__name__} is not JSON serializable")
+            raise TypeError(
+                f"Object of type {o.__class__.__name__} is not JSON serializable"
+            )
 
         # Use latin-1 encoding to match Django's JSONSerializer behavior
         return json.dumps(obj, separators=(",", ":"), default=default).encode("latin-1")

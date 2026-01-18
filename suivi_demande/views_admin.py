@@ -112,7 +112,9 @@ def admin_edit_user(request, user_id):
 
         # Verifier unicite (sauf pour l'utilisateur actuel)
         if User.objects.filter(username=username).exclude(pk=user_id).exists():
-            messages.error(request, f"Le nom d'utilisateur '{username}' est deje  utilise.")
+            messages.error(
+                request, f"Le nom d'utilisateur '{username}' est deje  utilise."
+            )
             return redirect("pro:dashboard")
 
         if User.objects.filter(email=email).exclude(pk=user_id).exists():
@@ -137,7 +139,9 @@ def admin_edit_user(request, user_id):
             # Changer le mot de passe si fourni
             if new_password:
                 if len(new_password) < 8:
-                    messages.error(request, "Le mot de passe doit contenir au moins 8 caracteres.")
+                    messages.error(
+                        request, "Le mot de passe doit contenir au moins 8 caracteres."
+                    )
                     return redirect("pro:dashboard")
                 user.set_password(new_password)
 
@@ -159,7 +163,9 @@ def admin_edit_user(request, user_id):
                     address="",
                 )
 
-            messages.success(request, f"âœ… L'utilisateur '{username}' a ete modifie avec succes.")
+            messages.success(
+                request, f"âœ… L'utilisateur '{username}' a ete modifie avec succes."
+            )
 
         except Exception as e:
             messages.error(request, f"âŒ Erreur lors de la modification : {str(e)}")
@@ -204,7 +210,9 @@ def admin_create_user(request):
             return redirect("pro:dashboard")
 
         if len(password) < 8:
-            messages.error(request, "Le mot de passe doit contenir au moins 8 caracteres.")
+            messages.error(
+                request, "Le mot de passe doit contenir au moins 8 caracteres."
+            )
             return redirect("pro:dashboard")
 
         if not role:
@@ -251,7 +259,9 @@ def admin_create_user(request):
             )
 
         except Exception as e:
-            messages.error(request, f"âŒ Erreur lors de la creation de l'utilisateur : {str(e)}")
+            messages.error(
+                request, f"âŒ Erreur lors de la creation de l'utilisateur : {str(e)}"
+            )
 
     return redirect("pro:dashboard")
 

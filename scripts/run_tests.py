@@ -33,7 +33,9 @@ def main():
     results = []
 
     # 1. Tests unitaires Django
-    results.append(run_command("python manage.py test --verbosity=2", "Tests unitaires Django"))
+    results.append(
+        run_command("python manage.py test --verbosity=2", "Tests unitaires Django")
+    )
 
     # 2. Tests avec pytest et couverture
     results.append(
@@ -44,7 +46,9 @@ def main():
     )
 
     # 3. Verification de la couverture minimale
-    results.append(run_command("coverage report --fail-under=75", "Verification couverture >= 75%"))
+    results.append(
+        run_command("coverage report --fail-under=75", "Verification couverture >= 75%")
+    )
 
     # 4. Generation du rapport HTML
     results.append(run_command("coverage html", "Generation rapport HTML"))

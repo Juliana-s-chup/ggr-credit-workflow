@@ -12,13 +12,13 @@ from suivi_demande.models import (
 
 
 class Command(BaseCommand):
-    help = (
-        "Seed de donnees de demonstration: utilisateurs par role et dossiers e  differents statuts."
-    )
+    help = "Seed de donnees de demonstration: utilisateurs par role et dossiers e  differents statuts."
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--reset", action="store_true", help="Supprimer les donnees demo avant de recreer"
+            "--reset",
+            action="store_true",
+            help="Supprimer les donnees demo avant de recreer",
         )
 
     @transaction.atomic
@@ -32,7 +32,15 @@ class Command(BaseCommand):
             UserProfile.objects.all().delete()
             self.stdout.write("Suppression des users demo'¦")
             User.objects.filter(
-                username__in=["client1", "client2", "gest1", "an1", "resp1", "boe1", "admin"]
+                username__in=[
+                    "client1",
+                    "client2",
+                    "gest1",
+                    "an1",
+                    "resp1",
+                    "boe1",
+                    "admin",
+                ]
             ).delete()
 
         # Superuser
@@ -58,7 +66,9 @@ class Command(BaseCommand):
 
         created_users = {}
         for username, role, email in users_spec:
-            user, created = User.objects.get_or_create(username=username, defaults={"email": email})
+            user, created = User.objects.get_or_create(
+                username=username, defaults={"email": email}
+            )
             if created:
                 user.set_password("demo1234")
                 user.is_active = True

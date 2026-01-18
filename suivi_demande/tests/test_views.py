@@ -270,7 +270,9 @@ class NotificationsViewTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
 
         # Verifier que toutes sont lues
-        unread_count = Notification.objects.filter(utilisateur_cible=self.user, lu=False).count()
+        unread_count = Notification.objects.filter(
+            utilisateur_cible=self.user, lu=False
+        ).count()
         self.assertEqual(unread_count, 0)
 
 

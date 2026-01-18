@@ -49,9 +49,13 @@ class Command(BaseCommand):
                         address="",
                         role=UserRoles.CLIENT,
                     )
-                    self.stdout.write(f"âœ“ Profil cree pour {user.username} avec le role CLIENT")
+                    self.stdout.write(
+                        f"âœ“ Profil cree pour {user.username} avec le role CLIENT"
+                    )
             else:
-                self.stdout.write("Utilisez --create-missing pour creer les profils manquants")
+                self.stdout.write(
+                    "Utilisez --create-missing pour creer les profils manquants"
+                )
 
         # Definir un role specifique
         if options["set_role"]:
@@ -85,7 +89,9 @@ class Command(BaseCommand):
 
         self.stdout.write("\n=== Exemples d'utilisation ===")
         self.stdout.write("python manage.py fix_user_profiles --create-missing")
-        self.stdout.write("python manage.py fix_user_profiles --set-role admin:SUPER_ADMIN")
+        self.stdout.write(
+            "python manage.py fix_user_profiles --set-role admin:SUPER_ADMIN"
+        )
         self.stdout.write(
             "python manage.py fix_user_profiles --set-role gestionnaire1:GESTIONNAIRE"
         )

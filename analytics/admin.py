@@ -82,10 +82,24 @@ class PredictionRisqueAdmin(admin.ModelAdmin):
         ("Dossier", {"fields": ("dossier",)}),
         (
             "Prediction",
-            {"fields": ("score_risque", "probabilite_defaut", "classe_risque", "confiance")},
+            {
+                "fields": (
+                    "score_risque",
+                    "probabilite_defaut",
+                    "classe_risque",
+                    "confiance",
+                )
+            },
         ),
         (
             "Details",
-            {"fields": ("facteurs_risque", "recommandation", "modele_version", "date_prediction")},
+            {
+                "fields": (
+                    "facteurs_risque",
+                    "recommandation",
+                    "modele_version",
+                    "date_prediction",
+                )
+            },
         ),
     )

@@ -54,13 +54,29 @@ class CommentaireAdmin(admin.ModelAdmin):
 
 @admin.register(JournalAction)
 class JournalActionAdmin(admin.ModelAdmin):
-    list_display = ("id", "dossier", "action", "de_statut", "vers_statut", "acteur", "timestamp")
+    list_display = (
+        "id",
+        "dossier",
+        "action",
+        "de_statut",
+        "vers_statut",
+        "acteur",
+        "timestamp",
+    )
     list_filter = ("action", "de_statut", "vers_statut", "timestamp")
     search_fields = ("dossier__reference", "acteur__username")
 
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ("id", "utilisateur_cible", "type", "titre", "lu", "canal", "created_at")
+    list_display = (
+        "id",
+        "utilisateur_cible",
+        "type",
+        "titre",
+        "lu",
+        "canal",
+        "created_at",
+    )
     list_filter = ("lu", "canal", "created_at")
     search_fields = ("titre", "utilisateur_cible__username")

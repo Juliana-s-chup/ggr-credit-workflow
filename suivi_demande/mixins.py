@@ -83,7 +83,9 @@ class ErrorHandlingMixin:
         # Afficher un message user-friendly
         messages.error(request, user_message)
 
-    def handle_permission_denied(self, request, message="Vous n'avez pas les droits necessaires"):
+    def handle_permission_denied(
+        self, request, message="Vous n'avez pas les droits necessaires"
+    ):
         """
         Gere un refus de permission.
 

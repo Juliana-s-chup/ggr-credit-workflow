@@ -107,9 +107,13 @@ def predire_dossier(request, dossier_id):
         prediction = MLPredictionService.predire_risque(dossier)
 
         if prediction:
-            messages.success(request, f"Prediction generee : Risque {prediction.classe_risque}")
+            messages.success(
+                request, f"Prediction generee : Risque {prediction.classe_risque}"
+            )
         else:
-            messages.warning(request, "Pas assez de donnees pour generer une prediction.")
+            messages.warning(
+                request, "Pas assez de donnees pour generer une prediction."
+            )
 
     except DossierCredit.DoesNotExist:
         messages.error(request, "Dossier introuvable.")
@@ -131,7 +135,9 @@ def exporter_excel(request):
             open(filepath, "rb"),
             content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
-        response["Content-Disposition"] = f'attachment; filename="{filepath.split("/")[-1]}"'
+        response["Content-Disposition"] = (
+            f'attachment; filename="{filepath.split("/")[-1]}"'
+        )
 
         messages.success(request, "Export Excel genere avec succes.")
         return response
