@@ -95,43 +95,8 @@ services:
       - ggr_network
     restart: unless-stopped
 
-  # Celery Worker (Tâches asynchrones)
-  celery_worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: ggr_credit_celery
-    command: celery -A core worker -l info --concurrency=2
-    environment:
-      - DATABASE_URL=postgresql://${DB_USER:-credit_user}:${DB_PASSWORD:-credit_password}@db:5432/${DB_NAME:-credit_db}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
-    volumes:
-      - ./logs:/app/logs
-    depends_on:
-      - db
-      - redis
-    networks:
-      - ggr_network
-    restart: unless-stopped
-
-  # Celery Beat (Tâches planifiées)
-  celery_beat:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: ggr_credit_celery_beat
-    command: celery -A core beat -l info --scheduler django_celery_beat.schedulers:DatabaseScheduler
-    environment:
-      - DATABASE_URL=postgresql://${DB_USER:-credit_user}:${DB_PASSWORD:-credit_password}@db:5432/${DB_NAME:-credit_db}
-      - REDIS_URL=redis://:${REDIS_PASSWORD:-redis_password}@redis:6379/0
-    volumes:
-      - ./logs:/app/logs
-    depends_on:
-      - db
-      - redis
-    networks:
-      - ggr_network
-    restart: unless-stopped
+  # Note: Celery peut etre ajoute plus tard si necessaire pour les taches asynchrones
+  # Les services celery_worker et celery_beat ont ete retires car non implementes
 
 volumes:
   postgres_data:

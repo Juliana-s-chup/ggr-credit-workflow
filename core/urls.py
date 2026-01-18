@@ -19,6 +19,13 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
+
+
+def health_check(request):
+    """Endpoint de sante pour Docker healthcheck."""
+    return JsonResponse({"status": "ok"})
+
 
 try:
     from django.contrib import admin
@@ -29,6 +36,8 @@ except Exception:
     ADMIN_AVAILABLE = False
 
 urlpatterns = [
+    # Health check pour Docker
+    path("health/", health_check, name="health_check"),
     # Auth URLs (login, logout, password reset, etc.)
     path("accounts/", include("django.contrib.auth.urls")),
     # Convenience redirects
