@@ -45,31 +45,31 @@ from .workflow import (
     transmettre_analyste_page,
 )
 
-# Note : Les autres modules (wizard, etc.) 
+# Note : Les autres modules (wizard, etc.)
 # seront ajoutés progressivement pour éviter les erreurs.
 # Pour l'instant, on importe depuis l'ancien views.py
 
 __all__ = [
     # Base
-    'home',
-    'signup',
-    'pending_approval',
+    "home",
+    "signup",
+    "pending_approval",
     # Dossiers
-    'my_applications',
-    'create_application',
-    'edit_application',
-    'delete_application',
-    'test_dossiers_list',
+    "my_applications",
+    "create_application",
+    "edit_application",
+    "delete_application",
+    "test_dossiers_list",
     # Notifications
-    'notifications_list',
-    'notifications_mark_all_read',
-    'notifications_mark_read',
+    "notifications_list",
+    "notifications_mark_all_read",
+    "notifications_mark_read",
     # AJAX
-    'test_notification_api',
+    "test_notification_api",
     # Dashboard
-    'dashboard',
-    'dossier_detail',
+    "dashboard",
+    "dossier_detail",
     # Workflow
-    'transition_dossier',
-    'transmettre_analyste_page',
+    "transition_dossier",
+    "transmettre_analyste_page",
 ]

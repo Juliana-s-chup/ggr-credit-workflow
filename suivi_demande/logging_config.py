@@ -1,14 +1,15 @@
 """
 Configuration et helpers pour le logging professionnel de l'application.
 """
+
 import logging
 from functools import wraps
 
 # Loggers spécialisés
-logger = logging.getLogger('suivi_demande')
-security_logger = logging.getLogger('suivi_demande.security')
-workflow_logger = logging.getLogger('suivi_demande.workflow')
-models_logger = logging.getLogger('suivi_demande.models')
+logger = logging.getLogger("suivi_demande")
+security_logger = logging.getLogger("suivi_demande.security")
+workflow_logger = logging.getLogger("suivi_demande.workflow")
+models_logger = logging.getLogger("suivi_demande.models")
 
 
 # LOGS MÉTIER - DOSSIERS
@@ -71,9 +72,7 @@ def log_login_failure(username, ip_address=None, reason=None):
     """Log une tentative de connexion échouée."""
     ip_info = f" | IP: {ip_address}" if ip_address else ""
     reason_info = f" | Raison: {reason}" if reason else ""
-    security_logger.warning(
-        f"[LOGIN FAILED] Username: {username}{ip_info}{reason_info}"
-    )
+    security_logger.warning(f"[LOGIN FAILED] Username: {username}{ip_info}{reason_info}")
 
 
 def log_logout(user):
@@ -95,8 +94,7 @@ def log_permission_denied(user, permission, resource=None):
     """Log un refus de permission."""
     resource_info = f" | Ressource: {resource}" if resource else ""
     security_logger.warning(
-        f"[PERMISSION DENIED] User: {user.username} | "
-        f"Permission: {permission}{resource_info}"
+        f"[PERMISSION DENIED] User: {user.username} | " f"Permission: {permission}{resource_info}"
     )
 
 
@@ -159,11 +157,16 @@ def log_email_sent(recipient, subject, success=True):
 # DÉCORATEURS
 def log_view_access(view_name):
     """Décorateur pour logger l'accès à une vue."""
+
     def decorator(func):
         @wraps(func)
         def wrapper(request, *args, **kwargs):
             user = request.user if request.user.is_authenticated else "Anonymous"
-            logger.debug(f"[VIEW ACCESS] Vue: {view_name} | User: {user} | Method: {request.method}")
+            logger.debug(
+                f"[VIEW ACCESS] Vue: {view_name} | User: {user} | Method: {request.method}"
+            )
             return func(request, *args, **kwargs)
+
         return wrapper
+
     return decorator

@@ -7,14 +7,15 @@ import sys
 import os
 import subprocess
 
+
 def run_command(cmd, description):
     """Exécute une commande et affiche le résultat."""
     print(f"\n{'='*70}")
     print(f"🧪 {description}")
     print(f"{'='*70}\n")
-    
+
     result = subprocess.run(cmd, shell=True)
-    
+
     if result.returncode != 0:
         print(f"\n❌ ÉCHEC: {description}")
         return False
@@ -22,50 +23,44 @@ def run_command(cmd, description):
         print(f"\n✅ SUCCÈS: {description}")
         return True
 
+
 def main():
     """Fonction principale."""
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("🚀 LANCEMENT DE LA SUITE DE TESTS COMPLÈTE")
-    print("="*70)
-    
+    print("=" * 70)
+
     results = []
-    
+
     # 1. Tests unitaires Django
-    results.append(run_command(
-        "python manage.py test --verbosity=2",
-        "Tests unitaires Django"
-    ))
-    
+    results.append(run_command("python manage.py test --verbosity=2", "Tests unitaires Django"))
+
     # 2. Tests avec pytest et couverture
-    results.append(run_command(
-        "pytest --cov=suivi_demande --cov=analytics --cov-report=html --cov-report=term-missing",
-        "Tests pytest avec couverture"
-    ))
-    
+    results.append(
+        run_command(
+            "pytest --cov=suivi_demande --cov=analytics --cov-report=html --cov-report=term-missing",
+            "Tests pytest avec couverture",
+        )
+    )
+
     # 3. Vérification de la couverture minimale
-    results.append(run_command(
-        "coverage report --fail-under=75",
-        "Vérification couverture >= 75%"
-    ))
-    
+    results.append(run_command("coverage report --fail-under=75", "Vérification couverture >= 75%"))
+
     # 4. Génération du rapport HTML
-    results.append(run_command(
-        "coverage html",
-        "Génération rapport HTML"
-    ))
-    
+    results.append(run_command("coverage html", "Génération rapport HTML"))
+
     # Résumé final
-    print("\n" + "="*70)
+    print("\n" + "=" * 70)
     print("📊 RÉSUMÉ DES TESTS")
-    print("="*70)
-    
+    print("=" * 70)
+
     total = len(results)
     passed = sum(results)
     failed = total - passed
-    
+
     print(f"\n✅ Tests réussis: {passed}/{total}")
     print(f"❌ Tests échoués: {failed}/{total}")
-    
+
     if failed == 0:
         print("\n🎉 TOUS LES TESTS SONT PASSÉS !")
         print(f"\n📄 Rapport de couverture: htmlcov/index.html")
@@ -73,6 +68,7 @@ def main():
     else:
         print("\n⚠️  CERTAINS TESTS ONT ÉCHOUÉ")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

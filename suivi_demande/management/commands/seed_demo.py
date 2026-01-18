@@ -12,10 +12,14 @@ from suivi_demande.models import (
 
 
 class Command(BaseCommand):
-    help = "Seed de données de démonstration: utilisateurs par rôle et dossiers à différents statuts."
+    help = (
+        "Seed de données de démonstration: utilisateurs par rôle et dossiers à différents statuts."
+    )
 
     def add_arguments(self, parser):
-        parser.add_argument("--reset", action="store_true", help="Supprimer les données demo avant de recréer")
+        parser.add_argument(
+            "--reset", action="store_true", help="Supprimer les données demo avant de recréer"
+        )
 
     @transaction.atomic
     def handle(self, *args, **options):
@@ -27,12 +31,14 @@ class Command(BaseCommand):
             self.stdout.write("Suppression des profils demo…")
             UserProfile.objects.all().delete()
             self.stdout.write("Suppression des users demo…")
-            User.objects.filter(username__in=[
-                "client1", "client2", "gest1", "an1", "resp1", "boe1", "admin"
-            ]).delete()
+            User.objects.filter(
+                username__in=["client1", "client2", "gest1", "an1", "resp1", "boe1", "admin"]
+            ).delete()
 
         # Superuser
-        admin, _ = User.objects.get_or_create(username="admin", defaults={"email": "admin@example.com"})
+        admin, _ = User.objects.get_or_create(
+            username="admin", defaults={"email": "admin@example.com"}
+        )
         if not admin.is_superuser:
             admin.set_password("admin")
             admin.is_staff = True
@@ -67,14 +73,66 @@ class Command(BaseCommand):
         client2 = created_users["client2"]
 
         data = [
-            ("REF-NEW-1", client1, DossierStatutAgent.NOUVEAU, DossierStatutClient.BROUILLON if hasattr(DossierStatutClient, 'BROUILLON') else DossierStatutClient.EN_COURS_TRAITEMENT, 5000),
-            ("REF-AN-1", client1, DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutClient.EN_COURS_TRAITEMENT, 7000),
-            ("REF-AN-2", client2, DossierStatutAgent.EN_COURS_ANALYSE, DossierStatutClient.EN_COURS_TRAITEMENT, 9000),
-            ("REF-GGR-1", client2, DossierStatutAgent.EN_COURS_VALIDATION_GGR, DossierStatutClient.EN_COURS_TRAITEMENT, 15000),
-            ("REF-DG-1", client1, DossierStatutAgent.EN_ATTENTE_DECISION_DG, DossierStatutClient.EN_COURS_TRAITEMENT, 20000),
-            ("REF-APP-1", client1, DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutClient.EN_COURS_TRAITEMENT, 12000),
-            ("REF-DONE-1", client2, DossierStatutAgent.FONDS_LIBERE, DossierStatutClient.TERMINE, 3000),
-            ("REF-REF-1", client2, DossierStatutAgent.REFUSE, DossierStatutClient.SE_RAPPROCHER_GEST, 2500),
+            (
+                "REF-NEW-1",
+                client1,
+                DossierStatutAgent.NOUVEAU,
+                (
+                    DossierStatutClient.BROUILLON
+                    if hasattr(DossierStatutClient, "BROUILLON")
+                    else DossierStatutClient.EN_COURS_TRAITEMENT
+                ),
+                5000,
+            ),
+            (
+                "REF-AN-1",
+                client1,
+                DossierStatutAgent.TRANSMIS_ANALYSTE,
+                DossierStatutClient.EN_COURS_TRAITEMENT,
+                7000,
+            ),
+            (
+                "REF-AN-2",
+                client2,
+                DossierStatutAgent.EN_COURS_ANALYSE,
+                DossierStatutClient.EN_COURS_TRAITEMENT,
+                9000,
+            ),
+            (
+                "REF-GGR-1",
+                client2,
+                DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+                DossierStatutClient.EN_COURS_TRAITEMENT,
+                15000,
+            ),
+            (
+                "REF-DG-1",
+                client1,
+                DossierStatutAgent.EN_ATTENTE_DECISION_DG,
+                DossierStatutClient.EN_COURS_TRAITEMENT,
+                20000,
+            ),
+            (
+                "REF-APP-1",
+                client1,
+                DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+                DossierStatutClient.EN_COURS_TRAITEMENT,
+                12000,
+            ),
+            (
+                "REF-DONE-1",
+                client2,
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutClient.TERMINE,
+                3000,
+            ),
+            (
+                "REF-REF-1",
+                client2,
+                DossierStatutAgent.REFUSE,
+                DossierStatutClient.SE_RAPPROCHER_GEST,
+                2500,
+            ),
         ]
 
         for ref, client, s_agent, s_client, montant in data:
@@ -86,7 +144,7 @@ class Command(BaseCommand):
                     "montant": montant,
                     "statut_agent": s_agent,
                     "statut_client": s_client,
-                }
+                },
             )
 
         self.stdout.write(self.style.SUCCESS("Seed de démo terminé."))

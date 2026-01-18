@@ -1,6 +1,7 @@
 """
 Context processors pour ajouter des variables globales aux templates.
 """
+
 from .models import Notification
 
 

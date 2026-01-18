@@ -1,6 +1,7 @@
 """
 Décorateurs pour la gestion des permissions et des transitions.
 """
+
 from functools import wraps
 from typing import Iterable
 
@@ -15,6 +16,7 @@ def role_required(roles: Iterable[str]):
     """Decorator to require that request.user has one of the given roles.
     roles: iterable of UserRoles values.
     """
+
     def decorator(view_func):
         @wraps(view_func)
         def _wrapped(request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -24,7 +26,9 @@ def role_required(roles: Iterable[str]):
                 return view_func(request, *args, **kwargs)
             messages.error(request, "Accès non autorisé pour votre rôle.")
             return redirect("suivi:dashboard")
+
         return _wrapped
+
     return decorator
 
 
@@ -32,6 +36,7 @@ def transition_allowed(view_func):
     """Decorator to validate that the current user can perform the transition specified by 'action' on the dossier 'pk'.
     If not allowed, redirect to dashboard with an error message.
     """
+
     @wraps(view_func)
     def _wrapped(request: HttpRequest, *args, **kwargs) -> HttpResponse:
         pk = kwargs.get("pk")

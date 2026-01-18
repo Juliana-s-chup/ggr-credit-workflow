@@ -1,6 +1,7 @@
 """
 Vues des dashboards par rôle et détail des dossiers.
 """
+
 import statistics
 
 from django.contrib import messages
@@ -28,7 +29,7 @@ from ..utils import get_current_namespace
 def dashboard(request):
     """
     Dashboard principal adapté au rôle de l'utilisateur.
-    
+
     Affiche des vues différentes selon le rôle :
     - CLIENT : Ses dossiers
     - GESTIONNAIRE : Dossiers à traiter
@@ -39,26 +40,26 @@ def dashboard(request):
     """
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", UserRoles.CLIENT)
-    
+
     # Si pas de profil, créer un profil CLIENT par défaut
     if profile is None:
         profile, created = UserProfile.objects.get_or_create(
             user=request.user,
             defaults={
-                'full_name': request.user.get_full_name() or request.user.username,
-                'phone': '',
-                'address': '',
-                'role': UserRoles.CLIENT
-            }
+                "full_name": request.user.get_full_name() or request.user.username,
+                "phone": "",
+                "address": "",
+                "role": UserRoles.CLIENT,
+            },
         )
         role = profile.role
-    
+
     # Debug info
     debug_info = {
-        'user': request.user.username,
-        'profile_exists': profile is not None,
-        'role': role,
-        'template_to_use': None
+        "user": request.user.username,
+        "profile_exists": profile is not None,
+        "role": role,
+        "template_to_use": None,
     }
 
     if role == UserRoles.CLIENT:
@@ -77,36 +78,45 @@ def dashboard(request):
 
 def _dashboard_client(request, debug_info):
     """Dashboard pour les clients."""
-    debug_info['template_to_use'] = 'dashboard_client.html'
-    
+    debug_info["template_to_use"] = "dashboard_client.html"
+
     # Dossiers en cours (non terminés)
-    dossiers_en_cours = DossierCredit.objects.filter(
-        client=request.user
-    ).exclude(
-        statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-    ).select_related('acteur_courant').order_by("-date_soumission")
-    
+    dossiers_en_cours = (
+        DossierCredit.objects.filter(client=request.user)
+        .exclude(statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE])
+        .select_related("acteur_courant")
+        .order_by("-date_soumission")
+    )
+
     # Dossiers traités (terminés)
-    dossiers_traites = DossierCredit.objects.filter(
-        client=request.user,
-        statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-    ).select_related('acteur_courant').order_by('-date_maj')[:20]
-    
+    dossiers_traites = (
+        DossierCredit.objects.filter(
+            client=request.user,
+            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE],
+        )
+        .select_related("acteur_courant")
+        .order_by("-date_maj")[:20]
+    )
+
     # Tous les dossiers (pour compatibilité)
-    dossiers = DossierCredit.objects.filter(
-        client=request.user
-    ).select_related('acteur_courant').order_by("-date_soumission")
-    
+    dossiers = (
+        DossierCredit.objects.filter(client=request.user)
+        .select_related("acteur_courant")
+        .order_by("-date_soumission")
+    )
+
     dossiers_approuves = dossiers.filter(
         statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
     ).count()
-    montant_total = dossiers.aggregate(total=Sum('montant'))['total'] or 0
-    
+    montant_total = dossiers.aggregate(total=Sum("montant"))["total"] or 0
+
     # Historique des actions sur les dossiers du client
-    historique_actions = JournalAction.objects.filter(
-        dossier__client=request.user
-    ).select_related('dossier', 'acteur').order_by("-timestamp")[:20]
-    
+    historique_actions = (
+        JournalAction.objects.filter(dossier__client=request.user)
+        .select_related("dossier", "acteur")
+        .order_by("-timestamp")[:20]
+    )
+
     context = {
         "mes_dossiers": dossiers,
         "dossiers": dossiers_en_cours,
@@ -124,17 +134,20 @@ def _dashboard_client(request, debug_info):
 def _dashboard_gestionnaire(request, debug_info):
     """Dashboard pour les gestionnaires."""
     # Dossiers en attente
-    dossiers_pending = DossierCredit.objects.filter(
-        statut_agent__in=[
-            DossierStatutAgent.NOUVEAU,
-            DossierStatutAgent.TRANSMIS_RESP_GEST
-        ]
-    ).select_related('client', 'acteur_courant').order_by("-date_soumission")
+    dossiers_pending = (
+        DossierCredit.objects.filter(
+            statut_agent__in=[DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]
+        )
+        .select_related("client", "acteur_courant")
+        .order_by("-date_soumission")
+    )
 
     # Dossiers récents
-    recents = DossierCredit.objects.select_related(
-        'client', 'acteur_courant'
-    ).all().order_by("-date_soumission")[:10]
+    recents = (
+        DossierCredit.objects.select_related("client", "acteur_courant")
+        .all()
+        .order_by("-date_soumission")[:10]
+    )
 
     # KPI
     today = timezone.now().date()
@@ -154,7 +167,10 @@ def _dashboard_gestionnaire(request, debug_info):
     retournes_today = retournes_qs.filter(date_soumission__date=today).count()
 
     en_attente_qs = DossierCredit.objects.filter(
-        statut_agent__in=[DossierStatutAgent.EN_COURS_VALIDATION_GGR, DossierStatutAgent.EN_ATTENTE_DECISION_DG]
+        statut_agent__in=[
+            DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+            DossierStatutAgent.EN_ATTENTE_DECISION_DG,
+        ]
     )
     en_attente_total = en_attente_qs.count()
     en_attente_today = en_attente_qs.filter(date_soumission__date=today).count()
@@ -187,25 +203,33 @@ def _dashboard_gestionnaire(request, debug_info):
     }
 
     # Dossiers en cours
-    dossiers_en_cours = DossierCredit.objects.exclude(
-        statut_agent__in=[
-            DossierStatutAgent.FONDS_LIBERE,
-            DossierStatutAgent.REFUSE,
-        ]
-    ).select_related('client', 'acteur_courant').order_by("-date_soumission")
-    
+    dossiers_en_cours = (
+        DossierCredit.objects.exclude(
+            statut_agent__in=[
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
+        )
+        .select_related("client", "acteur_courant")
+        .order_by("-date_soumission")
+    )
+
     # Dossiers traités
-    dossiers_traites = DossierCredit.objects.filter(
-        statut_agent__in=[
-            DossierStatutAgent.FONDS_LIBERE,
-            DossierStatutAgent.REFUSE,
-        ]
-    ).select_related('client').order_by("-date_maj")[:20]
-    
+    dossiers_traites = (
+        DossierCredit.objects.filter(
+            statut_agent__in=[
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
+        )
+        .select_related("client")
+        .order_by("-date_maj")[:20]
+    )
+
     # Historique
-    historique_actions = JournalAction.objects.select_related(
-        'dossier', 'acteur'
-    ).order_by("-timestamp")[:20]
+    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+        "-timestamp"
+    )[:20]
 
     # Statistiques supplémentaires
     total_dossiers = DossierCredit.objects.count()
@@ -222,19 +246,21 @@ def _dashboard_gestionnaire(request, debug_info):
     total_decides = approuves + refuses
     taux_validation = round((approuves / total_decides) * 100, 1) if total_decides else 0
 
-    portefeuille_total = DossierCredit.objects.aggregate(total=Sum('montant'))['total'] or 0
+    portefeuille_total = DossierCredit.objects.aggregate(total=Sum("montant"))["total"] or 0
 
     dossiers_urgents = list(dossiers_pending[:5])
     mes_clients = []
-    
-    mes_dossiers_crees = DossierCredit.objects.filter(
-        acteur_courant=request.user
-    ).select_related('client').order_by("-date_soumission")[:20]
 
-    debug_info['template_to_use'] = 'dashboard_gestionnaire.html'
-    debug_info['total_dossiers_base'] = total_dossiers
-    debug_info['dossiers_affiches'] = dossiers_en_cours.count()
-    
+    mes_dossiers_crees = (
+        DossierCredit.objects.filter(acteur_courant=request.user)
+        .select_related("client")
+        .order_by("-date_soumission")[:20]
+    )
+
+    debug_info["template_to_use"] = "dashboard_gestionnaire.html"
+    debug_info["total_dossiers_base"] = total_dossiers
+    debug_info["dossiers_affiches"] = dossiers_en_cours.count()
+
     # Messages d'information
     if total_dossiers == 0:
         messages.warning(request, "🔍 Aucun dossier n'existe en base de données.")
@@ -242,7 +268,7 @@ def _dashboard_gestionnaire(request, debug_info):
         messages.info(request, f"🔍 {total_dossiers} dossier(s) en base, mais aucun actif.")
     else:
         messages.success(request, f"✓ {dossiers_en_cours.count()} dossier(s) en cours.")
-    
+
     ctx = {
         "dossiers_pending": dossiers_pending,
         "recents": recents,
@@ -264,28 +290,38 @@ def _dashboard_gestionnaire(request, debug_info):
 
 def _dashboard_analyste(request, debug_info):
     """Dashboard pour les analystes."""
-    dossiers = DossierCredit.objects.filter(
-        statut_agent__in=[DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]
-    ).select_related('client', 'acteur_courant').order_by("-date_soumission")
-    
+    dossiers = (
+        DossierCredit.objects.filter(
+            statut_agent__in=[
+                DossierStatutAgent.TRANSMIS_ANALYSTE,
+                DossierStatutAgent.EN_COURS_ANALYSE,
+            ]
+        )
+        .select_related("client", "acteur_courant")
+        .order_by("-date_soumission")
+    )
+
     dossiers_en_attente = dossiers.filter(statut_agent=DossierStatutAgent.TRANSMIS_ANALYSTE)
     dossiers_a_analyser = dossiers
     dossiers_prioritaires = dossiers[:5]
-    
+
     total_dossiers = dossiers.count()
     dossiers_ce_mois = dossiers.filter(
-        date_soumission__year=timezone.now().year,
-        date_soumission__month=timezone.now().month
+        date_soumission__year=timezone.now().year, date_soumission__month=timezone.now().month
     ).count()
-    
-    dossiers_traites = DossierCredit.objects.filter(
-        statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-    ).select_related('client').order_by("-date_maj")[:20]
-    
-    historique_actions = JournalAction.objects.select_related(
-        'dossier', 'acteur'
-    ).order_by("-timestamp")[:20]
-    
+
+    dossiers_traites = (
+        DossierCredit.objects.filter(
+            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        )
+        .select_related("client")
+        .order_by("-date_maj")[:20]
+    )
+
+    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+        "-timestamp"
+    )[:20]
+
     context = {
         "dossiers": dossiers,
         "dossiers_en_attente": dossiers_en_attente,
@@ -301,45 +337,65 @@ def _dashboard_analyste(request, debug_info):
 
 def _dashboard_responsable_ggr(request, debug_info):
     """Dashboard pour le responsable GGR."""
-    dossiers = DossierCredit.objects.filter(
-        statut_agent__in=[DossierStatutAgent.EN_COURS_VALIDATION_GGR, DossierStatutAgent.EN_ATTENTE_DECISION_DG]
-    ).select_related('client', 'acteur_courant').order_by("-date_soumission")
-    
-    dossiers_traites = DossierCredit.objects.filter(
-        statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-    ).select_related('client').order_by("-date_maj")[:20]
-    
-    historique_actions = JournalAction.objects.select_related(
-        'dossier', 'acteur'
-    ).order_by("-timestamp")[:20]
-    
-    return render(request, "suivi_demande/dashboard_responsable_ggr_pro.html", {
-        "dossiers": dossiers,
-        "dossiers_traites": dossiers_traites,
-        "historique_actions": historique_actions,
-    })
+    dossiers = (
+        DossierCredit.objects.filter(
+            statut_agent__in=[
+                DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+                DossierStatutAgent.EN_ATTENTE_DECISION_DG,
+            ]
+        )
+        .select_related("client", "acteur_courant")
+        .order_by("-date_soumission")
+    )
+
+    dossiers_traites = (
+        DossierCredit.objects.filter(
+            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        )
+        .select_related("client")
+        .order_by("-date_maj")[:20]
+    )
+
+    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+        "-timestamp"
+    )[:20]
+
+    return render(
+        request,
+        "suivi_demande/dashboard_responsable_ggr_pro.html",
+        {
+            "dossiers": dossiers,
+            "dossiers_traites": dossiers_traites,
+            "historique_actions": historique_actions,
+        },
+    )
 
 
 def _dashboard_boe(request, debug_info):
     """Dashboard pour le BOE (Back Office Engagement)."""
-    dossiers = DossierCredit.objects.filter(
-        statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
-    ).select_related('client', 'acteur_courant').order_by("-date_soumission")
-    
+    dossiers = (
+        DossierCredit.objects.filter(statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS)
+        .select_related("client", "acteur_courant")
+        .order_by("-date_soumission")
+    )
+
     today = timezone.now().date()
     fonds_liberes_today = DossierCredit.objects.filter(
-        statut_agent=DossierStatutAgent.FONDS_LIBERE,
-        date_maj__date=today
+        statut_agent=DossierStatutAgent.FONDS_LIBERE, date_maj__date=today
     ).count()
-    
-    dossiers_traites = DossierCredit.objects.filter(
-        statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-    ).select_related('client').order_by("-date_maj")[:20]
-    
-    historique_actions = JournalAction.objects.select_related(
-        'dossier', 'acteur'
-    ).order_by("-timestamp")[:20]
-    
+
+    dossiers_traites = (
+        DossierCredit.objects.filter(
+            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        )
+        .select_related("client")
+        .order_by("-date_maj")[:20]
+    )
+
+    historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+        "-timestamp"
+    )[:20]
+
     context = {
         "dossiers": dossiers,
         "dossiers_traites": dossiers_traites,
@@ -354,26 +410,28 @@ def _dashboard_super_admin(request, debug_info):
     """Dashboard pour le super administrateur."""
     from django.contrib.auth import get_user_model
     from django.contrib.admin.models import LogEntry
-    
+
     User = get_user_model()
-    
-    all_users = User.objects.select_related('profile').all().order_by('-date_joined')
-    
+
+    all_users = User.objects.select_related("profile").all().order_by("-date_joined")
+
     stats_total_users = all_users.count()
     stats_users_active = all_users.filter(is_active=True).count()
     stats_users_inactive = all_users.filter(is_active=False).count()
-    
+
     stats_roles = {}
     for role_value, role_label in UserRoles.choices:
         count = UserProfile.objects.filter(role=role_value).count()
         stats_roles[role_label] = count
-    
-    historique_utilisateurs = LogEntry.objects.select_related('user', 'content_type').filter(
-        content_type__model__in=['user', 'userprofile']
-    ).order_by('-action_time')[:50]
-    
+
+    historique_utilisateurs = (
+        LogEntry.objects.select_related("user", "content_type")
+        .filter(content_type__model__in=["user", "userprofile"])
+        .order_by("-action_time")[:50]
+    )
+
     users_recent = all_users[:10]
-    
+
     context = {
         "all_users": all_users,
         "users_recent": users_recent,
@@ -390,14 +448,16 @@ def _dashboard_super_admin(request, debug_info):
 def dossier_detail(request, pk):
     """
     Affiche le détail complet d'un dossier.
-    
+
     Gère :
     - Affichage des informations du dossier
     - Ajout de commentaires
     - Upload de pièces jointes
     - Permissions selon le rôle
     """
-    dossier = get_object_or_404(DossierCredit.objects.select_related('client', 'acteur_courant'), pk=pk)
+    dossier = get_object_or_404(
+        DossierCredit.objects.select_related("client", "acteur_courant"), pk=pk
+    )
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", UserRoles.CLIENT)
 
@@ -430,7 +490,7 @@ def dossier_detail(request, pk):
 
     if request.method == "POST":
         action = (request.POST.get("action") or "").strip()
-        
+
         if action == "add_comment":
             msg = (request.POST.get("message") or "").strip()
             if msg:
@@ -443,7 +503,7 @@ def dossier_detail(request, pk):
                 messages.success(request, "Commentaire ajouté.")
             namespace = get_current_namespace(request)
             return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
-            
+
         elif action == "upload_piece":
             if not can_upload:
                 messages.error(request, "Vous ne pouvez pas déposer de pièce à ce stade.")
@@ -456,7 +516,7 @@ def dossier_detail(request, pk):
                 messages.error(request, "Aucun fichier sélectionné.")
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
-                
+
             # Validation taille
             file_size = getattr(f, "size", 0) or 0
             max_size = getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024)
@@ -465,16 +525,19 @@ def dossier_detail(request, pk):
                 messages.error(request, f"Fichier trop volumineux. Taille max: {max_mb} Mo.")
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
-                
+
             # Validation extension
             filename = getattr(f, "name", "")
             ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
             allowed_exts = getattr(settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"})
             if ext not in allowed_exts:
-                messages.error(request, f"Extension non autorisée ({ext}). Autorisées: {', '.join(sorted(allowed_exts))}.")
+                messages.error(
+                    request,
+                    f"Extension non autorisée ({ext}). Autorisées: {', '.join(sorted(allowed_exts))}.",
+                )
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
-                
+
             # Créer la pièce jointe
             pj = PieceJointe.objects.create(
                 dossier=dossier,
@@ -488,9 +551,19 @@ def dossier_detail(request, pk):
             return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
     # Récupérer les données
-    pieces = PieceJointe.objects.filter(dossier=dossier).select_related('upload_by').order_by("-upload_at")
-    commentaires = Commentaire.objects.filter(dossier=dossier).select_related('auteur').order_by("-created_at")
-    journal = JournalAction.objects.filter(dossier=dossier).select_related('acteur').order_by("-timestamp")
+    pieces = (
+        PieceJointe.objects.filter(dossier=dossier)
+        .select_related("upload_by")
+        .order_by("-upload_at")
+    )
+    commentaires = (
+        Commentaire.objects.filter(dossier=dossier).select_related("auteur").order_by("-created_at")
+    )
+    journal = (
+        JournalAction.objects.filter(dossier=dossier)
+        .select_related("acteur")
+        .order_by("-timestamp")
+    )
 
     ctx = {
         "dossier": dossier,

@@ -1,6 +1,7 @@
 """
 Development settings.
 """
+
 from .base import *  # noqa
 
 DEBUG = True
@@ -19,11 +20,9 @@ DATABASES = {
 
 # Hosts / CSRF suitable for local dev (can be overridden via .env)
 # En mode DEBUG, accepter tous les domaines
-ALLOWED_HOSTS = ['*']  # Accepte tous les domaines en développement
+ALLOWED_HOSTS = ["*"]  # Accepte tous les domaines en développement
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
 # In development, avoid WhiteNoise manifest storage to prevent missing manifest errors
-STORAGES["staticfiles"] = {
-    "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"
-}
+STORAGES["staticfiles"] = {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"}

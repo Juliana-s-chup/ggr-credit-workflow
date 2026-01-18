@@ -1,6 +1,7 @@
 """
 Vues de gestion du workflow et des transitions de statut.
 """
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -30,7 +31,7 @@ User = get_user_model()
 def transition_dossier(request, pk, action: str):
     """
     Effectue une transition d'état sur un dossier en fonction du rôle et de l'action.
-    
+
     Actions possibles :
     - GESTIONNAIRE : transmettre_analyste, retour_client
     - ANALYSTE : transmettre_ggr, retour_gestionnaire
@@ -47,7 +48,7 @@ def transition_dossier(request, pk, action: str):
     role = getattr(profile, "role", None)
 
     # Récupérer le commentaire de retour s'il existe
-    commentaire_retour = request.POST.get('commentaire_retour', '').strip()
+    commentaire_retour = request.POST.get("commentaire_retour", "").strip()
 
     allowed = False
     de_statut = dossier.statut_agent
@@ -57,16 +58,25 @@ def transition_dossier(request, pk, action: str):
 
     try:
         if role == UserRoles.GESTIONNAIRE and action == "transmettre_analyste":
-            if dossier.statut_agent in [DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]:
+            if dossier.statut_agent in [
+                DossierStatutAgent.NOUVEAU,
+                DossierStatutAgent.TRANSMIS_RESP_GEST,
+            ]:
                 vers_statut = DossierStatutAgent.TRANSMIS_ANALYSTE
                 nouveau_statut_client = DossierStatutClient.EN_COURS_TRAITEMENT
                 action_log = "TRANSITION"
                 allowed = True
 
         elif role == UserRoles.GESTIONNAIRE and action == "retour_client":
-            if dossier.statut_agent in [DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]:
+            if dossier.statut_agent in [
+                DossierStatutAgent.NOUVEAU,
+                DossierStatutAgent.TRANSMIS_RESP_GEST,
+            ]:
                 if not commentaire_retour:
-                    messages.error(request, "Un commentaire expliquant pourquoi le dossier est incomplet est requis.")
+                    messages.error(
+                        request,
+                        "Un commentaire expliquant pourquoi le dossier est incomplet est requis.",
+                    )
                     namespace = get_current_namespace(request)
                     return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
                 vers_statut = DossierStatutAgent.NOUVEAU
@@ -75,21 +85,30 @@ def transition_dossier(request, pk, action: str):
                 allowed = True
 
         elif role == UserRoles.ANALYSTE and action == "transmettre_ggr":
-            if dossier.statut_agent in [DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]:
+            if dossier.statut_agent in [
+                DossierStatutAgent.TRANSMIS_ANALYSTE,
+                DossierStatutAgent.EN_COURS_ANALYSE,
+            ]:
                 vers_statut = DossierStatutAgent.EN_COURS_VALIDATION_GGR
                 nouveau_statut_client = DossierStatutClient.EN_COURS_TRAITEMENT
                 action_log = "TRANSITION"
                 allowed = True
 
         elif role == UserRoles.ANALYSTE and action == "retour_gestionnaire":
-            if dossier.statut_agent in [DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]:
+            if dossier.statut_agent in [
+                DossierStatutAgent.TRANSMIS_ANALYSTE,
+                DossierStatutAgent.EN_COURS_ANALYSE,
+            ]:
                 vers_statut = DossierStatutAgent.TRANSMIS_RESP_GEST
                 nouveau_statut_client = DossierStatutClient.EN_COURS_TRAITEMENT
                 action_log = "RETOUR"
                 allowed = True
 
         elif role == UserRoles.RESPONSABLE_GGR and action == "approuver":
-            if dossier.statut_agent in [DossierStatutAgent.EN_COURS_VALIDATION_GGR, DossierStatutAgent.EN_ATTENTE_DECISION_DG]:
+            if dossier.statut_agent in [
+                DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+                DossierStatutAgent.EN_ATTENTE_DECISION_DG,
+            ]:
                 vers_statut = DossierStatutAgent.APPROUVE_ATTENTE_FONDS
                 nouveau_statut_client = DossierStatutClient.EN_COURS_TRAITEMENT
                 action_log = "APPROBATION"
@@ -159,14 +178,19 @@ def transition_dossier(request, pk, action: str):
         _handle_notifications(request, dossier, action, commentaire_retour)
     except Exception as e:
         log_error("notifications_transition", e, request.user)
-        messages.warning(request, "Transition effectuée mais erreur lors de l'envoi des notifications.")
+        messages.warning(
+            request, "Transition effectuée mais erreur lors de l'envoi des notifications."
+        )
 
     # Message de succès
     if action == "retour_client":
-        messages.success(request, f"Le dossier {dossier.reference} a été retourné au client avec vos commentaires.")
+        messages.success(
+            request,
+            f"Le dossier {dossier.reference} a été retourné au client avec vos commentaires.",
+        )
     else:
         messages.success(request, "Transition effectuée avec succès.")
-    
+
     namespace = get_current_namespace(request)
     return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
@@ -186,7 +210,7 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             f"Statut côté client: {dossier.get_statut_client_display()}"
         )
         titre_notification = f"🔔 Dossier {dossier.reference} • Mise à jour"
-    
+
     # Créer la notification pour le client
     Notification.objects.create(
         utilisateur_cible=dossier.client,
@@ -195,7 +219,7 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
         message=message_notification,
         canal="INTERNE",
     )
-    
+
     # Notifier les groupes selon l'action
     if action == "transmettre_analyste":
         _notifier_groupe(
@@ -203,36 +227,36 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             dossier,
             UserRoles.ANALYSTE,
             f"🔔 Nouveau dossier à analyser • {dossier.reference}",
-            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}"
+            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
         )
-    
+
     elif action == "transmettre_ggr":
         _notifier_groupe(
             request,
             dossier,
             UserRoles.RESPONSABLE_GGR,
             f"🔔 Dossier à valider • {dossier.reference}",
-            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}"
+            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
         )
-    
+
     elif action == "approuver":
         _notifier_groupe(
             request,
             dossier,
             UserRoles.BOE,
             f"🔔 Dossier approuvé • {dossier.reference}",
-            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nApprouvé par: {expediteur}"
+            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nApprouvé par: {expediteur}",
         )
-    
+
     elif action == "retour_gestionnaire":
         _notifier_groupe(
             request,
             dossier,
             UserRoles.GESTIONNAIRE,
             f"🔔 Dossier retourné • {dossier.reference}",
-            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nRetourné par: {expediteur}"
+            "🔔 Nouveau message\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nRetourné par: {expediteur}",
         )
-    
+
     # Email au client
     if dossier.client.email:
         _send_email_to_client(request, dossier, action, commentaire_retour)
@@ -240,11 +264,8 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
 
 def _notifier_groupe(request, dossier, role_cible, titre, message_template):
     """Notifie tous les utilisateurs d'un rôle donné."""
-    utilisateurs = User.objects.filter(
-        profile__role=role_cible,
-        is_active=True
-    )
-    
+    utilisateurs = User.objects.filter(profile__role=role_cible, is_active=True)
+
     count = 0
     for user in utilisateurs:
         Notification.objects.create(
@@ -257,11 +278,11 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
                 client_name=dossier.client.get_full_name() or dossier.client.username,
                 montant=dossier.montant,
                 produit=dossier.produit,
-                expediteur=request.user.get_full_name() or request.user.username
+                expediteur=request.user.get_full_name() or request.user.username,
             ),
             canal="INTERNE",
         )
-        
+
         # Email
         if user.email:
             try:
@@ -273,7 +294,7 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
                         client_name=dossier.client.get_full_name() or dossier.client.username,
                         montant=dossier.montant,
                         produit=dossier.produit,
-                        expediteur=request.user.get_full_name() or request.user.username
+                        expediteur=request.user.get_full_name() or request.user.username,
                     ),
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[user.email],
@@ -282,7 +303,7 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
                 count += 1
             except Exception:
                 pass
-    
+
     if count > 0:
         messages.success(request, f"✓ {count} utilisateur(s) notifié(s).")
 
@@ -304,23 +325,26 @@ def _send_email_to_client(request, dossier, action, commentaire_retour):
             f"Bonjour,\n\nVotre dossier {dossier.reference} a été mis à jour. "
             f"Nouveau statut côté client: {dossier.get_statut_client_display()}.\n\nCeci est un message automatique."
         )
-    
+
     # Template HTML pour retour client
     html_message = None
     if action == "retour_client":
         try:
-            logo_url = request.build_absolute_uri(static('suivi_demande/img/Credit_Du_Congo.png'))
-            site_url = request.build_absolute_uri('/')
-            
-            html_message = render_to_string('emails/retour_client.html', {
-                'dossier': dossier,
-                'commentaire_retour': commentaire_retour,
-                'logo_url': logo_url,
-                'site_url': site_url,
-            })
+            logo_url = request.build_absolute_uri(static("suivi_demande/img/Credit_Du_Congo.png"))
+            site_url = request.build_absolute_uri("/")
+
+            html_message = render_to_string(
+                "emails/retour_client.html",
+                {
+                    "dossier": dossier,
+                    "commentaire_retour": commentaire_retour,
+                    "logo_url": logo_url,
+                    "site_url": site_url,
+                },
+            )
         except Exception:
             html_message = None
-    
+
     try:
         send_mail(
             subject=subject,

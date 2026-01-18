@@ -2,6 +2,7 @@
 Service layer pour la gestion des dossiers de crédit.
 Centralise la logique métier et évite la duplication dans les views.
 """
+
 from typing import Optional, List, Dict, Any
 from decimal import Decimal
 from django.contrib.auth.models import User
@@ -25,40 +26,34 @@ from ..models import UserRoles
 
 class DossierService:
     """Service pour la gestion des dossiers de crédit."""
-    
+
     @staticmethod
     def get_dossiers_for_user(
-        user: User,
-        page: int = 1,
-        per_page: int = 20,
-        filters: Optional[Dict[str, Any]] = None
+        user: User, page: int = 1, per_page: int = 20, filters: Optional[Dict[str, Any]] = None
     ) -> Page:
         """
         Récupère les dossiers accessibles par un utilisateur avec pagination.
         Optimisé avec select_related et prefetch_related.
-        
+
         Args:
             user: Utilisateur connecté
             page: Numéro de page
             per_page: Nombre d'éléments par page
             filters: Filtres optionnels (statut, date, etc.)
-            
+
         Returns:
             Page: Page Django avec les dossiers
         """
         role = get_user_role(user)
-        
+
         # Base queryset optimisé
         queryset = DossierCredit.objects.select_related(
-            'client',
-            'client__profile',
-            'acteur_courant',
-            'canevas'
+            "client", "client__profile", "acteur_courant", "canevas"
         ).prefetch_related(
-            Prefetch('pieces', queryset=PieceJointe.objects.order_by('-upload_at')),
-            Prefetch('journal', queryset=JournalAction.objects.order_by('-timestamp')),
+            Prefetch("pieces", queryset=PieceJointe.objects.order_by("-upload_at")),
+            Prefetch("journal", queryset=JournalAction.objects.order_by("-timestamp")),
         )
-        
+
         # Filtrage par rôle
         if role == UserRoles.CLIENT:
             queryset = queryset.filter(client=user)
@@ -94,91 +89,87 @@ class DossierService:
         else:
             # Rôle inconnu: aucun dossier
             queryset = queryset.none()
-        
+
         # Appliquer les filtres additionnels
         if filters:
-            if 'statut' in filters:
-                queryset = queryset.filter(statut_agent=filters['statut'])
-            if 'date_debut' in filters:
-                queryset = queryset.filter(date_soumission__gte=filters['date_debut'])
-            if 'date_fin' in filters:
-                queryset = queryset.filter(date_soumission__lte=filters['date_fin'])
-            if 'search' in filters:
-                search = filters['search']
+            if "statut" in filters:
+                queryset = queryset.filter(statut_agent=filters["statut"])
+            if "date_debut" in filters:
+                queryset = queryset.filter(date_soumission__gte=filters["date_debut"])
+            if "date_fin" in filters:
+                queryset = queryset.filter(date_soumission__lte=filters["date_fin"])
+            if "search" in filters:
+                search = filters["search"]
                 queryset = queryset.filter(
-                    Q(reference__icontains=search) |
-                    Q(client__username__icontains=search) |
-                    Q(produit__icontains=search)
+                    Q(reference__icontains=search)
+                    | Q(client__username__icontains=search)
+                    | Q(produit__icontains=search)
                 )
-        
+
         # Tri par défaut
-        queryset = queryset.order_by('-date_soumission')
-        
+        queryset = queryset.order_by("-date_soumission")
+
         # Pagination
         paginator = Paginator(queryset, per_page)
         return paginator.get_page(page)
-    
+
     @staticmethod
     def get_dossier_detail(dossier_id: int, user: User) -> Optional[DossierCredit]:
         """
         Récupère un dossier avec toutes ses relations (optimisé).
         Vérifie les permissions d'accès.
-        
+
         Args:
             dossier_id: ID du dossier
             user: Utilisateur connecté
-            
+
         Returns:
             DossierCredit ou None si non trouvé/non autorisé
         """
         try:
-            dossier = DossierCredit.objects.select_related(
-                'client',
-                'client__profile',
-                'acteur_courant',
-                'canevas'
-            ).prefetch_related(
-                'pieces',
-                'journal',
-                'commentaires',
-                'commentaires__auteur',
-            ).get(pk=dossier_id)
-            
+            dossier = (
+                DossierCredit.objects.select_related(
+                    "client", "client__profile", "acteur_courant", "canevas"
+                )
+                .prefetch_related(
+                    "pieces",
+                    "journal",
+                    "commentaires",
+                    "commentaires__auteur",
+                )
+                .get(pk=dossier_id)
+            )
+
             # Vérifier les permissions
             role = get_user_role(user)
             if role == UserRoles.CLIENT and dossier.client != user:
                 return None
-            
+
             return dossier
         except DossierCredit.DoesNotExist:
             return None
-    
+
     @staticmethod
     def create_dossier(
-        client: User,
-        produit: str,
-        montant: Decimal,
-        created_by: User
+        client: User, produit: str, montant: Decimal, created_by: User
     ) -> DossierCredit:
         """
         Crée un nouveau dossier de crédit.
-        
+
         Args:
             client: Client demandeur
             produit: Type de crédit
             montant: Montant demandé
             created_by: Utilisateur créateur
-            
+
         Returns:
             DossierCredit: Nouveau dossier créé
         """
         # Générer la référence
         year = timezone.now().year
-        count = DossierCredit.objects.filter(
-            date_soumission__year=year
-        ).count() + 1
+        count = DossierCredit.objects.filter(date_soumission__year=year).count() + 1
         reference = f"DOS-{year}-{count:05d}"
-        
+
         # Créer le dossier
         dossier = DossierCredit.objects.create(
             client=client,
@@ -188,78 +179,75 @@ class DossierService:
             statut_agent=DossierStatutAgent.NOUVEAU,
             statut_client=DossierStatutClient.EN_ATTENTE,
         )
-        
+
         # Créer l'entrée journal
         JournalAction.objects.create(
             dossier=dossier,
-            action='CREATION',
+            action="CREATION",
             vers_statut=DossierStatutAgent.NOUVEAU,
             acteur=created_by,
-            commentaire_systeme=f"Dossier créé par {created_by.username}"
+            commentaire_systeme=f"Dossier créé par {created_by.username}",
         )
-        
+
         return dossier
-    
+
     @staticmethod
     def transition_statut(
-        dossier: DossierCredit,
-        nouveau_statut: str,
-        acteur: User,
-        commentaire: Optional[str] = None
+        dossier: DossierCredit, nouveau_statut: str, acteur: User, commentaire: Optional[str] = None
     ) -> bool:
         """
         Effectue une transition de statut avec validation.
-        
+
         Args:
             dossier: Dossier concerné
             nouveau_statut: Nouveau statut agent
             acteur: Utilisateur effectuant la transition
             commentaire: Commentaire optionnel
-            
+
         Returns:
             bool: True si transition réussie
         """
         ancien_statut = dossier.statut_agent
-        
+
         # Mettre à jour le dossier
         dossier.statut_agent = nouveau_statut
         dossier.acteur_courant = acteur
         dossier.save()
-        
+
         # Créer l'entrée journal
         JournalAction.objects.create(
             dossier=dossier,
-            action='TRANSITION',
+            action="TRANSITION",
             de_statut=ancien_statut,
             vers_statut=nouveau_statut,
             acteur=acteur,
-            commentaire_systeme=commentaire or f"Transition {ancien_statut} → {nouveau_statut}"
+            commentaire_systeme=commentaire or f"Transition {ancien_statut} → {nouveau_statut}",
         )
-        
+
         # Créer notification pour le client
         Notification.objects.create(
             utilisateur_cible=dossier.client,
-            type='CHANGEMENT_STATUT',
+            type="CHANGEMENT_STATUT",
             titre=f"Dossier {dossier.reference} - Mise à jour",
             message=f"Votre dossier est passé au statut: {dossier.get_statut_agent_display()}",
-            canal='INTERNE'
+            canal="INTERNE",
         )
-        
+
         return True
-    
+
     @staticmethod
     def get_statistics_for_role(user: User) -> Dict[str, Any]:
         """
         Calcule les statistiques pour un utilisateur selon son rôle.
-        
+
         Args:
             user: Utilisateur connecté
-            
+
         Returns:
             Dict: Statistiques (total, en_cours, approuves, refuses, etc.)
         """
         role = get_user_role(user)
-        
+
         # Base queryset selon le rôle
         if role == UserRoles.CLIENT:
             queryset = DossierCredit.objects.filter(client=user)
@@ -269,25 +257,18 @@ class DossierService:
             queryset = DossierCredit.objects.all()
         else:
             queryset = DossierCredit.objects.none()
-        
+
         # Calculer les stats
         stats = {
-            'total': queryset.count(),
-            'en_cours': queryset.exclude(
-                statut_agent__in=[
-                    DossierStatutAgent.FONDS_LIBERE,
-                    DossierStatutAgent.REFUSE
-                ]
+            "total": queryset.count(),
+            "en_cours": queryset.exclude(
+                statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
             ).count(),
-            'approuves': queryset.filter(
+            "approuves": queryset.filter(
                 statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
             ).count(),
-            'refuses': queryset.filter(
-                statut_agent=DossierStatutAgent.REFUSE
-            ).count(),
-            'montant_total': queryset.aggregate(
-                total=Sum('montant')
-            )['total'] or Decimal('0'),
+            "refuses": queryset.filter(statut_agent=DossierStatutAgent.REFUSE).count(),
+            "montant_total": queryset.aggregate(total=Sum("montant"))["total"] or Decimal("0"),
         }
-        
+
         return stats

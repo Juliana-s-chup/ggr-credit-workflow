@@ -2,6 +2,7 @@
 Utilitaires pour l'application suivi_demande.
 Fonctions de notification et helpers.
 """
+
 from typing import Iterable, Optional
 
 from django.conf import settings
@@ -12,7 +13,16 @@ from .models import Notification, DossierCredit
 
 User = get_user_model()
 
-def notify(users: Iterable[User], *, type: str, titre: str, message: str, dossier: Optional[DossierCredit] = None, email: bool = False) -> int:
+
+def notify(
+    users: Iterable[User],
+    *,
+    type: str,
+    titre: str,
+    message: str,
+    dossier: Optional[DossierCredit] = None,
+    email: bool = False,
+) -> int:
     """Create in-app notifications for given users and optionally send emails.
     Returns number of notifications created.
     """
@@ -26,12 +36,12 @@ def notify(users: Iterable[User], *, type: str, titre: str, message: str, dossie
             canal="INTERNE",
         )
         count += 1
-        if email and getattr(u, 'email', None):
+        if email and getattr(u, "email", None):
             try:
                 send_mail(
                     subject=titre,
                     message=message,
-                    from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', None),
+                    from_email=getattr(settings, "DEFAULT_FROM_EMAIL", None),
                     recipient_list=[u.email],
                     fail_silently=True,
                 )
@@ -43,8 +53,8 @@ def notify(users: Iterable[User], *, type: str, titre: str, message: str, dossie
 
 def get_current_namespace(request):
     """Détermine le namespace actuel basé sur la configuration du portail"""
-    if hasattr(request, 'resolver_match') and request.resolver_match:
-        return request.resolver_match.namespace or 'pro'
+    if hasattr(request, "resolver_match") and request.resolver_match:
+        return request.resolver_match.namespace or "pro"
     # Fallback basé sur les settings
-    portal_type = getattr(settings, 'PORTAL_TYPE', 'PROFESSIONAL')
-    return 'client' if portal_type == 'CLIENT' else 'pro'
+    portal_type = getattr(settings, "PORTAL_TYPE", "PROFESSIONAL")
+    return "client" if portal_type == "CLIENT" else "pro"

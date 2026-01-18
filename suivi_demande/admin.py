@@ -1,6 +1,7 @@
 """
 Configuration de l'interface d'administration Django.
 """
+
 from django.contrib import admin
 
 from .models import (

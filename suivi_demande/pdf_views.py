@@ -1,6 +1,7 @@
 """
 Vues pour la génération de PDF.
 """
+
 from decimal import Decimal
 from io import BytesIO
 
@@ -34,7 +35,7 @@ def dossier_proposition_pdf(request, pk: int):
     capacite_max = None
 
     # Resolve logo to filesystem path for xhtml2pdf compatibility
-    logo_rel = 'core/img/Credit_Du_Congo.png'
+    logo_rel = "core/img/Credit_Du_Congo.png"
     logo_path = finders.find(logo_rel)
 
     context = {

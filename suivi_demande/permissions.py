@@ -1,6 +1,7 @@
 """
 Gestion des permissions pour les dossiers de crédit.
 """
+
 from __future__ import annotations
 
 from django.contrib.auth.models import AnonymousUser
@@ -43,31 +44,44 @@ def get_transition_flags(dossier: DossierCredit, user) -> dict:
     statut = dossier.statut_agent
 
     return {
-        "can_tx_transmettre_analyste": role == UserRoles.GESTIONNAIRE and statut in (
+        "can_tx_transmettre_analyste": role == UserRoles.GESTIONNAIRE
+        and statut
+        in (
             DossierStatutAgent.NOUVEAU,
             DossierStatutAgent.TRANSMIS_RESP_GEST,
         ),
-        "can_tx_retour_client": role == UserRoles.GESTIONNAIRE and statut in (
+        "can_tx_retour_client": role == UserRoles.GESTIONNAIRE
+        and statut
+        in (
             DossierStatutAgent.NOUVEAU,
             DossierStatutAgent.TRANSMIS_RESP_GEST,
         ),
-        "can_tx_transmettre_ggr": role == UserRoles.ANALYSTE and statut in (
+        "can_tx_transmettre_ggr": role == UserRoles.ANALYSTE
+        and statut
+        in (
             DossierStatutAgent.TRANSMIS_ANALYSTE,
             DossierStatutAgent.EN_COURS_ANALYSE,
         ),
-        "can_tx_retour_gestionnaire": role == UserRoles.ANALYSTE and statut in (
+        "can_tx_retour_gestionnaire": role == UserRoles.ANALYSTE
+        and statut
+        in (
             DossierStatutAgent.TRANSMIS_ANALYSTE,
             DossierStatutAgent.EN_COURS_ANALYSE,
         ),
-        "can_tx_approuver": role == UserRoles.RESPONSABLE_GGR and statut in (
+        "can_tx_approuver": role == UserRoles.RESPONSABLE_GGR
+        and statut
+        in (
             DossierStatutAgent.EN_COURS_VALIDATION_GGR,
             DossierStatutAgent.EN_ATTENTE_DECISION_DG,
         ),
-        "can_tx_refuser": role == UserRoles.RESPONSABLE_GGR and statut in (
+        "can_tx_refuser": role == UserRoles.RESPONSABLE_GGR
+        and statut
+        in (
             DossierStatutAgent.EN_COURS_VALIDATION_GGR,
             DossierStatutAgent.EN_ATTENTE_DECISION_DG,
             DossierStatutAgent.TRANSMIS_ANALYSTE,
             DossierStatutAgent.EN_COURS_ANALYSE,
         ),
-        "can_tx_liberer_fonds": role == UserRoles.BOE and statut == DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+        "can_tx_liberer_fonds": role == UserRoles.BOE
+        and statut == DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
     }

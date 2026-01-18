@@ -2,6 +2,7 @@
 Base settings for ggr_credit_workflow Django project.
 Shared by dev and prod.
 """
+
 from pathlib import Path
 import environ
 
@@ -59,14 +60,14 @@ WSGI_APPLICATION = "core.wsgi.application"
 
 # Configuration PostgreSQL (utilisée par défaut)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME', default='credit_db'),
-        'USER': env('DB_USER', default='credit_user'),
-        'PASSWORD': env('DB_PASSWORD', default=''),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": env("DB_NAME", default="credit_db"),
+        "USER": env("DB_USER", default="credit_user"),
+        "PASSWORD": env("DB_PASSWORD", default=""),
         # En dev local, utiliser localhost par défaut (au lieu de "db" prévu pour Docker)
-        'HOST': env('DB_HOST', default='localhost'),
-        'PORT': env('DB_PORT', default='5434'),
+        "HOST": env("DB_HOST", default="localhost"),
+        "PORT": env("DB_PORT", default="5434"),
     }
 }
 
@@ -133,141 +134,141 @@ STORAGES = {
 
 # Logging configuration professionnelle
 LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': '[{levelname}] {asctime} | {name} | {module}.{funcName}:{lineno} | {message}',
-            'style': '{',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "[{levelname}] {asctime} | {name} | {module}.{funcName}:{lineno} | {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'simple': {
-            'format': '[{levelname}] {asctime} | {message}',
-            'style': '{',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
+        "simple": {
+            "format": "[{levelname}] {asctime} | {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
-        'security': {
-            'format': '[SECURITY] {asctime} | User: {user} | IP: {ip} | {message}',
-            'style': '{',
-            'datefmt': '%Y-%m-%d %H:%M:%S',
-        },
-    },
-    'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
-        'require_debug_true': {
-            '()': 'django.utils.log.RequireDebugTrue',
+        "security": {
+            "format": "[SECURITY] {asctime} | User: {user} | IP: {ip} | {message}",
+            "style": "{",
+            "datefmt": "%Y-%m-%d %H:%M:%S",
         },
     },
-    'handlers': {
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+    },
+    "handlers": {
         # Console - Tous les logs en développement
-        'console': {
-            'level': 'DEBUG',
-            'class': 'logging.StreamHandler',
-            'formatter': 'verbose',
+        "console": {
+            "level": "DEBUG",
+            "class": "logging.StreamHandler",
+            "formatter": "verbose",
         },
         # Fichier général - INFO et supérieur
-        'file_general': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'general.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 10,
-            'formatter': 'verbose',
+        "file_general": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "general.log",
+            "maxBytes": 1024 * 1024 * 10,  # 10 MB
+            "backupCount": 10,
+            "formatter": "verbose",
         },
         # Fichier debug - Tous les logs DEBUG
-        'file_debug': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'debug.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
-            'formatter': 'verbose',
-            'filters': ['require_debug_true'],
+        "file_debug": {
+            "level": "DEBUG",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "debug.log",
+            "maxBytes": 1024 * 1024 * 5,  # 5 MB
+            "backupCount": 5,
+            "formatter": "verbose",
+            "filters": ["require_debug_true"],
         },
         # Fichier erreurs - WARNING et supérieur
-        'file_error': {
-            'level': 'WARNING',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'error.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 10,
-            'formatter': 'verbose',
+        "file_error": {
+            "level": "WARNING",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "error.log",
+            "maxBytes": 1024 * 1024 * 10,  # 10 MB
+            "backupCount": 10,
+            "formatter": "verbose",
         },
         # Fichier sécurité - Authentification, permissions, accès
-        'file_security': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'security.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 15,
-            'formatter': 'verbose',
+        "file_security": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "security.log",
+            "maxBytes": 1024 * 1024 * 10,  # 10 MB
+            "backupCount": 15,
+            "formatter": "verbose",
         },
         # Fichier workflow - Actions métier importantes
-        'file_workflow': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'workflow.log',
-            'maxBytes': 1024 * 1024 * 10,  # 10 MB
-            'backupCount': 10,
-            'formatter': 'verbose',
+        "file_workflow": {
+            "level": "INFO",
+            "class": "logging.handlers.RotatingFileHandler",
+            "filename": BASE_DIR / "logs" / "workflow.log",
+            "maxBytes": 1024 * 1024 * 10,  # 10 MB
+            "backupCount": 10,
+            "formatter": "verbose",
         },
         # Email admin en cas d'erreur critique (production)
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-            'filters': ['require_debug_false'],
-            'formatter': 'verbose',
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+            "filters": ["require_debug_false"],
+            "formatter": "verbose",
         },
     },
-    'loggers': {
+    "loggers": {
         # Logger Django par défaut
-        'django': {
-            'handlers': ['console', 'file_general', 'file_error'],
-            'level': env('DJANGO_LOG_LEVEL', default='INFO'),
-            'propagate': False,
+        "django": {
+            "handlers": ["console", "file_general", "file_error"],
+            "level": env("DJANGO_LOG_LEVEL", default="INFO"),
+            "propagate": False,
         },
         # Logger pour les requêtes Django
-        'django.request': {
-            'handlers': ['console', 'file_error', 'mail_admins'],
-            'level': 'WARNING',
-            'propagate': False,
+        "django.request": {
+            "handlers": ["console", "file_error", "mail_admins"],
+            "level": "WARNING",
+            "propagate": False,
         },
         # Logger pour la sécurité Django
-        'django.security': {
-            'handlers': ['console', 'file_security'],
-            'level': 'INFO',
-            'propagate': False,
+        "django.security": {
+            "handlers": ["console", "file_security"],
+            "level": "INFO",
+            "propagate": False,
         },
         # Logger application suivi_demande
-        'suivi_demande': {
-            'handlers': ['console', 'file_general', 'file_debug', 'file_error'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': False,
+        "suivi_demande": {
+            "handlers": ["console", "file_general", "file_debug", "file_error"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
         },
         # Logger sécurité application
-        'suivi_demande.security': {
-            'handlers': ['console', 'file_security'],
-            'level': 'INFO',
-            'propagate': False,
+        "suivi_demande.security": {
+            "handlers": ["console", "file_security"],
+            "level": "INFO",
+            "propagate": False,
         },
         # Logger workflow métier
-        'suivi_demande.workflow': {
-            'handlers': ['console', 'file_workflow', 'file_general'],
-            'level': 'INFO',
-            'propagate': False,
+        "suivi_demande.workflow": {
+            "handlers": ["console", "file_workflow", "file_general"],
+            "level": "INFO",
+            "propagate": False,
         },
         # Logger modèles
-        'suivi_demande.models': {
-            'handlers': ['console', 'file_general', 'file_debug'],
-            'level': 'DEBUG' if DEBUG else 'INFO',
-            'propagate': False,
+        "suivi_demande.models": {
+            "handlers": ["console", "file_general", "file_debug"],
+            "level": "DEBUG" if DEBUG else "INFO",
+            "propagate": False,
         },
     },
     # Logger root (fallback)
-    'root': {
-        'handlers': ['console', 'file_general'],
-        'level': 'INFO',
+    "root": {
+        "handlers": ["console", "file_general"],
+        "level": "INFO",
     },
 }
