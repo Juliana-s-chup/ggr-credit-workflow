@@ -1,5 +1,5 @@
 """
-Mixins réutilisables pour les vues avec gestion d'erreurs.
+Mixins rÃ©utilisables pour les vues avec gestion d'erreurs.
 """
 
 from django.shortcuts import get_object_or_404
@@ -13,20 +13,20 @@ logger = logging.getLogger(__name__)
 
 class SafeObjectMixin:
     """
-    Mixin pour récupérer des objets de manière sécurisée.
+    Mixin pour rÃ©cupÃ©rer des objets de maniÃ¨re sÃ©curisÃ©e.
     Remplace les .get() dangereux par get_object_or_404().
     """
 
     def get_object_safe(self, model, **kwargs):
         """
-        Récupère un objet de manière sécurisée.
+        RÃ©cupÃ¨re un objet de maniÃ¨re sÃ©curisÃ©e.
 
         Args:
-            model: Modèle Django
+            model: ModÃ¨le Django
             **kwargs: Filtres (ex: id=1, reference='DOS-001')
 
         Returns:
-            Instance du modèle ou 404
+            Instance du modÃ¨le ou 404
 
         Example:
             dossier = self.get_object_safe(DossierCredit, id=dossier_id)
@@ -34,19 +34,19 @@ class SafeObjectMixin:
         try:
             return get_object_or_404(model, **kwargs)
         except Http404:
-            logger.warning(f"Objet {model.__name__} non trouvé: {kwargs}")
+            logger.warning(f"Objet {model.__name__} non trouvÃ©: {kwargs}")
             raise
 
     def get_object_or_none(self, model, **kwargs):
         """
-        Récupère un objet ou retourne None (pas d'erreur).
+        RÃ©cupÃ¨re un objet ou retourne None (pas d'erreur).
 
         Args:
-            model: Modèle Django
+            model: ModÃ¨le Django
             **kwargs: Filtres
 
         Returns:
-            Instance du modèle ou None
+            Instance du modÃ¨le ou None
 
         Example:
             dossier = self.get_object_or_none(DossierCredit, id=dossier_id)
@@ -56,7 +56,7 @@ class SafeObjectMixin:
         try:
             return model.objects.get(**kwargs)
         except model.DoesNotExist:
-            logger.info(f"Objet {model.__name__} non trouvé: {kwargs}")
+            logger.info(f"Objet {model.__name__} non trouvÃ©: {kwargs}")
             return None
         except Exception as e:
             logger.error(f"Erreur get_object_or_none: {e}")
@@ -65,17 +65,17 @@ class SafeObjectMixin:
 
 class ErrorHandlingMixin:
     """
-    Mixin pour gérer les erreurs de manière uniforme.
+    Mixin pour gÃ©rer les erreurs de maniÃ¨re uniforme.
     """
 
     def handle_error(self, request, error, user_message="Une erreur est survenue"):
         """
-        Gère une erreur de manière uniforme.
+        GÃ¨re une erreur de maniÃ¨re uniforme.
 
         Args:
-            request: Requête Django
+            request: RequÃªte Django
             error: Exception
-            user_message: Message à afficher à l'utilisateur
+            user_message: Message Ã  afficher Ã  l'utilisateur
         """
         # Logger l'erreur technique
         logger.error(f"Erreur dans {self.__class__.__name__}: {error}", exc_info=True)
@@ -83,22 +83,22 @@ class ErrorHandlingMixin:
         # Afficher un message user-friendly
         messages.error(request, user_message)
 
-    def handle_permission_denied(self, request, message="Vous n'avez pas les droits nécessaires"):
+    def handle_permission_denied(self, request, message="Vous n'avez pas les droits nÃ©cessaires"):
         """
-        Gère un refus de permission.
+        GÃ¨re un refus de permission.
 
         Args:
-            request: Requête Django
-            message: Message à afficher
+            request: RequÃªte Django
+            message: Message Ã  afficher
         """
-        logger.warning(f"Permission refusée pour {request.user}: {message}")
+        logger.warning(f"Permission refusÃ©e pour {request.user}: {message}")
         messages.error(request, message)
         raise PermissionDenied(message)
 
 
 class ValidationMixin:
     """
-    Mixin pour valider les données de manière sécurisée.
+    Mixin pour valider les donnÃ©es de maniÃ¨re sÃ©curisÃ©e.
     """
 
     def validate_positive_number(self, value, field_name="valeur"):
@@ -106,7 +106,7 @@ class ValidationMixin:
         Valide qu'un nombre est positif.
 
         Args:
-            value: Valeur à valider
+            value: Valeur Ã  valider
             field_name: Nom du champ (pour le message d'erreur)
 
         Returns:
@@ -118,22 +118,22 @@ class ValidationMixin:
         try:
             num = float(value)
             if num <= 0:
-                raise ValueError(f"{field_name} doit être positif")
+                raise ValueError(f"{field_name} doit Ãªtre positif")
             return True
         except (TypeError, ValueError) as e:
-            logger.warning(f"Validation échouée pour {field_name}: {e}")
+            logger.warning(f"Validation Ã©chouÃ©e pour {field_name}: {e}")
             raise ValueError(f"{field_name} invalide")
 
     def validate_required_fields(self, data, required_fields):
         """
-        Valide que tous les champs requis sont présents.
+        Valide que tous les champs requis sont prÃ©sents.
 
         Args:
-            data: Dictionnaire de données (ex: request.POST)
+            data: Dictionnaire de donnÃ©es (ex: request.POST)
             required_fields: Liste des champs requis
 
         Returns:
-            True si tous présents
+            True si tous prÃ©sents
 
         Raises:
             ValueError si champ manquant
@@ -152,13 +152,13 @@ class ExampleView(SafeObjectMixin, ErrorHandlingMixin, ValidationMixin):
 
     def get(self, request, dossier_id):
         try:
-            # ✅ Récupération sécurisée
+            # âœ… RÃ©cupÃ©ration sÃ©curisÃ©e
             dossier = self.get_object_safe(DossierCredit, id=dossier_id)
 
-            # ✅ Validation
+            # âœ… Validation
             self.validate_positive_number(dossier.montant, "montant")
 
-            # Logique métier...
+            # Logique mÃ©tier...
 
         except Http404:
             messages.error(request, "Dossier introuvable")

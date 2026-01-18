@@ -30,7 +30,7 @@ def my_applications(request):
 
 @login_required
 def create_application(request):
-    """Créer une nouvelle demande."""
+    """CrÃ©er une nouvelle demande."""
     return render(request, "suivi_demande/nouveau_dossier.html")
 
 

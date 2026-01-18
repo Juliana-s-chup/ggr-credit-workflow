@@ -1,6 +1,6 @@
 """
-Service layer pour la gestion des dossiers de crédit.
-Centralise la logique métier et évite la duplication dans les views.
+Service layer pour la gestion des dossiers de crÃ©dit.
+Centralise la logique mÃ©tier et Ã©vite la duplication dans les views.
 """
 
 from typing import Optional, List, Dict, Any
@@ -25,20 +25,20 @@ from ..models import UserRoles
 
 
 class DossierService:
-    """Service pour la gestion des dossiers de crédit."""
+    """Service pour la gestion des dossiers de crÃ©dit."""
 
     @staticmethod
     def get_dossiers_for_user(
         user: User, page: int = 1, per_page: int = 20, filters: Optional[Dict[str, Any]] = None
     ) -> Page:
         """
-        Récupère les dossiers accessibles par un utilisateur avec pagination.
-        Optimisé avec select_related et prefetch_related.
+        RÃ©cupÃ¨re les dossiers accessibles par un utilisateur avec pagination.
+        OptimisÃ© avec select_related et prefetch_related.
 
         Args:
-            user: Utilisateur connecté
-            page: Numéro de page
-            per_page: Nombre d'éléments par page
+            user: Utilisateur connectÃ©
+            page: NumÃ©ro de page
+            per_page: Nombre d'Ã©lÃ©ments par page
             filters: Filtres optionnels (statut, date, etc.)
 
         Returns:
@@ -46,7 +46,7 @@ class DossierService:
         """
         role = get_user_role(user)
 
-        # Base queryset optimisé
+        # Base queryset optimisÃ©
         queryset = DossierCredit.objects.select_related(
             "client", "client__profile", "acteur_courant", "canevas"
         ).prefetch_related(
@@ -54,11 +54,11 @@ class DossierService:
             Prefetch("journal", queryset=JournalAction.objects.order_by("-timestamp")),
         )
 
-        # Filtrage par rôle
+        # Filtrage par rÃ´le
         if role == UserRoles.CLIENT:
             queryset = queryset.filter(client=user)
         elif role == UserRoles.GESTIONNAIRE:
-            # Gestionnaire voit tous les dossiers non archivés
+            # Gestionnaire voit tous les dossiers non archivÃ©s
             queryset = queryset.filter(is_archived=False)
         elif role == UserRoles.ANALYSTE:
             # Analyste voit les dossiers en analyse
@@ -77,7 +77,7 @@ class DossierService:
                 ]
             )
         elif role == UserRoles.BOE:
-            # BOE voit les dossiers approuvés
+            # BOE voit les dossiers approuvÃ©s
             queryset = queryset.filter(
                 statut_agent__in=[
                     DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
@@ -87,7 +87,7 @@ class DossierService:
             # Super admin voit tout
             pass
         else:
-            # Rôle inconnu: aucun dossier
+            # RÃ´le inconnu: aucun dossier
             queryset = queryset.none()
 
         # Appliquer les filtres additionnels
@@ -106,7 +106,7 @@ class DossierService:
                     | Q(produit__icontains=search)
                 )
 
-        # Tri par défaut
+        # Tri par dÃ©faut
         queryset = queryset.order_by("-date_soumission")
 
         # Pagination
@@ -116,15 +116,15 @@ class DossierService:
     @staticmethod
     def get_dossier_detail(dossier_id: int, user: User) -> Optional[DossierCredit]:
         """
-        Récupère un dossier avec toutes ses relations (optimisé).
-        Vérifie les permissions d'accès.
+        RÃ©cupÃ¨re un dossier avec toutes ses relations (optimisÃ©).
+        VÃ©rifie les permissions d'accÃ¨s.
 
         Args:
             dossier_id: ID du dossier
-            user: Utilisateur connecté
+            user: Utilisateur connectÃ©
 
         Returns:
-            DossierCredit ou None si non trouvé/non autorisé
+            DossierCredit ou None si non trouvÃ©/non autorisÃ©
         """
         try:
             dossier = (
@@ -140,7 +140,7 @@ class DossierService:
                 .get(pk=dossier_id)
             )
 
-            # Vérifier les permissions
+            # VÃ©rifier les permissions
             role = get_user_role(user)
             if role == UserRoles.CLIENT and dossier.client != user:
                 return None
@@ -154,23 +154,23 @@ class DossierService:
         client: User, produit: str, montant: Decimal, created_by: User
     ) -> DossierCredit:
         """
-        Crée un nouveau dossier de crédit.
+        CrÃ©e un nouveau dossier de crÃ©dit.
 
         Args:
             client: Client demandeur
-            produit: Type de crédit
-            montant: Montant demandé
-            created_by: Utilisateur créateur
+            produit: Type de crÃ©dit
+            montant: Montant demandÃ©
+            created_by: Utilisateur crÃ©ateur
 
         Returns:
-            DossierCredit: Nouveau dossier créé
+            DossierCredit: Nouveau dossier crÃ©Ã©
         """
-        # Générer la référence
+        # GÃ©nÃ©rer la rÃ©fÃ©rence
         year = timezone.now().year
         count = DossierCredit.objects.filter(date_soumission__year=year).count() + 1
         reference = f"DOS-{year}-{count:05d}"
 
-        # Créer le dossier
+        # CrÃ©er le dossier
         dossier = DossierCredit.objects.create(
             client=client,
             reference=reference,
@@ -180,13 +180,13 @@ class DossierService:
             statut_client=DossierStatutClient.EN_ATTENTE,
         )
 
-        # Créer l'entrée journal
+        # CrÃ©er l'entrÃ©e journal
         JournalAction.objects.create(
             dossier=dossier,
             action="CREATION",
             vers_statut=DossierStatutAgent.NOUVEAU,
             acteur=created_by,
-            commentaire_systeme=f"Dossier créé par {created_by.username}",
+            commentaire_systeme=f"Dossier crÃ©Ã© par {created_by.username}",
         )
 
         return dossier
@@ -199,37 +199,37 @@ class DossierService:
         Effectue une transition de statut avec validation.
 
         Args:
-            dossier: Dossier concerné
+            dossier: Dossier concernÃ©
             nouveau_statut: Nouveau statut agent
             acteur: Utilisateur effectuant la transition
             commentaire: Commentaire optionnel
 
         Returns:
-            bool: True si transition réussie
+            bool: True si transition rÃ©ussie
         """
         ancien_statut = dossier.statut_agent
 
-        # Mettre à jour le dossier
+        # Mettre Ã  jour le dossier
         dossier.statut_agent = nouveau_statut
         dossier.acteur_courant = acteur
         dossier.save()
 
-        # Créer l'entrée journal
+        # CrÃ©er l'entrÃ©e journal
         JournalAction.objects.create(
             dossier=dossier,
             action="TRANSITION",
             de_statut=ancien_statut,
             vers_statut=nouveau_statut,
             acteur=acteur,
-            commentaire_systeme=commentaire or f"Transition {ancien_statut} → {nouveau_statut}",
+            commentaire_systeme=commentaire or f"Transition {ancien_statut} â†’ {nouveau_statut}",
         )
 
-        # Créer notification pour le client
+        # CrÃ©er notification pour le client
         Notification.objects.create(
             utilisateur_cible=dossier.client,
             type="CHANGEMENT_STATUT",
-            titre=f"Dossier {dossier.reference} - Mise à jour",
-            message=f"Votre dossier est passé au statut: {dossier.get_statut_agent_display()}",
+            titre=f"Dossier {dossier.reference} - Mise Ã  jour",
+            message=f"Votre dossier est passÃ© au statut: {dossier.get_statut_agent_display()}",
             canal="INTERNE",
         )
 
@@ -238,17 +238,17 @@ class DossierService:
     @staticmethod
     def get_statistics_for_role(user: User) -> Dict[str, Any]:
         """
-        Calcule les statistiques pour un utilisateur selon son rôle.
+        Calcule les statistiques pour un utilisateur selon son rÃ´le.
 
         Args:
-            user: Utilisateur connecté
+            user: Utilisateur connectÃ©
 
         Returns:
             Dict: Statistiques (total, en_cours, approuves, refuses, etc.)
         """
         role = get_user_role(user)
 
-        # Base queryset selon le rôle
+        # Base queryset selon le rÃ´le
         if role == UserRoles.CLIENT:
             queryset = DossierCredit.objects.filter(client=user)
         elif role == UserRoles.GESTIONNAIRE:

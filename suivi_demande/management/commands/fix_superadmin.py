@@ -42,7 +42,7 @@ class Command(BaseCommand):
             if not user.is_active:
                 user.is_active = True
                 user.save()
-                self.stdout.write(self.style.SUCCESS("  ✓ Activated user"))
+                self.stdout.write(self.style.SUCCESS("  âœ“ Activated user"))
 
             # Get or create profile
             profile, created = UserProfile.objects.get_or_create(
@@ -56,15 +56,17 @@ class Command(BaseCommand):
             )
 
             if created:
-                self.stdout.write(self.style.SUCCESS(f"  ✓ Created profile with role SUPER_ADMIN"))
+                self.stdout.write(
+                    self.style.SUCCESS(f"  âœ“ Created profile with role SUPER_ADMIN")
+                )
             else:
                 self.stdout.write(f"  - Current role: {profile.role}")
                 if profile.role != UserRoles.SUPER_ADMIN:
                     profile.role = UserRoles.SUPER_ADMIN
                     profile.save(update_fields=["role"])
-                    self.stdout.write(self.style.SUCCESS(f"  ✓ Updated role to SUPER_ADMIN"))
+                    self.stdout.write(self.style.SUCCESS(f"  âœ“ Updated role to SUPER_ADMIN"))
                 else:
-                    self.stdout.write(self.style.SUCCESS(f"  ✓ Role already SUPER_ADMIN"))
+                    self.stdout.write(self.style.SUCCESS(f"  âœ“ Role already SUPER_ADMIN"))
 
-        self.stdout.write(self.style.SUCCESS(f"\n✓ Fixed {len(users)} superuser account(s)"))
+        self.stdout.write(self.style.SUCCESS(f"\nâœ“ Fixed {len(users)} superuser account(s)"))
         self.stdout.write("\nYou can now log in with these credentials.")

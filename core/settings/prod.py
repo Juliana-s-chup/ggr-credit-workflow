@@ -5,7 +5,7 @@ Configuration Django pour l'environnement de PRODUCTION
 from .base import *
 import os
 
-# SÉCURITÉ
+# SÃ‰CURITÃ‰
 DEBUG = False
 
 # Charger depuis variables d'environnement
@@ -23,7 +23,7 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
 
-# Base de données (depuis .env)
+# Base de donnÃ©es (depuis .env)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
@@ -77,6 +77,6 @@ LOGGING = {
     },
 }
 
-# Créer le dossier logs s'il n'existe pas
+# CrÃ©er le dossier logs s'il n'existe pas
 LOGS_DIR = os.path.join(BASE_DIR.parent, "logs")
 os.makedirs(LOGS_DIR, exist_ok=True)

@@ -27,15 +27,15 @@ def dashboard_analytics(request):
     # KPIs
     kpis = AnalyticsService.obtenir_kpis_dashboard()
 
-    # Données pour graphiques
+    # DonnÃ©es pour graphiques
     graphiques = AnalyticsService.obtenir_donnees_graphiques()
 
-    # Statistiques récentes
+    # Statistiques rÃ©centes
     stats_recentes = StatistiquesDossier.objects.all()[:5]
 
     context = {
         "kpis": kpis,
-        "graphiques": json.dumps(graphiques),  # Sérialiser en JSON
+        "graphiques": json.dumps(graphiques),  # SÃ©rialiser en JSON
         "stats_recentes": stats_recentes,
         "page_title": "Analytics & Reporting",
     }
@@ -47,7 +47,7 @@ def dashboard_analytics(request):
 @role_required("SUPER_ADMIN", "RESPONSABLE_GGR")
 def rapport_statistiques(request):
     """
-    Page de rapport statistiques détaillées
+    Page de rapport statistiques dÃ©taillÃ©es
     """
     periode = request.GET.get("periode", "MOIS")
 
@@ -71,12 +71,12 @@ def rapport_statistiques(request):
 @role_required("ANALYSTE", "RESPONSABLE_GGR")
 def predictions_risque(request):
     """
-    Page des prédictions de risque ML
+    Page des prÃ©dictions de risque ML
     """
-    # Récupérer les prédictions récentes
+    # RÃ©cupÃ©rer les prÃ©dictions rÃ©centes
     predictions = PredictionRisque.objects.select_related("dossier").all()[:20]
 
-    # Statistiques des prédictions
+    # Statistiques des prÃ©dictions
     total_predictions = predictions.count()
     risque_faible = predictions.filter(classe_risque="FAIBLE").count()
     risque_moyen = predictions.filter(classe_risque="MOYEN").count()
@@ -90,7 +90,7 @@ def predictions_risque(request):
             "moyen": risque_moyen,
             "eleve": risque_eleve,
         },
-        "page_title": "Prédictions de Risque",
+        "page_title": "PrÃ©dictions de Risque",
     }
 
     return render(request, "analytics/predictions_risque.html", context)
@@ -100,16 +100,16 @@ def predictions_risque(request):
 @role_required("ANALYSTE", "RESPONSABLE_GGR")
 def predire_dossier(request, dossier_id):
     """
-    Génère une prédiction de risque pour un dossier spécifique
+    GÃ©nÃ¨re une prÃ©diction de risque pour un dossier spÃ©cifique
     """
     try:
         dossier = DossierCredit.objects.get(id=dossier_id)
         prediction = MLPredictionService.predire_risque(dossier)
 
         if prediction:
-            messages.success(request, f"Prédiction générée : Risque {prediction.classe_risque}")
+            messages.success(request, f"PrÃ©diction gÃ©nÃ©rÃ©e : Risque {prediction.classe_risque}")
         else:
-            messages.warning(request, "Pas assez de données pour générer une prédiction.")
+            messages.warning(request, "Pas assez de donnÃ©es pour gÃ©nÃ©rer une prÃ©diction.")
 
     except DossierCredit.DoesNotExist:
         messages.error(request, "Dossier introuvable.")
@@ -133,7 +133,7 @@ def exporter_excel(request):
         )
         response["Content-Disposition"] = f'attachment; filename="{filepath.split("/")[-1]}"'
 
-        messages.success(request, "Export Excel généré avec succès.")
+        messages.success(request, "Export Excel gÃ©nÃ©rÃ© avec succÃ¨s.")
         return response
 
     except Exception as e:
@@ -144,7 +144,7 @@ def exporter_excel(request):
 @login_required
 def api_graphiques_data(request):
     """
-    API JSON pour les données de graphiques (Charts.js)
+    API JSON pour les donnÃ©es de graphiques (Charts.js)
     """
     graphiques = AnalyticsService.obtenir_donnees_graphiques()
     return JsonResponse(graphiques)
@@ -153,7 +153,7 @@ def api_graphiques_data(request):
 @login_required
 def api_kpis(request):
     """
-    API JSON pour les KPIs en temps réel
+    API JSON pour les KPIs en temps rÃ©el
     """
     kpis = AnalyticsService.obtenir_kpis_dashboard()
     return JsonResponse(kpis)

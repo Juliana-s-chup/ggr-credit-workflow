@@ -1,5 +1,5 @@
 """
-Tests pour les permissions et le contrôle d'accès.
+Tests pour les permissions et le contrÃ´le d'accÃ¨s.
 """
 
 from django.test import TestCase
@@ -24,8 +24,8 @@ class PermissionsTestCase(TestCase):
     """Tests pour les fonctions de permissions."""
 
     def setUp(self):
-        """Préparation des données de test."""
-        # Créer un client
+        """PrÃ©paration des donnÃ©es de test."""
+        # CrÃ©er un client
         self.client_user = User.objects.create_user(username="client", password="pass123")
         self.client_profile = UserProfile.objects.create(
             user=self.client_user,
@@ -35,7 +35,7 @@ class PermissionsTestCase(TestCase):
             role=UserRoles.CLIENT,
         )
 
-        # Créer un gestionnaire
+        # CrÃ©er un gestionnaire
         self.gest_user = User.objects.create_user(username="gestionnaire", password="pass123")
         self.gest_profile = UserProfile.objects.create(
             user=self.gest_user,
@@ -45,7 +45,7 @@ class PermissionsTestCase(TestCase):
             role=UserRoles.GESTIONNAIRE,
         )
 
-        # Créer un analyste
+        # CrÃ©er un analyste
         self.analyste_user = User.objects.create_user(username="analyste", password="pass123")
         self.analyste_profile = UserProfile.objects.create(
             user=self.analyste_user,
@@ -55,13 +55,13 @@ class PermissionsTestCase(TestCase):
             role=UserRoles.ANALYSTE,
         )
 
-        # Créer un dossier
+        # CrÃ©er un dossier
         self.dossier = DossierCredit.objects.create(
-            client=self.client_user, reference="DOS-PERM-001", produit="Crédit", montant=1000000
+            client=self.client_user, reference="DOS-PERM-001", produit="CrÃ©dit", montant=1000000
         )
 
     def test_get_user_role(self):
-        """Test récupération du rôle utilisateur."""
+        """Test rÃ©cupÃ©ration du rÃ´le utilisateur."""
         self.assertEqual(get_user_role(self.client_user), UserRoles.CLIENT)
         self.assertEqual(get_user_role(self.gest_user), UserRoles.GESTIONNAIRE)
         self.assertEqual(get_user_role(self.analyste_user), UserRoles.ANALYSTE)

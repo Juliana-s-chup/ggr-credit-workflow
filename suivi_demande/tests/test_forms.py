@@ -12,17 +12,17 @@ from ..forms import SignupForm
 
 
 class DemandeStep1FormTestCase(TestCase):
-    """Tests du formulaire étape 1."""
+    """Tests du formulaire Ã©tape 1."""
 
     def test_form_valid_avec_donnees_correctes(self):
-        """Test que le formulaire est valide avec des données correctes."""
+        """Test que le formulaire est valide avec des donnÃ©es correctes."""
         form_data = {
             "nom_prenom": "Jean Dupont",
             "date_naissance": (date.today() - timedelta(days=365 * 30)).isoformat(),
             "nationalite": "CONGOLAISE",
             "adresse_exacte": "123 Rue Test, Brazzaville",
             "numero_telephone": "+242 06 123 45 67",
-            "emploi_occupe": "Développeur",
+            "emploi_occupe": "DÃ©veloppeur",
             "statut_emploi": "PRIVE",
             "anciennete_emploi": "5 ans",
             "type_contrat": "CDI",
@@ -37,7 +37,7 @@ class DemandeStep1FormTestCase(TestCase):
         """Test que le formulaire est invalide sans champs requis."""
         form = DemandeStep1Form(data={})
         self.assertFalse(form.is_valid())
-        # Vérifier que les champs requis sont dans les erreurs
+        # VÃ©rifier que les champs requis sont dans les erreurs
         self.assertIn("nom_prenom", form.errors)
         self.assertIn("date_naissance", form.errors)
 
@@ -58,15 +58,15 @@ class DemandeStep1FormTestCase(TestCase):
             "situation_famille": "CELIBATAIRE",
         }
         form = DemandeStep1Form(data=form_data)
-        # Selon votre validation, cela peut être valide ou invalide
-        # Ajustez selon vos règles métier
+        # Selon votre validation, cela peut Ãªtre valide ou invalide
+        # Ajustez selon vos rÃ¨gles mÃ©tier
 
 
 class DemandeStep2FormTestCase(TestCase):
-    """Tests du formulaire étape 2."""
+    """Tests du formulaire Ã©tape 2."""
 
     def test_form_valid_avec_donnees_correctes(self):
-        """Test que le formulaire étape 2 est valide."""
+        """Test que le formulaire Ã©tape 2 est valide."""
         form_data = {
             "salaire_net_moyen": "500000",
             "autres_revenus": "50000",
@@ -79,9 +79,9 @@ class DemandeStep2FormTestCase(TestCase):
         self.assertTrue(form.is_valid(), f"Erreurs: {form.errors}")
 
     def test_form_refuse_salaire_negatif(self):
-        """Test que le formulaire refuse un salaire négatif."""
+        """Test que le formulaire refuse un salaire nÃ©gatif."""
         form_data = {
-            "salaire_net_moyen": "-100000",  # Négatif !
+            "salaire_net_moyen": "-100000",  # NÃ©gatif !
             "autres_revenus": "0",
             "total_charges_mensuelles": "100000",
             "nombre_personnes_charge": 1,
@@ -89,11 +89,11 @@ class DemandeStep2FormTestCase(TestCase):
             "total_echeances_credits": "0",
         }
         form = DemandeStep2Form(data=form_data)
-        # Devrait être invalide
+        # Devrait Ãªtre invalide
         self.assertFalse(form.is_valid())
 
     def test_form_accepte_salaire_zero(self):
-        """Test que le formulaire gère le cas salaire zéro."""
+        """Test que le formulaire gÃ¨re le cas salaire zÃ©ro."""
         form_data = {
             "salaire_net_moyen": "0",
             "autres_revenus": "100000",
@@ -103,20 +103,20 @@ class DemandeStep2FormTestCase(TestCase):
             "total_echeances_credits": "0",
         }
         form = DemandeStep2Form(data=form_data)
-        # Selon votre logique métier
+        # Selon votre logique mÃ©tier
 
 
 class DemandeStep3FormTestCase(TestCase):
-    """Tests du formulaire étape 3."""
+    """Tests du formulaire Ã©tape 3."""
 
     def test_form_valid_avec_donnees_correctes(self):
-        """Test que le formulaire étape 3 est valide."""
+        """Test que le formulaire Ã©tape 3 est valide."""
         form_data = {
             "type_credit": "PERSONNEL",
             "montant_demande": "1000000",
             "duree_mois": 24,
-            "objet_financement": "Achat véhicule",
-            "garanties_proposees": "Salaire domicilié",
+            "objet_financement": "Achat vÃ©hicule",
+            "garanties_proposees": "Salaire domiciliÃ©",
         }
         form = DemandeStep3Form(data=form_data)
         self.assertTrue(form.is_valid(), f"Erreurs: {form.errors}")
@@ -134,7 +134,7 @@ class DemandeStep3FormTestCase(TestCase):
         # Selon votre validation MONTANT_MINIMUM_CREDIT
 
     def test_form_refuse_duree_trop_longue(self):
-        """Test que le formulaire refuse une durée trop longue."""
+        """Test que le formulaire refuse une durÃ©e trop longue."""
         form_data = {
             "type_credit": "PERSONNEL",
             "montant_demande": "1000000",
@@ -147,7 +147,7 @@ class DemandeStep3FormTestCase(TestCase):
 
 
 class DemandeStep4FormTestCase(TestCase):
-    """Tests du formulaire étape 4."""
+    """Tests du formulaire Ã©tape 4."""
 
     def test_form_valid_avec_consentement(self):
         """Test que le formulaire est valide avec consentement."""
@@ -167,7 +167,7 @@ class DemandeStep4FormTestCase(TestCase):
             "consentement_conditions_generales": True,
         }
         form = DemandeStep4Form(data=form_data)
-        # Devrait être invalide si consentement obligatoire
+        # Devrait Ãªtre invalide si consentement obligatoire
         # self.assertFalse(form.is_valid())
 
 
@@ -186,16 +186,16 @@ class SignupFormTestCase(TestCase):
         self.assertTrue(form.is_valid(), f"Erreurs: {form.errors}")
 
     def test_form_refuse_mots_de_passe_differents(self):
-        """Test que le formulaire refuse des mots de passe différents."""
+        """Test que le formulaire refuse des mots de passe diffÃ©rents."""
         form_data = {
             "username": "newuser",
             "email": "new@test.com",
             "password1": "ComplexPass123!",
-            "password2": "DifferentPass456!",  # Différent
+            "password2": "DifferentPass456!",  # DiffÃ©rent
         }
         form = SignupForm(data=form_data)
         self.assertFalse(form.is_valid())
-        # Vérifier l'erreur sur password2
+        # VÃ©rifier l'erreur sur password2
         self.assertIn("password2", form.errors)
 
     def test_form_refuse_mot_de_passe_trop_simple(self):
@@ -223,31 +223,31 @@ class SignupFormTestCase(TestCase):
 
 
 class FormValidationTestCase(TestCase):
-    """Tests de validation croisée des formulaires."""
+    """Tests de validation croisÃ©e des formulaires."""
 
     def test_step2_echeances_coherentes_avec_credits(self):
-        """Test que les échéances sont cohérentes avec l'existence de crédits."""
-        # Si credits_en_cours = NON, total_echeances doit être 0
+        """Test que les Ã©chÃ©ances sont cohÃ©rentes avec l'existence de crÃ©dits."""
+        # Si credits_en_cours = NON, total_echeances doit Ãªtre 0
         form_data = {
             "salaire_net_moyen": "500000",
             "autres_revenus": "0",
             "total_charges_mensuelles": "100000",
             "nombre_personnes_charge": 1,
             "credits_en_cours": "NON",
-            "total_echeances_credits": "50000",  # Incohérent !
+            "total_echeances_credits": "50000",  # IncohÃ©rent !
         }
         form = DemandeStep2Form(data=form_data)
-        # Selon votre logique de validation croisée
+        # Selon votre logique de validation croisÃ©e
 
     def test_step3_duree_coherente_avec_montant(self):
-        """Test que la durée est cohérente avec le montant."""
-        # Petit montant avec longue durée = suspect
+        """Test que la durÃ©e est cohÃ©rente avec le montant."""
+        # Petit montant avec longue durÃ©e = suspect
         form_data = {
             "type_credit": "PERSONNEL",
             "montant_demande": "100000",  # Petit montant
-            "duree_mois": 120,  # Longue durée
+            "duree_mois": 120,  # Longue durÃ©e
             "objet_financement": "Test",
             "garanties_proposees": "Test",
         }
         form = DemandeStep3Form(data=form_data)
-        # Selon votre logique métier
+        # Selon votre logique mÃ©tier

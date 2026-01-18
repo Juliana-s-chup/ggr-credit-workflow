@@ -1,5 +1,5 @@
 """
-Validators pour la sécurité des uploads et des données.
+Validators pour la sÃ©curitÃ© des uploads et des donnÃ©es.
 """
 
 import os
@@ -19,7 +19,7 @@ except ImportError:
 # Taille maximale des fichiers (10 MB)
 MAX_FILE_SIZE = 10 * 1024 * 1024
 
-# Types MIME autorisés
+# Types MIME autorisÃ©s
 ALLOWED_MIME_TYPES = {
     "application/pdf",
     "image/jpeg",
@@ -29,7 +29,7 @@ ALLOWED_MIME_TYPES = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 }
 
-# Extensions autorisées
+# Extensions autorisÃ©es
 ALLOWED_EXTENSIONS = {
     ".pdf",
     ".jpg",
@@ -42,7 +42,7 @@ ALLOWED_EXTENSIONS = {
 
 def validate_file_upload(uploaded_file: UploadedFile) -> Tuple[bool, str]:
     """
-    Valide un fichier uploadé (taille, type MIME, extension).
+    Valide un fichier uploadÃ© (taille, type MIME, extension).
 
     Args:
         uploaded_file: Fichier Django UploadedFile
@@ -58,42 +58,42 @@ def validate_file_upload(uploaded_file: UploadedFile) -> Tuple[bool, str]:
         >>> if not is_valid:
         ...     messages.error(request, error)
     """
-    # Vérifier la taille
+    # VÃ©rifier la taille
     if uploaded_file.size > MAX_FILE_SIZE:
         return (
             False,
             f"Fichier trop volumineux ({uploaded_file.size / 1024 / 1024:.1f} MB). Maximum: 10 MB",
         )
 
-    # Vérifier l'extension
+    # VÃ©rifier l'extension
     file_ext = os.path.splitext(uploaded_file.name)[1].lower()
     if file_ext not in ALLOWED_EXTENSIONS:
         return (
             False,
-            f"Extension '{file_ext}' non autorisée. Extensions acceptées: {', '.join(ALLOWED_EXTENSIONS)}",
+            f"Extension '{file_ext}' non autorisÃ©e. Extensions acceptÃ©es: {', '.join(ALLOWED_EXTENSIONS)}",
         )
 
-    # Vérifier le type MIME (protection contre renommage malveillant)
+    # VÃ©rifier le type MIME (protection contre renommage malveillant)
     try:
-        # Lire les premiers octets pour détecter le vrai type
+        # Lire les premiers octets pour dÃ©tecter le vrai type
         file_content = uploaded_file.read(2048)
-        uploaded_file.seek(0)  # Remettre le curseur au début
+        uploaded_file.seek(0)  # Remettre le curseur au dÃ©but
 
         # Utiliser python-magic si disponible, sinon fallback sur content_type
         if MAGIC_AVAILABLE:
             try:
                 mime_type = magic.from_buffer(file_content, mime=True)
             except Exception:
-                # Fallback si magic échoue
+                # Fallback si magic Ã©choue
                 mime_type = uploaded_file.content_type
         else:
-            # Fallback: utiliser le content_type déclaré
+            # Fallback: utiliser le content_type dÃ©clarÃ©
             mime_type = uploaded_file.content_type
 
         if mime_type not in ALLOWED_MIME_TYPES:
             return (
                 False,
-                f"Type de fichier '{mime_type}' non autorisé. Types acceptés: PDF, JPG, PNG, DOC, DOCX",
+                f"Type de fichier '{mime_type}' non autorisÃ©. Types acceptÃ©s: PDF, JPG, PNG, DOC, DOCX",
             )
 
     except Exception as e:
@@ -104,7 +104,7 @@ def validate_file_upload(uploaded_file: UploadedFile) -> Tuple[bool, str]:
 
 def validate_file_upload_strict(uploaded_file: UploadedFile) -> None:
     """
-    Version stricte qui lève une ValidationError.
+    Version stricte qui lÃ¨ve une ValidationError.
 
     Args:
         uploaded_file: Fichier Django UploadedFile
@@ -119,13 +119,13 @@ def validate_file_upload_strict(uploaded_file: UploadedFile) -> None:
 
 def sanitize_filename(filename: str) -> str:
     """
-    Nettoie un nom de fichier pour éviter les injections.
+    Nettoie un nom de fichier pour Ã©viter les injections.
 
     Args:
         filename: Nom de fichier original
 
     Returns:
-        str: Nom de fichier sécurisé
+        str: Nom de fichier sÃ©curisÃ©
 
     Examples:
         >>> sanitize_filename("../../etc/passwd.txt")
@@ -136,7 +136,7 @@ def sanitize_filename(filename: str) -> str:
     # Supprimer les chemins
     filename = os.path.basename(filename)
 
-    # Remplacer les caractères dangereux
+    # Remplacer les caractÃ¨res dangereux
     dangerous_chars = ["/", "\\", "..", "<", ">", ":", '"', "|", "?", "*"]
     for char in dangerous_chars:
         filename = filename.replace(char, "_")
@@ -155,15 +155,15 @@ def validate_comment_length(comment: str, max_length: int = 1000) -> Tuple[bool,
 
     Args:
         comment: Texte du commentaire
-        max_length: Longueur maximale autorisée
+        max_length: Longueur maximale autorisÃ©e
 
     Returns:
         Tuple[bool, str]: (is_valid, error_message)
     """
     if not comment or not comment.strip():
-        return False, "Le commentaire ne peut pas être vide"
+        return False, "Le commentaire ne peut pas Ãªtre vide"
 
     if len(comment) > max_length:
-        return False, f"Commentaire trop long ({len(comment)} caractères). Maximum: {max_length}"
+        return False, f"Commentaire trop long ({len(comment)} caractÃ¨res). Maximum: {max_length}"
 
     return True, ""

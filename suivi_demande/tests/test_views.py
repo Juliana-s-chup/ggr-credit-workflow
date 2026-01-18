@@ -19,13 +19,13 @@ User = get_user_model()
 
 
 class ViewsAccessTestCase(TestCase):
-    """Tests d'accès aux vues."""
+    """Tests d'accÃ¨s aux vues."""
 
     def setUp(self):
-        """Préparation des données de test."""
+        """PrÃ©paration des donnÃ©es de test."""
         self.client = Client()
 
-        # Créer un client
+        # CrÃ©er un client
         self.client_user = User.objects.create_user(
             username="client", email="client@test.com", password="testpass123"
         )
@@ -37,7 +37,7 @@ class ViewsAccessTestCase(TestCase):
             role=UserRoles.CLIENT,
         )
 
-        # Créer un gestionnaire
+        # CrÃ©er un gestionnaire
         self.gest_user = User.objects.create_user(
             username="gestionnaire", email="gest@test.com", password="testpass123"
         )
@@ -56,25 +56,25 @@ class ViewsAccessTestCase(TestCase):
         self.assertEqual(response.status_code, 302)
 
     def test_dashboard_require_login(self):
-        """Test que le dashboard nécessite une connexion."""
+        """Test que le dashboard nÃ©cessite une connexion."""
         response = self.client.get("/dashboard/")
         # Doit rediriger vers login
         self.assertEqual(response.status_code, 302)
         self.assertIn("/accounts/login/", response.url)
 
     def test_dashboard_accessible_when_logged_in(self):
-        """Test que le dashboard est accessible une fois connecté."""
+        """Test que le dashboard est accessible une fois connectÃ©."""
         self.client.login(username="client", password="testpass123")
         response = self.client.get("/dashboard/")
         self.assertEqual(response.status_code, 200)
 
     def test_my_applications_require_login(self):
-        """Test que my_applications nécessite une connexion."""
+        """Test que my_applications nÃ©cessite une connexion."""
         response = self.client.get("/mes-dossiers/")
         self.assertEqual(response.status_code, 302)
 
     def test_my_applications_accessible_when_logged_in(self):
-        """Test que my_applications est accessible connecté."""
+        """Test que my_applications est accessible connectÃ©."""
         self.client.login(username="client", password="testpass123")
         response = self.client.get("/mes-dossiers/")
         self.assertEqual(response.status_code, 200)
@@ -84,7 +84,7 @@ class DashboardViewTestCase(TestCase):
     """Tests du dashboard."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.client = Client()
         self.user = User.objects.create_user("testuser", password="pass")
         self.profile = UserProfile.objects.create(
@@ -97,12 +97,12 @@ class DashboardViewTestCase(TestCase):
 
     def test_dashboard_client_affiche_ses_dossiers(self):
         """Test que le dashboard client affiche ses dossiers."""
-        # Créer 3 dossiers pour ce client
+        # CrÃ©er 3 dossiers pour ce client
         for i in range(3):
             DossierCredit.objects.create(
                 client=self.user,
                 reference=f"DOS-TEST-{i:03d}",
-                produit="Crédit",
+                produit="CrÃ©dit",
                 montant=Decimal("1000000.00"),
             )
 
@@ -110,13 +110,13 @@ class DashboardViewTestCase(TestCase):
         response = self.client.get("/dashboard/")
 
         self.assertEqual(response.status_code, 200)
-        # Vérifier que les dossiers sont dans le contexte
+        # VÃ©rifier que les dossiers sont dans le contexte
         self.assertIn("dossiers_en_cours", response.context)
         self.assertEqual(response.context["dossiers_en_cours"].count(), 3)
 
     def test_dashboard_client_ne_voit_pas_dossiers_autres(self):
         """Test qu'un client ne voit pas les dossiers des autres."""
-        # Créer un autre client
+        # CrÃ©er un autre client
         other_user = User.objects.create_user("other", password="pass")
         UserProfile.objects.create(
             user=other_user,
@@ -126,11 +126,11 @@ class DashboardViewTestCase(TestCase):
             role=UserRoles.CLIENT,
         )
 
-        # Créer un dossier pour l'autre client
+        # CrÃ©er un dossier pour l'autre client
         DossierCredit.objects.create(
             client=other_user,
             reference="DOS-OTHER-001",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("500000.00"),
         )
 
@@ -138,7 +138,7 @@ class DashboardViewTestCase(TestCase):
         self.client.login(username="testuser", password="pass")
         response = self.client.get("/dashboard/")
 
-        # Vérifier qu'il ne voit pas le dossier de l'autre
+        # VÃ©rifier qu'il ne voit pas le dossier de l'autre
         self.assertEqual(response.context["dossiers_en_cours"].count(), 0)
 
 
@@ -146,7 +146,7 @@ class PaginationTestCase(TestCase):
     """Tests de la pagination."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.client = Client()
         self.user = User.objects.create_user("testuser", password="pass")
         UserProfile.objects.create(
@@ -159,12 +159,12 @@ class PaginationTestCase(TestCase):
 
     def test_my_applications_pagination_page_1(self):
         """Test que la pagination fonctionne sur page 1."""
-        # Créer 30 dossiers
+        # CrÃ©er 30 dossiers
         for i in range(30):
             DossierCredit.objects.create(
                 client=self.user,
                 reference=f"DOS-{i:03d}",
-                produit="Crédit",
+                produit="CrÃ©dit",
                 montant=Decimal("1000000.00"),
             )
 
@@ -172,20 +172,20 @@ class PaginationTestCase(TestCase):
         response = self.client.get("/mes-dossiers/?page=1")
 
         self.assertEqual(response.status_code, 200)
-        # Vérifier qu'il y a 25 dossiers (ITEMS_PER_PAGE)
+        # VÃ©rifier qu'il y a 25 dossiers (ITEMS_PER_PAGE)
         dossiers = response.context["dossiers"]
         self.assertEqual(len(dossiers), 25)
-        # Vérifier qu'il y a une page suivante
+        # VÃ©rifier qu'il y a une page suivante
         self.assertTrue(dossiers.has_next())
 
     def test_my_applications_pagination_page_2(self):
         """Test que la page 2 fonctionne."""
-        # Créer 30 dossiers
+        # CrÃ©er 30 dossiers
         for i in range(30):
             DossierCredit.objects.create(
                 client=self.user,
                 reference=f"DOS-{i:03d}",
-                produit="Crédit",
+                produit="CrÃ©dit",
                 montant=Decimal("1000000.00"),
             )
 
@@ -193,10 +193,10 @@ class PaginationTestCase(TestCase):
         response = self.client.get("/mes-dossiers/?page=2")
 
         self.assertEqual(response.status_code, 200)
-        # Vérifier qu'il y a 5 dossiers restants
+        # VÃ©rifier qu'il y a 5 dossiers restants
         dossiers = response.context["dossiers"]
         self.assertEqual(len(dossiers), 5)
-        # Vérifier qu'il n'y a pas de page suivante
+        # VÃ©rifier qu'il n'y a pas de page suivante
         self.assertFalse(dossiers.has_next())
 
 
@@ -204,7 +204,7 @@ class NotificationsViewTestCase(TestCase):
     """Tests des vues de notifications."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.client = Client()
         self.user = User.objects.create_user("testuser", password="pass")
         UserProfile.objects.create(
@@ -222,8 +222,8 @@ class NotificationsViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_notifications_list_affiche_notifications_utilisateur(self):
-        """Test que seules les notifications de l'utilisateur sont affichées."""
-        # Créer 3 notifications pour cet utilisateur
+        """Test que seules les notifications de l'utilisateur sont affichÃ©es."""
+        # CrÃ©er 3 notifications pour cet utilisateur
         for i in range(3):
             Notification.objects.create(
                 utilisateur_cible=self.user,
@@ -233,7 +233,7 @@ class NotificationsViewTestCase(TestCase):
                 canal="INTERNE",
             )
 
-        # Créer une notification pour un autre utilisateur
+        # CrÃ©er une notification pour un autre utilisateur
         other_user = User.objects.create_user("other", password="pass")
         Notification.objects.create(
             utilisateur_cible=other_user,
@@ -246,13 +246,13 @@ class NotificationsViewTestCase(TestCase):
         self.client.login(username="testuser", password="pass")
         response = self.client.get("/notifications/")
 
-        # Vérifier qu'il y a 3 notifications
+        # VÃ©rifier qu'il y a 3 notifications
         notifications = response.context["notifications"]
         self.assertEqual(notifications.count(), 3)
 
     def test_mark_all_read_fonctionne(self):
         """Test que marquer toutes les notifications comme lues fonctionne."""
-        # Créer 3 notifications non lues
+        # CrÃ©er 3 notifications non lues
         for i in range(3):
             Notification.objects.create(
                 utilisateur_cible=self.user,
@@ -266,19 +266,19 @@ class NotificationsViewTestCase(TestCase):
         self.client.login(username="testuser", password="pass")
         response = self.client.post("/notifications/mark-all/")
 
-        # Vérifier la redirection
+        # VÃ©rifier la redirection
         self.assertEqual(response.status_code, 302)
 
-        # Vérifier que toutes sont lues
+        # VÃ©rifier que toutes sont lues
         unread_count = Notification.objects.filter(utilisateur_cible=self.user, lu=False).count()
         self.assertEqual(unread_count, 0)
 
 
 class DossierDetailViewTestCase(TestCase):
-    """Tests de la vue détail dossier."""
+    """Tests de la vue dÃ©tail dossier."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.client = Client()
         self.user = User.objects.create_user("testuser", password="pass")
         UserProfile.objects.create(
@@ -292,12 +292,12 @@ class DossierDetailViewTestCase(TestCase):
         self.dossier = DossierCredit.objects.create(
             client=self.user,
             reference="DOS-DETAIL-001",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("1000000.00"),
         )
 
     def test_dossier_detail_accessible_par_proprietaire(self):
-        """Test que le propriétaire peut voir son dossier."""
+        """Test que le propriÃ©taire peut voir son dossier."""
         self.client.login(username="testuser", password="pass")
         response = self.client.get(f"/dashboard/dossier/{self.dossier.pk}/")
         self.assertEqual(response.status_code, 200)
@@ -305,7 +305,7 @@ class DossierDetailViewTestCase(TestCase):
 
     def test_dossier_detail_refuse_autre_client(self):
         """Test qu'un autre client ne peut pas voir le dossier."""
-        # Créer un autre client
+        # CrÃ©er un autre client
         other_user = User.objects.create_user("other", password="pass")
         UserProfile.objects.create(
             user=other_user,
@@ -319,12 +319,12 @@ class DossierDetailViewTestCase(TestCase):
         self.client.login(username="other", password="pass")
         response = self.client.get(f"/dashboard/dossier/{self.dossier.pk}/")
 
-        # Doit être refusé
+        # Doit Ãªtre refusÃ©
         self.assertEqual(response.status_code, 302)  # Redirect
 
     def test_dossier_detail_accessible_par_gestionnaire(self):
         """Test qu'un gestionnaire peut voir tous les dossiers."""
-        # Créer un gestionnaire
+        # CrÃ©er un gestionnaire
         gest_user = User.objects.create_user("gest", password="pass")
         UserProfile.objects.create(
             user=gest_user,
@@ -348,7 +348,7 @@ class SignupViewTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_signup_cree_utilisateur(self):
-        """Test que l'inscription crée un utilisateur."""
+        """Test que l'inscription crÃ©e un utilisateur."""
         response = self.client.post(
             "/accounts/signup/",
             {
@@ -359,5 +359,5 @@ class SignupViewTestCase(TestCase):
             },
         )
 
-        # Vérifier que l'utilisateur existe
+        # VÃ©rifier que l'utilisateur existe
         self.assertTrue(User.objects.filter(username="newuser").exists())

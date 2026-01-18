@@ -65,6 +65,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='piecejointe',
             name='type_piece',
-            field=models.CharField(choices=[('CNI', "Carte Nationale d'Identité"), ('FICHE_PAIE', 'Fiche de paie'), ('RELEVE_BANCAIRE', 'Relevé bancaire'), ('BILLET_ORDRE', 'Billet à ordre'), ('ATTESTATION_EMPLOYEUR', "Attestation de l'employeur"), ('ATTESTATION_DOMICILIATION', 'Attestation de domiciliation irrévocable'), ('ASSURANCE_DECES_INVALIDITE', 'Assurance décès-invalidité'), ('AUTRE', 'Autre')], max_length=30),
+            field=models.CharField(choices=[('CNI', "Carte Nationale d'IdentitÃ©"), ('FICHE_PAIE', 'Fiche de paie'), ('RELEVE_BANCAIRE', 'RelevÃ© bancaire'), ('BILLET_ORDRE', 'Billet Ã  ordre'), ('ATTESTATION_EMPLOYEUR', "Attestation de l'employeur"), ('ATTESTATION_DOMICILIATION', 'Attestation de domiciliation irrÃ©vocable'), ('ASSURANCE_DECES_INVALIDITE', 'Assurance dÃ©cÃ¨s-invaliditÃ©'), ('AUTRE', 'Autre')], max_length=30),
         ),
     ]

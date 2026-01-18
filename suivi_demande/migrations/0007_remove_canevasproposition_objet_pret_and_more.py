@@ -17,6 +17,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='canevasproposition',
             name='nature_pret',
-            field=models.CharField(choices=[('CAUTION', 'Caution'), ('PRET', 'Prêt'), ('DECOUVERT', 'Découvert')], default='PRET', max_length=20),
+            field=models.CharField(choices=[('CAUTION', 'Caution'), ('PRET', 'PrÃªt'), ('DECOUVERT', 'DÃ©couvert')], default='PRET', max_length=20),
         ),
     ]

@@ -12,8 +12,8 @@ class AnalyticsConfig(AppConfig):
 
     def ready(self):
         """
-        Code exécuté au démarrage de l'application
+        Code exÃ©cutÃ© au dÃ©marrage de l'application
         """
-        # Import des signaux si nécessaire
+        # Import des signaux si nÃ©cessaire
         # import analytics.signals
         pass

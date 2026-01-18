@@ -15,17 +15,17 @@ from .forms_canevas import CanevasPropositionForm
 
 @login_required
 def canevas_create_or_edit(request, dossier_id):
-    """Créer ou modifier le canevas de proposition pour un dossier."""
+    """CrÃ©er ou modifier le canevas de proposition pour un dossier."""
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
 
-    # Vérifier les permissions (Gestionnaire ou Admin)
+    # VÃ©rifier les permissions (Gestionnaire ou Admin)
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", None)
     if role not in (UserRoles.GESTIONNAIRE, UserRoles.SUPER_ADMIN):
-        messages.error(request, "Accès refusé. Réservé aux gestionnaires.")
+        messages.error(request, "AccÃ¨s refusÃ©. RÃ©servÃ© aux gestionnaires.")
         return redirect("suivi:dossier_detail", pk=dossier_id)
 
-    # Récupérer ou créer le canevas
+    # RÃ©cupÃ©rer ou crÃ©er le canevas
     try:
         canevas = dossier.canevas
         is_new = False
@@ -40,7 +40,7 @@ def canevas_create_or_edit(request, dossier_id):
             if is_new:
                 canevas.dossier = dossier
 
-            # Calculer automatiquement la capacité d'endettement
+            # Calculer automatiquement la capacitÃ© d'endettement
             canevas.calculer_capacite_endettement()
             canevas.save()
 
@@ -51,19 +51,19 @@ def canevas_create_or_edit(request, dossier_id):
                 de_statut=None,
                 vers_statut=None,
                 acteur=request.user,
-                commentaire_systeme=f"Canevas de proposition {'créé' if is_new else 'modifié'}",
+                commentaire_systeme=f"Canevas de proposition {'crÃ©Ã©' if is_new else 'modifiÃ©'}",
             )
 
             messages.success(
                 request,
-                f"✓ Canevas de proposition {'créé' if is_new else 'mis à jour'} avec succès.",
+                f"âœ“ Canevas de proposition {'crÃ©Ã©' if is_new else 'mis Ã  jour'} avec succÃ¨s.",
             )
 
             # Si nouveau canevas, rediriger vers upload documents
             if is_new:
                 messages.info(
                     request,
-                    "Canevas enregistré ! Veuillez maintenant uploader les documents requis.",
+                    "Canevas enregistrÃ© ! Veuillez maintenant uploader les documents requis.",
                 )
                 return redirect("suivi:upload_documents", dossier_id=dossier_id)
             else:
@@ -71,7 +71,7 @@ def canevas_create_or_edit(request, dossier_id):
         else:
             messages.error(request, "Erreur dans le formulaire. Veuillez corriger les champs.")
     else:
-        # Pré-remplir avec les données du dossier et du client
+        # PrÃ©-remplir avec les donnÃ©es du dossier et du client
         initial_data = {}
         if is_new:
             initial_data = {
@@ -95,7 +95,7 @@ def canevas_create_or_edit(request, dossier_id):
 
 @login_required
 def canevas_view_pdf(request, dossier_id):
-    """Générer et afficher le PDF du canevas de proposition."""
+    """GÃ©nÃ©rer et afficher le PDF du canevas de proposition."""
     dossier = get_object_or_404(DossierCredit, pk=dossier_id)
 
     try:
@@ -104,14 +104,14 @@ def canevas_view_pdf(request, dossier_id):
         messages.error(request, "Aucun canevas de proposition pour ce dossier.")
         return redirect("suivi:dossier_detail", pk=dossier_id)
 
-    # Générer le PDF
+    # GÃ©nÃ©rer le PDF
     template_path = "suivi_demande/canevas_pdf.html"
     context = {
         "canevas": canevas,
         "dossier": dossier,
     }
 
-    # Créer le PDF
+    # CrÃ©er le PDF
     response = HttpResponse(content_type="application/pdf")
     response["Content-Disposition"] = f'inline; filename="canevas_{dossier.reference}.pdf"'
 
@@ -119,7 +119,7 @@ def canevas_view_pdf(request, dossier_id):
     pisa_status = pisa.CreatePDF(template, dest=response)
 
     if pisa_status.err:
-        messages.error(request, "Erreur lors de la génération du PDF.")
+        messages.error(request, "Erreur lors de la gÃ©nÃ©ration du PDF.")
         return redirect("suivi:dossier_detail", pk=dossier_id)
 
     return response

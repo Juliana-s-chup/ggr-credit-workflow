@@ -20,7 +20,7 @@ class StatistiquesDossierAdmin(admin.ModelAdmin):
     readonly_fields = ("date_calcul",)
 
     fieldsets = (
-        ("Période", {"fields": ("periode", "date_calcul")}),
+        ("PÃ©riode", {"fields": ("periode", "date_calcul")}),
         (
             "Compteurs",
             {
@@ -44,7 +44,7 @@ class StatistiquesDossierAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Délais et Taux",
+            "DÃ©lais et Taux",
             {"fields": ("delai_moyen_traitement", "taux_approbation", "taux_rejet")},
         ),
     )
@@ -81,11 +81,11 @@ class PredictionRisqueAdmin(admin.ModelAdmin):
     fieldsets = (
         ("Dossier", {"fields": ("dossier",)}),
         (
-            "Prédiction",
+            "PrÃ©diction",
             {"fields": ("score_risque", "probabilite_defaut", "classe_risque", "confiance")},
         ),
         (
-            "Détails",
+            "DÃ©tails",
             {"fields": ("facteurs_risque", "recommandation", "modele_version", "date_prediction")},
         ),
     )

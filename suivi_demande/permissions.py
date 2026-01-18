@@ -1,5 +1,5 @@
 """
-Gestion des permissions pour les dossiers de crédit.
+Gestion des permissions pour les dossiers de crÃ©dit.
 """
 
 from __future__ import annotations
@@ -17,8 +17,8 @@ def get_user_role(user) -> str:
 
 
 def can_upload_piece(dossier: DossierCredit, user) -> bool:
-    """Règles (MVP) pour l'upload de pièces jointes.
-    - Client: désactivé (les clients n'uploadent plus de documents)
+    """RÃ¨gles (MVP) pour l'upload de piÃ¨ces jointes.
+    - Client: dÃ©sactivÃ© (les clients n'uploadent plus de documents)
     - Gestionnaire: si statut_agent in {NOUVEAU, TRANSMIS_RESP_GEST}
     """
     role = get_user_role(user)
@@ -31,8 +31,8 @@ def can_upload_piece(dossier: DossierCredit, user) -> bool:
 
 
 def get_transition_flags(dossier: DossierCredit, user) -> dict:
-    """Calcule les flags d'actions de transition autorisées pour l'utilisateur donné.
-    Retourne un dict de booléens:
+    """Calcule les flags d'actions de transition autorisÃ©es pour l'utilisateur donnÃ©.
+    Retourne un dict de boolÃ©ens:
       - can_tx_transmettre_analyste
       - can_tx_transmettre_ggr
       - can_tx_retour_gestionnaire

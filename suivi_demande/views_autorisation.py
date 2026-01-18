@@ -15,7 +15,9 @@ def autorisation_ponctuelle(request):
         form = AutorisationPonctuelleForm(request.POST)
         formset = EngagementLigneFormSet(request.POST, prefix="eng")
         if form.is_valid() and formset.is_valid():
-            messages.success(request, "Demande d'Autorisation Ponctuelle enregistrée (simulation).")
+            messages.success(
+                request, "Demande d'Autorisation Ponctuelle enregistrÃ©e (simulation)."
+            )
             return redirect("suivi:dashboard")
     else:
         form = AutorisationPonctuelleForm()

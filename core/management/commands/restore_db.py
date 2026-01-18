@@ -1,5 +1,5 @@
 """
-Commande de Restauration de la Base de Données
+Commande de Restauration de la Base de DonnÃ©es
 Usage: python manage.py restore_db <backup_file>
 """
 
@@ -10,7 +10,7 @@ from django.core.management import call_command
 
 
 class Command(BaseCommand):
-    help = "Restaure la base de données depuis un backup"
+    help = "Restaure la base de donnÃ©es depuis un backup"
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -27,28 +27,28 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         backup_file = options["backup_file"]
 
-        # Vérifier que le fichier existe
+        # VÃ©rifier que le fichier existe
         if not os.path.exists(backup_file):
-            raise CommandError(f"❌ Fichier non trouvé: {backup_file}")
+            raise CommandError(f"âŒ Fichier non trouvÃ©: {backup_file}")
 
         self.stdout.write(
-            self.style.WARNING("⚠️  ATTENTION: Cette opération va modifier la base de données")
+            self.style.WARNING("âš ï¸  ATTENTION: Cette opÃ©ration va modifier la base de donnÃ©es")
         )
 
         # Confirmation
         confirm = input("Voulez-vous continuer? (oui/non): ")
         if confirm.lower() not in ["oui", "yes", "y"]:
-            self.stdout.write(self.style.ERROR("❌ Restauration annulée"))
+            self.stdout.write(self.style.ERROR("âŒ Restauration annulÃ©e"))
             return
 
-        # Flush si demandé
+        # Flush si demandÃ©
         if options["flush"]:
-            self.stdout.write(self.style.WARNING("🗑️  Vidage de la base de données..."))
+            self.stdout.write(self.style.WARNING("ðŸ—‘ï¸  Vidage de la base de donnÃ©es..."))
             call_command("flush", "--no-input")
 
-        # Décompresser si nécessaire
+        # DÃ©compresser si nÃ©cessaire
         if backup_file.endswith(".gz"):
-            self.stdout.write(self.style.SUCCESS("📦 Décompression du backup..."))
+            self.stdout.write(self.style.SUCCESS("ðŸ“¦ DÃ©compression du backup..."))
             temp_file = backup_file.replace(".gz", "")
 
             with gzip.open(backup_file, "rb") as f_in:
@@ -58,9 +58,9 @@ class Command(BaseCommand):
             backup_file = temp_file
 
         # Restaurer
-        self.stdout.write(self.style.SUCCESS("🔄 Restauration en cours..."))
+        self.stdout.write(self.style.SUCCESS("ðŸ”„ Restauration en cours..."))
 
         with open(backup_file, "r") as f:
             call_command("loaddata", backup_file)
 
-        self.stdout.write(self.style.SUCCESS("✅ Restauration terminée avec succès"))
+        self.stdout.write(self.style.SUCCESS("âœ… Restauration terminÃ©e avec succÃ¨s"))

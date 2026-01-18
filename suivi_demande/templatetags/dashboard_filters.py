@@ -6,7 +6,7 @@ register = template.Library()
 
 @register.filter
 def add_days(date_value, days):
-    """Ajoute un nombre de jours à une date."""
+    """Ajoute un nombre de jours Ã  une date."""
     try:
         if isinstance(date_value, str):
             from django.utils.dateparse import parse_date
@@ -22,7 +22,7 @@ def add_days(date_value, days):
 
 @register.filter
 def days_until(date_value):
-    """Calcule le nombre de jours jusqu'à une date."""
+    """Calcule le nombre de jours jusqu'Ã  une date."""
     try:
         from django.utils import timezone
 
@@ -42,7 +42,7 @@ def days_until(date_value):
 
 @register.filter
 def is_past_date(date_value):
-    """Vérifie si une date est passée."""
+    """VÃ©rifie si une date est passÃ©e."""
     try:
         from django.utils import timezone
 

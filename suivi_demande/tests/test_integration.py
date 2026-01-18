@@ -1,5 +1,5 @@
 """
-Tests d'intégration du workflow complet.
+Tests d'intÃ©gration du workflow complet.
 """
 
 from decimal import Decimal
@@ -24,7 +24,7 @@ class WorkflowCompletTestCase(TestCase):
     """Tests du workflow complet d'un dossier."""
 
     def setUp(self):
-        """Préparation des utilisateurs."""
+        """PrÃ©paration des utilisateurs."""
         # Client
         self.client_user = User.objects.create_user("client", password="pass")
         UserProfile.objects.create(
@@ -78,18 +78,18 @@ class WorkflowCompletTestCase(TestCase):
         self.client = Client()
 
     def test_workflow_complet_nouveau_to_fonds_libere(self):
-        """Test du workflow complet : NOUVEAU → FONDS_LIBERE."""
-        # 1. Créer un dossier
+        """Test du workflow complet : NOUVEAU â†’ FONDS_LIBERE."""
+        # 1. CrÃ©er un dossier
         dossier = DossierCredit.objects.create(
             client=self.client_user,
             reference="DOS-INT-001",
-            produit="Crédit Personnel",
+            produit="CrÃ©dit Personnel",
             montant=Decimal("2000000.00"),
         )
         self.assertEqual(dossier.statut_agent, DossierStatutAgent.NOUVEAU)
         self.assertEqual(dossier.statut_client, DossierStatutClient.EN_ATTENTE)
 
-        # 2. Gestionnaire transmet à l'analyste
+        # 2. Gestionnaire transmet Ã  l'analyste
         dossier.statut_agent = DossierStatutAgent.TRANSMIS_ANALYSTE
         dossier.statut_client = DossierStatutClient.EN_COURS_TRAITEMENT
         dossier.acteur_courant = self.analyste_user
@@ -138,7 +138,7 @@ class WorkflowCompletTestCase(TestCase):
         self.assertEqual(dossier.statut_agent, DossierStatutAgent.APPROUVE_ATTENTE_FONDS)
         self.assertEqual(dossier.journal.count(), 3)
 
-        # 5. BOE libère les fonds
+        # 5. BOE libÃ¨re les fonds
         dossier.statut_agent = DossierStatutAgent.FONDS_LIBERE
         dossier.statut_client = DossierStatutClient.TERMINE
         dossier.save()
@@ -151,18 +151,18 @@ class WorkflowCompletTestCase(TestCase):
             acteur=self.boe_user,
         )
 
-        # Vérifications finales
+        # VÃ©rifications finales
         self.assertEqual(dossier.statut_agent, DossierStatutAgent.FONDS_LIBERE)
         self.assertEqual(dossier.statut_client, DossierStatutClient.TERMINE)
         self.assertEqual(dossier.journal.count(), 4)
 
     def test_workflow_avec_retour_client(self):
         """Test du workflow avec retour au client."""
-        # 1. Créer un dossier
+        # 1. CrÃ©er un dossier
         dossier = DossierCredit.objects.create(
             client=self.client_user,
             reference="DOS-INT-002",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("1000000.00"),
         )
 
@@ -180,11 +180,11 @@ class WorkflowCompletTestCase(TestCase):
             commentaire_systeme="Documents incomplets",
         )
 
-        # Vérifications
+        # VÃ©rifications
         self.assertEqual(dossier.statut_client, DossierStatutClient.SE_RAPPROCHER_GEST)
         self.assertEqual(dossier.journal.count(), 1)
 
-        # 3. Client complète et gestionnaire transmet
+        # 3. Client complÃ¨te et gestionnaire transmet
         dossier.statut_agent = DossierStatutAgent.TRANSMIS_ANALYSTE
         dossier.statut_client = DossierStatutClient.EN_COURS_TRAITEMENT
         dossier.save()
@@ -193,15 +193,15 @@ class WorkflowCompletTestCase(TestCase):
 
     def test_workflow_avec_refus(self):
         """Test du workflow avec refus."""
-        # 1. Créer un dossier
+        # 1. CrÃ©er un dossier
         dossier = DossierCredit.objects.create(
             client=self.client_user,
             reference="DOS-INT-003",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("5000000.00"),
         )
 
-        # 2. Passer par les étapes jusqu'au GGR
+        # 2. Passer par les Ã©tapes jusqu'au GGR
         dossier.statut_agent = DossierStatutAgent.EN_COURS_VALIDATION_GGR
         dossier.save()
 
@@ -216,19 +216,19 @@ class WorkflowCompletTestCase(TestCase):
             de_statut=DossierStatutAgent.EN_COURS_VALIDATION_GGR,
             vers_statut=DossierStatutAgent.REFUSE,
             acteur=self.resp_ggr_user,
-            commentaire_systeme="Capacité d'endettement insuffisante",
+            commentaire_systeme="CapacitÃ© d'endettement insuffisante",
         )
 
-        # Vérifications
+        # VÃ©rifications
         self.assertEqual(dossier.statut_agent, DossierStatutAgent.REFUSE)
         self.assertEqual(dossier.statut_client, DossierStatutClient.SE_RAPPROCHER_GEST)
 
 
 class NotificationIntegrationTestCase(TestCase):
-    """Tests d'intégration des notifications."""
+    """Tests d'intÃ©gration des notifications."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.user = User.objects.create_user("testuser", password="pass")
         UserProfile.objects.create(
             user=self.user,
@@ -239,39 +239,39 @@ class NotificationIntegrationTestCase(TestCase):
         )
 
     def test_notification_creee_lors_transition(self):
-        """Test qu'une notification est créée lors d'une transition."""
-        # Créer un dossier
+        """Test qu'une notification est crÃ©Ã©e lors d'une transition."""
+        # CrÃ©er un dossier
         dossier = DossierCredit.objects.create(
             client=self.user,
             reference="DOS-NOTIF-001",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("1000000.00"),
         )
 
-        # Créer une notification
+        # CrÃ©er une notification
         notif = Notification.objects.create(
             utilisateur_cible=self.user,
             type="NOUVEAU_MESSAGE",
-            titre=f"Dossier {dossier.reference} mis à jour",
-            message="Votre dossier a été transmis à l'analyste",
+            titre=f"Dossier {dossier.reference} mis Ã  jour",
+            message="Votre dossier a Ã©tÃ© transmis Ã  l'analyste",
             canal="INTERNE",
         )
 
-        # Vérifier que la notification existe
+        # VÃ©rifier que la notification existe
         self.assertEqual(Notification.objects.filter(utilisateur_cible=self.user).count(), 1)
         self.assertFalse(notif.lu)
 
     def test_notification_marquee_lue_lors_acces_dossier(self):
-        """Test que les notifications sont marquées lues."""
-        # Créer un dossier
+        """Test que les notifications sont marquÃ©es lues."""
+        # CrÃ©er un dossier
         dossier = DossierCredit.objects.create(
             client=self.user,
             reference="DOS-NOTIF-002",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("1000000.00"),
         )
 
-        # Créer une notification
+        # CrÃ©er une notification
         notif = Notification.objects.create(
             utilisateur_cible=self.user,
             type="NOUVEAU_MESSAGE",
@@ -285,27 +285,27 @@ class NotificationIntegrationTestCase(TestCase):
         notif.lu = True
         notif.save()
 
-        # Vérifier
+        # VÃ©rifier
         notif.refresh_from_db()
         self.assertTrue(notif.lu)
 
 
 class CanevasIntegrationTestCase(TestCase):
-    """Tests d'intégration du canevas."""
+    """Tests d'intÃ©gration du canevas."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.user = User.objects.create_user("testuser", password="pass")
         self.dossier = DossierCredit.objects.create(
             client=self.user,
             reference="DOS-CAN-001",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("2000000.00"),
         )
 
     def test_creation_canevas_avec_calculs(self):
-        """Test de création d'un canevas avec calculs automatiques."""
-        # Créer un canevas
+        """Test de crÃ©ation d'un canevas avec calculs automatiques."""
+        # CrÃ©er un canevas
         canevas = CanevasProposition.objects.create(
             dossier=self.dossier,
             nom_prenom="Test User",
@@ -322,10 +322,10 @@ class CanevasIntegrationTestCase(TestCase):
             demande_taux_pourcent=Decimal("12.00"),
         )
 
-        # Calculer la capacité d'endettement
+        # Calculer la capacitÃ© d'endettement
         canevas.calculer_capacite_endettement()
 
-        # Vérifications
+        # VÃ©rifications
         # 40% de 1000000 = 400000
         self.assertEqual(canevas.capacite_endettement_brute_fcfa, Decimal("400000.00"))
         # 400000 - 100000 = 300000
@@ -333,10 +333,10 @@ class CanevasIntegrationTestCase(TestCase):
 
 
 class DashboardIntegrationTestCase(TestCase):
-    """Tests d'intégration des dashboards."""
+    """Tests d'intÃ©gration des dashboards."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.client = Client()
         self.user = User.objects.create_user("testuser", password="pass")
         UserProfile.objects.create(
@@ -349,29 +349,29 @@ class DashboardIntegrationTestCase(TestCase):
 
     def test_dashboard_affiche_statistiques_correctes(self):
         """Test que le dashboard affiche les bonnes statistiques."""
-        # Créer 5 dossiers
+        # CrÃ©er 5 dossiers
         for i in range(5):
             DossierCredit.objects.create(
                 client=self.user,
                 reference=f"DOS-STAT-{i:03d}",
-                produit="Crédit",
+                produit="CrÃ©dit",
                 montant=Decimal("1000000.00"),
             )
 
-        # Se connecter et accéder au dashboard
+        # Se connecter et accÃ©der au dashboard
         self.client.login(username="testuser", password="pass")
         response = self.client.get("/dashboard/")
 
-        # Vérifier que les 5 dossiers sont affichés
+        # VÃ©rifier que les 5 dossiers sont affichÃ©s
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["dossiers_en_cours"].count(), 5)
 
 
 class PermissionsIntegrationTestCase(TestCase):
-    """Tests d'intégration des permissions."""
+    """Tests d'intÃ©gration des permissions."""
 
     def setUp(self):
-        """Préparation."""
+        """PrÃ©paration."""
         self.client = Client()
 
         # Client 1
@@ -395,20 +395,20 @@ class PermissionsIntegrationTestCase(TestCase):
         )
 
     def test_isolation_donnees_entre_clients(self):
-        """Test que les clients ne voient pas les données des autres."""
-        # Client 1 crée un dossier
+        """Test que les clients ne voient pas les donnÃ©es des autres."""
+        # Client 1 crÃ©e un dossier
         dossier1 = DossierCredit.objects.create(
             client=self.client1,
             reference="DOS-ISOL-001",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("1000000.00"),
         )
 
-        # Client 2 crée un dossier
+        # Client 2 crÃ©e un dossier
         dossier2 = DossierCredit.objects.create(
             client=self.client2,
             reference="DOS-ISOL-002",
-            produit="Crédit",
+            produit="CrÃ©dit",
             montant=Decimal("2000000.00"),
         )
 
@@ -416,11 +416,11 @@ class PermissionsIntegrationTestCase(TestCase):
         self.client.login(username="client1", password="pass")
         response = self.client.get("/dashboard/")
 
-        # Vérifier qu'il ne voit que son dossier
+        # VÃ©rifier qu'il ne voit que son dossier
         dossiers = response.context["dossiers_en_cours"]
         self.assertEqual(dossiers.count(), 1)
         self.assertEqual(dossiers.first().reference, "DOS-ISOL-001")
 
-        # Client 1 ne peut pas accéder au dossier de Client 2
+        # Client 1 ne peut pas accÃ©der au dossier de Client 2
         response = self.client.get(f"/dossier/{dossier2.pk}/")
         self.assertEqual(response.status_code, 302)  # Redirect

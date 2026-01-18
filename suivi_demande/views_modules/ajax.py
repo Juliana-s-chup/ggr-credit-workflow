@@ -11,9 +11,9 @@ from ..models import Notification
 def test_notification_api(request):
     """API pour tester les notifications en AJAX."""
     if not request.user.is_authenticated:
-        return JsonResponse({"error": "Non authentifié"}, status=401)
+        return JsonResponse({"error": "Non authentifiÃ©"}, status=401)
 
-    # Récupérer les notifications récentes
+    # RÃ©cupÃ©rer les notifications rÃ©centes
     notifications = Notification.objects.filter(utilisateur_cible=request.user).order_by(
         "-created_at"
     )[:5]

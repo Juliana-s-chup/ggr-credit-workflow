@@ -28,8 +28,8 @@ urlpatterns = [
         views.transmettre_analyste_page,
         name="transmettre_analyste_page",
     ),
-    # path("dossier/<int:pk>/archiver/", views.archive_dossier, name="archive_dossier"),  # TODO: Vue à implémenter
-    # path("dossier/<int:pk>/desarchiver/", views.unarchive_dossier, name="unarchive_dossier"),  # TODO: Vue à implémenter
+    # path("dossier/<int:pk>/archiver/", views.archive_dossier, name="archive_dossier"),  # TODO: Vue Ã  implÃ©menter
+    # path("dossier/<int:pk>/desarchiver/", views.unarchive_dossier, name="unarchive_dossier"),  # TODO: Vue Ã  implÃ©menter
     # Canevas de proposition
     path(
         "dossier/<int:dossier_id>/canevas/",
@@ -55,7 +55,7 @@ urlpatterns = [
         views_documents.delete_document_ajax,
         name="delete_document_ajax",
     ),
-    # Demande de crédit (wizard)
+    # Demande de crÃ©dit (wizard)
     path("demande/", views.demande_start, name="demande_start"),
     path("demande/verification/", views.demande_verification, name="demande_verification"),
     path("demande/etape-1/", views.demande_step1, name="demande_step1"),
@@ -71,7 +71,7 @@ urlpatterns = [
     # Auth flows Option A
     path("accounts/signup/", views.signup, name="signup"),
     path("accounts/pending/", views.pending_approval, name="pending_approval"),
-    # Pages de connexion distinctes - TODO: Utiliser views_portals à la place
+    # Pages de connexion distinctes - TODO: Utiliser views_portals Ã  la place
     # path("accounts/login_client/", views.login_client, name="login_client"),
     # path("accounts/login_pro/", views.login_pro, name="login_pro"),
     # Pages d'inscription distinctes
@@ -84,16 +84,16 @@ urlpatterns = [
     path(
         "notifications/<int:pk>/mark/", views.notifications_mark_read, name="notifications_mark_one"
     ),
-    # Administration (éviter collision avec Django admin)
+    # Administration (Ã©viter collision avec Django admin)
     path("suivi-admin/users/", views.admin_users, name="admin_users"),
-    # path("suivi-admin/users/create/", views.admin_create_user, name="admin_create_user"),  # TODO: Vue à implémenter
+    # path("suivi-admin/users/create/", views.admin_create_user, name="admin_create_user"),  # TODO: Vue Ã  implÃ©menter
     path("suivi-admin/users/change-role/", views.admin_change_role, name="admin_change_role"),
     path(
         "suivi-admin/users/<int:user_id>/activate/",
         views.admin_activate_user,
         name="admin_activate_user",
     ),
-    # Rapports - TODO: Utiliser views_portals à la place
+    # Rapports - TODO: Utiliser views_portals Ã  la place
     # path("rapports/", views.reports_view, name="reports"),
     # path("rapports/export-xlsx/", views.reports_export_xlsx, name="reports_export_xlsx"),
 ]

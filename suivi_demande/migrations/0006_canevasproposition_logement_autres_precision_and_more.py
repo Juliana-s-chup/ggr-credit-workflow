@@ -44,22 +44,22 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='dossiercredit',
             name='wizard_current_step',
-            field=models.PositiveSmallIntegerField(choices=[(1, 'Étape 1'), (2, 'Étape 2'), (3, 'Étape 3'), (4, 'Étape 4')], default=1),
+            field=models.PositiveSmallIntegerField(choices=[(1, 'Ã‰tape 1'), (2, 'Ã‰tape 2'), (3, 'Ã‰tape 3'), (4, 'Ã‰tape 4')], default=1),
         ),
         migrations.AlterField(
             model_name='canevasproposition',
             name='regime_matrimonial',
-            field=models.CharField(blank=True, choices=[('COMMUNAUTE', 'Communauté des biens'), ('SEPARATION', 'Séparation des biens'), ('PARTICIPATION', 'Participation aux acquêts'), ('AUTRE', 'Autres')], max_length=100),
+            field=models.CharField(blank=True, choices=[('COMMUNAUTE', 'CommunautÃ© des biens'), ('SEPARATION', 'SÃ©paration des biens'), ('PARTICIPATION', 'Participation aux acquÃªts'), ('AUTRE', 'Autres')], max_length=100),
         ),
         migrations.AlterField(
             model_name='canevasproposition',
             name='statut_emploi',
-            field=models.CharField(choices=[('PRIVE', 'Privé'), ('PUBLIC', 'Public')], default='PRIVE', max_length=50),
+            field=models.CharField(choices=[('PRIVE', 'PrivÃ©'), ('PUBLIC', 'Public')], default='PRIVE', max_length=50),
         ),
         migrations.AlterField(
             model_name='canevasproposition',
             name='statut_logement',
-            field=models.CharField(blank=True, choices=[('LOCATAIRE', 'Locataire'), ('PROPRIETAIRE', 'Propriétaire'), ('AUTRES', 'Autres (à préciser)')], max_length=100),
+            field=models.CharField(blank=True, choices=[('LOCATAIRE', 'Locataire'), ('PROPRIETAIRE', 'PropriÃ©taire'), ('AUTRES', 'Autres (Ã  prÃ©ciser)')], max_length=100),
         ),
         SeparateDatabaseAndState(
             state_operations=[

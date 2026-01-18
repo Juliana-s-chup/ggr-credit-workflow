@@ -7,14 +7,14 @@ from .models import CanevasProposition
 
 
 class CanevasPropositionForm(forms.ModelForm):
-    """Formulaire pour le canevas de proposition de crédit."""
+    """Formulaire pour le canevas de proposition de crÃ©dit."""
 
     class Meta:
         model = CanevasProposition
         exclude = ["dossier"]
 
         widgets = {
-            # EN-TÊTE
+            # EN-TÃŠTE
             "agence": forms.TextInput(attrs={"class": "form-control", "placeholder": "PNBR"}),
             "code_agence": forms.TextInput(attrs={"class": "form-control", "placeholder": "10"}),
             "nom_exploitant": forms.TextInput(
@@ -24,7 +24,7 @@ class CanevasPropositionForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "101"}
             ),
             "date_proposition": forms.DateInput(attrs={"class": "form-control", "type": "date"}),
-            # SECTION 1: IDENTITÉ
+            # SECTION 1: IDENTITÃ‰
             "nom_prenom": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "Nom complet"}
             ),
@@ -33,7 +33,7 @@ class CanevasPropositionForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "CONGOLAISE"}
             ),
             "adresse_exacte": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Quartier, Avenue, N°"}
+                attrs={"class": "form-control", "placeholder": "Quartier, Avenue, NÂ°"}
             ),
             "numero_telephone": forms.TextInput(
                 attrs={"class": "form-control", "placeholder": "+242 XX XXX XX XX"}
@@ -49,7 +49,7 @@ class CanevasPropositionForm(forms.ModelForm):
                 attrs={"class": "form-control", "type": "date"}
             ),
             "emploi_occupe": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Poste occupé"}
+                attrs={"class": "form-control", "placeholder": "Poste occupÃ©"}
             ),
             "statut_emploi": forms.Select(attrs={"class": "form-select"}),
             "anciennete_emploi": forms.TextInput(
@@ -73,7 +73,7 @@ class CanevasPropositionForm(forms.ModelForm):
                 attrs={"class": "form-control", "min": "0"}
             ),
             "regime_matrimonial": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Si marié(e)"}
+                attrs={"class": "form-control", "placeholder": "Si mariÃ©(e)"}
             ),
             "participation_enquetes": forms.TextInput(attrs={"class": "form-control"}),
             # LOGEMENT
@@ -84,12 +84,12 @@ class CanevasPropositionForm(forms.ModelForm):
                 attrs={"class": "form-control", "placeholder": "Emploi du conjoint"}
             ),
             "statut_logement": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Propriétaire/Locataire"}
+                attrs={"class": "form-control", "placeholder": "PropriÃ©taire/Locataire"}
             ),
             "numero_tf": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "N° TF si propriétaire"}
+                attrs={"class": "form-control", "placeholder": "NÂ° TF si propriÃ©taire"}
             ),
-            # PRÊT EN COURS
+            # PRÃŠT EN COURS
             "nature_pret_cours": forms.Select(attrs={"class": "form-select"}),
             "montant_origine_fcfa": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "min": "0"}
@@ -103,7 +103,7 @@ class CanevasPropositionForm(forms.ModelForm):
             "k_restant_du_fcfa": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "min": "0"}
             ),
-            # SECTION 2: CAPACITÉ D'ENDETTEMENT
+            # SECTION 2: CAPACITÃ‰ D'ENDETTEMENT
             "salaire_net_moyen_fcfa": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "min": "0"}
             ),
@@ -122,10 +122,10 @@ class CanevasPropositionForm(forms.ModelForm):
             "capacite_endettement_nette_fcfa": forms.NumberInput(
                 attrs={"class": "form-control", "step": "0.01", "readonly": "readonly"}
             ),
-            # SECTION 3: DÉTAILS DU CRÉDIT
+            # SECTION 3: DÃ‰TAILS DU CRÃ‰DIT
             "nature_pret": forms.Select(attrs={"class": "form-select"}),
             "motif_credit": forms.TextInput(
-                attrs={"class": "form-control", "placeholder": "Motif du crédit"}
+                attrs={"class": "form-control", "placeholder": "Motif du crÃ©dit"}
             ),
             # Demande client
             "demande_montant_fcfa": forms.NumberInput(
@@ -181,25 +181,25 @@ class CanevasPropositionForm(forms.ModelForm):
         }
 
         labels = {
-            # EN-TÊTE
+            # EN-TÃŠTE
             "agence": "Agence",
             "code_agence": "Code agence",
             "nom_exploitant": "Nom exploitant",
             "matricule_exploitant": "Matricule exploitant",
             "date_proposition": "Date",
-            # IDENTITÉ
-            "nom_prenom": "Nom & Prénom",
+            # IDENTITÃ‰
+            "nom_prenom": "Nom & PrÃ©nom",
             "date_naissance": "Date de naissance",
-            "nationalite": "Nationalité",
+            "nationalite": "NationalitÃ©",
             "adresse_exacte": "Adresse exacte",
-            "numero_telephone": "N° de téléphone",
+            "numero_telephone": "NÂ° de tÃ©lÃ©phone",
             # EMPLOI
             "radical": "Radical",
             "date_ouverture_compte": "Date d'ouverture du compte",
             "date_domiciliation_salaire": "Date de domiciliation du salaire",
-            "emploi_occupe": "Emploi occupé",
-            "statut_emploi": "Statut d'emploi (Privé/Public)",
-            "anciennete_emploi": "Ancienneté dans l'emploi (Années)",
+            "emploi_occupe": "Emploi occupÃ©",
+            "statut_emploi": "Statut d'emploi (PrivÃ©/Public)",
+            "anciennete_emploi": "AnciennetÃ© dans l'emploi (AnnÃ©es)",
             "type_contrat": "Type de contrat",
             # EMPLOYEUR
             "nom_employeur": "Nom employeur",
@@ -208,79 +208,79 @@ class CanevasPropositionForm(forms.ModelForm):
             "radical_employeur": "Radical employeur",
             # SITUATION FAMILIALE
             "situation_famille": "Situation de famille",
-            "nombre_personnes_charge": "Nbr de personnes à charge",
-            "regime_matrimonial": "Si marié, régime matrimonial",
-            "participation_enquetes": "Participation aux enquêtes",
+            "nombre_personnes_charge": "Nbr de personnes Ã  charge",
+            "regime_matrimonial": "Si mariÃ©, rÃ©gime matrimonial",
+            "participation_enquetes": "Participation aux enquÃªtes",
             # LOGEMENT
             "salaire_conjoint": "Salaire du conjoint en",
             "emploi_conjoint": "Emploi du conjoint",
             "statut_logement": "Statut du logement",
-            "numero_tf": "N° du TF (si bien immaculé)",
-            # PRÊT EN COURS
-            "nature_pret_cours": "Nature prêt en cours",
-            "montant_origine_fcfa": "Montant à l'origine en fcfa",
-            "date_derniere_echeance": "Date dernière échéance",
-            "montant_echeance_fcfa": "Montant Échéance fcfa",
+            "numero_tf": "NÂ° du TF (si bien immaculÃ©)",
+            # PRÃŠT EN COURS
+            "nature_pret_cours": "Nature prÃªt en cours",
+            "montant_origine_fcfa": "Montant Ã  l'origine en fcfa",
+            "date_derniere_echeance": "Date derniÃ¨re Ã©chÃ©ance",
+            "montant_echeance_fcfa": "Montant Ã‰chÃ©ance fcfa",
             "k_restant_du_fcfa": "K restant du en fcfa",
-            # CAPACITÉ D'ENDETTEMENT
+            # CAPACITÃ‰ D'ENDETTEMENT
             "salaire_net_moyen_fcfa": "Salaire net moyen en fcfa (1)",
-            "echeances_prets_relevees": "Échéances prêts relevées par l'employeur à la source en fcfa (2)",
-            "total_echeances_credits_cours": "Total échéances crédits en cours chez CDCO en fcfa (3) / Voir NB",
+            "echeances_prets_relevees": "Ã‰chÃ©ances prÃªts relevÃ©es par l'employeur Ã  la source en fcfa (2)",
+            "total_echeances_credits_cours": "Total Ã©chÃ©ances crÃ©dits en cours chez CDCO en fcfa (3) / Voir NB",
             "salaire_net_avant_endettement_fcfa": "Salaire net avant endettement en fcfa (4) = (1) - (2)",
-            "capacite_endettement_brute_fcfa": "Capacité d'endettement brute en fcfa (5)",
-            "capacite_endettement_nette_fcfa": "Capacité d'endettement nette maximale en fcfa (6) = (5)-(3)-(4)",
-            # DÉTAILS DU CRÉDIT
-            "nature_pret": "Nature du crédit",
-            "motif_credit": "Motif du crédit",
+            "capacite_endettement_brute_fcfa": "CapacitÃ© d'endettement brute en fcfa (5)",
+            "capacite_endettement_nette_fcfa": "CapacitÃ© d'endettement nette maximale en fcfa (6) = (5)-(3)-(4)",
+            # DÃ‰TAILS DU CRÃ‰DIT
+            "nature_pret": "Nature du crÃ©dit",
+            "motif_credit": "Motif du crÃ©dit",
             "demande_montant_fcfa": "Montant en fcfa",
-            "demande_duree_mois": "Durée (mois)",
+            "demande_duree_mois": "DurÃ©e (mois)",
             "demande_taux_pourcent": "Taux %",
-            "demande_periodicite": "Périodicité",
-            "demande_montant_echeance_fcfa": "Montant échéance en fcfa (*)",
-            "demande_date_1ere_echeance": "Date 1ère échéance",
+            "demande_periodicite": "PÃ©riodicitÃ©",
+            "demande_montant_echeance_fcfa": "Montant Ã©chÃ©ance en fcfa (*)",
+            "demande_date_1ere_echeance": "Date 1Ã¨re Ã©chÃ©ance",
             "proposition_montant_fcfa": "Montant en fcfa",
-            "proposition_duree_mois": "Durée (mois)",
+            "proposition_duree_mois": "DurÃ©e (mois)",
             "proposition_taux_pourcent": "Taux %",
-            "proposition_periodicite": "Périodicité",
-            "proposition_montant_echeance_fcfa": "Montant échéance en fcfa (*)",
-            "proposition_date_1ere_echeance": "Date 1ère échéance",
+            "proposition_periodicite": "PÃ©riodicitÃ©",
+            "proposition_montant_echeance_fcfa": "Montant Ã©chÃ©ance en fcfa (*)",
+            "proposition_date_1ere_echeance": "Date 1Ã¨re Ã©chÃ©ance",
             # AVIS
-            "avis_conseiller_commercial": "Avis motivé du conseiller commercial",
+            "avis_conseiller_commercial": "Avis motivÃ© du conseiller commercial",
             "avis_responsable_agence": "Avis du responsable d'agence",
             "avis_risque_contrepartie": "Avis Risque de contrepartie",
             # DOCUMENTS & VALIDATION
-            "doc_cni_ok": "Carte d'identité (CNI)",
+            "doc_cni_ok": "Carte d'identitÃ© (CNI)",
             "doc_fiche_paie_ok": "Fiche de paie (3 derniers bulletins)",
-            "doc_releve_ok": "Relevé bancaire",
-            "doc_billet_ordre_ok": "Billet à ordre",
+            "doc_releve_ok": "RelevÃ© bancaire",
+            "doc_billet_ordre_ok": "Billet Ã  ordre",
             "doc_attestation_employeur_ok": "Attestation de l'employeur",
-            "doc_attestation_domiciliation_ok": "Attestation de domiciliation irrévocable",
-            "doc_assurance_deces_invalidite_ok": "Assurance décès-invalidité",
-            "validation_consentement": "Je certifie l'exactitude des informations et j'accepte les conditions générales.",
+            "doc_attestation_domiciliation_ok": "Attestation de domiciliation irrÃ©vocable",
+            "doc_assurance_deces_invalidite_ok": "Assurance dÃ©cÃ¨s-invaliditÃ©",
+            "validation_consentement": "Je certifie l'exactitude des informations et j'accepte les conditions gÃ©nÃ©rales.",
         }
 
     def clean(self):
         """Validation et calculs automatiques."""
         cleaned_data = super().clean()
 
-        # Calcul capacité d'endettement
+        # Calcul capacitÃ© d'endettement
         salaire_net = cleaned_data.get("salaire_net_moyen_fcfa", 0)
         echeances_relevees = cleaned_data.get("echeances_prets_relevees", 0)
         total_echeances = cleaned_data.get("total_echeances_credits_cours", 0)
 
         if salaire_net:
-            # Capacité brute = 40% du salaire
+            # CapacitÃ© brute = 40% du salaire
             cleaned_data["capacite_endettement_brute_fcfa"] = salaire_net * 0.40
 
             # Salaire net avant endettement
             cleaned_data["salaire_net_avant_endettement_fcfa"] = salaire_net - echeances_relevees
 
-            # Capacité nette
+            # CapacitÃ© nette
             cleaned_data["capacite_endettement_nette_fcfa"] = (
                 cleaned_data["capacite_endettement_brute_fcfa"] - total_echeances
             )
 
-        # Simulation indicative de l'échéance
+        # Simulation indicative de l'Ã©chÃ©ance
         try:
             P = float(cleaned_data.get("demande_montant_fcfa") or 0)
             n = int(cleaned_data.get("demande_duree_mois") or 0)

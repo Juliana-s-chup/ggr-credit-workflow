@@ -6,22 +6,22 @@ User = get_user_model()
 
 
 class Command(BaseCommand):
-    help = "Vérifie et corrige les profils utilisateur manquants"
+    help = "VÃ©rifie et corrige les profils utilisateur manquants"
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--create-missing",
             action="store_true",
-            help="Créer les profils manquants avec le rôle CLIENT par défaut",
+            help="CrÃ©er les profils manquants avec le rÃ´le CLIENT par dÃ©faut",
         )
         parser.add_argument(
             "--set-role",
             type=str,
-            help="Définir le rôle pour un utilisateur spécifique (format: username:role)",
+            help="DÃ©finir le rÃ´le pour un utilisateur spÃ©cifique (format: username:role)",
         )
 
     def handle(self, *args, **options):
-        self.stdout.write("=== Vérification des profils utilisateur ===")
+        self.stdout.write("=== VÃ©rification des profils utilisateur ===")
 
         # Lister tous les utilisateurs
         users = User.objects.all()
@@ -30,14 +30,14 @@ class Command(BaseCommand):
         for user in users:
             try:
                 profile = user.profile
-                self.stdout.write(f"✓ {user.username} -> Rôle: {profile.role}")
+                self.stdout.write(f"âœ“ {user.username} -> RÃ´le: {profile.role}")
             except UserProfile.DoesNotExist:
                 users_without_profile.append(user)
-                self.stdout.write(f"✗ {user.username} -> AUCUN PROFIL")
+                self.stdout.write(f"âœ— {user.username} -> AUCUN PROFIL")
 
         if users_without_profile:
             self.stdout.write(
-                f"\n{len(users_without_profile)} utilisateur(s) sans profil trouvé(s)"
+                f"\n{len(users_without_profile)} utilisateur(s) sans profil trouvÃ©(s)"
             )
 
             if options["create_missing"]:
@@ -49,11 +49,13 @@ class Command(BaseCommand):
                         address="",
                         role=UserRoles.CLIENT,
                     )
-                    self.stdout.write(f"✓ Profil créé pour {user.username} avec le rôle CLIENT")
+                    self.stdout.write(
+                        f"âœ“ Profil crÃ©Ã© pour {user.username} avec le rÃ´le CLIENT"
+                    )
             else:
-                self.stdout.write("Utilisez --create-missing pour créer les profils manquants")
+                self.stdout.write("Utilisez --create-missing pour crÃ©er les profils manquants")
 
-        # Définir un rôle spécifique
+        # DÃ©finir un rÃ´le spÃ©cifique
         if options["set_role"]:
             try:
                 username, role = options["set_role"].split(":")
@@ -71,7 +73,7 @@ class Command(BaseCommand):
                     profile.role = role
                     profile.save()
 
-                self.stdout.write(f"✓ Rôle {role} défini pour {username}")
+                self.stdout.write(f"âœ“ RÃ´le {role} dÃ©fini pour {username}")
             except ValueError:
                 self.stdout.write("Format incorrect. Utilisez: username:role")
             except User.DoesNotExist:
@@ -79,7 +81,7 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stdout.write(f"Erreur: {e}")
 
-        self.stdout.write("\n=== Rôles disponibles ===")
+        self.stdout.write("\n=== RÃ´les disponibles ===")
         for role_code, role_name in UserRoles.choices:
             self.stdout.write(f"- {role_code}: {role_name}")
 

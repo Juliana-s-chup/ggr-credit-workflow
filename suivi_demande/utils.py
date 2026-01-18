@@ -52,9 +52,9 @@ def notify(
 
 
 def get_current_namespace(request):
-    """Détermine le namespace actuel basé sur la configuration du portail"""
+    """DÃ©termine le namespace actuel basÃ© sur la configuration du portail"""
     if hasattr(request, "resolver_match") and request.resolver_match:
         return request.resolver_match.namespace or "pro"
-    # Fallback basé sur les settings
+    # Fallback basÃ© sur les settings
     portal_type = getattr(settings, "PORTAL_TYPE", "PROFESSIONAL")
     return "client" if portal_type == "CLIENT" else "pro"

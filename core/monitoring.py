@@ -1,6 +1,6 @@
 """
 Monitoring et Error Tracking
-Sentry + Logging structuré
+Sentry + Logging structurÃ©
 """
 
 import logging
@@ -25,7 +25,7 @@ def init_sentry():
     Initialise Sentry pour le tracking d'erreurs
     """
     if not SENTRY_AVAILABLE:
-        logger.warning("⚠️ Sentry SDK not installed. Monitoring disabled.")
+        logger.warning("âš ï¸ Sentry SDK not installed. Monitoring disabled.")
         return
 
     if not settings.DEBUG and hasattr(settings, "SENTRY_DSN"):
@@ -38,24 +38,24 @@ def init_sentry():
                 sentry_logging,
             ],
             traces_sample_rate=0.1,  # 10% des transactions
-            send_default_pii=False,  # Pas de données personnelles
+            send_default_pii=False,  # Pas de donnÃ©es personnelles
             environment=getattr(settings, "ENVIRONMENT", "development"),
             release=getattr(settings, "VERSION", "1.0.0"),
         )
 
-        logger.info("✅ Sentry initialized")
+        logger.info("âœ… Sentry initialized")
     else:
-        logger.info("ℹ️ Sentry disabled (DEBUG=True or no DSN)")
+        logger.info("â„¹ï¸ Sentry disabled (DEBUG=True or no DSN)")
 
 
 def log_business_event(event_type: str, user_id: int, data: dict):
     """
-    Log un événement métier important
+    Log un Ã©vÃ©nement mÃ©tier important
 
     Args:
-        event_type: Type d'événement (DOSSIER_CREATED, STATUS_CHANGED, etc.)
+        event_type: Type d'Ã©vÃ©nement (DOSSIER_CREATED, STATUS_CHANGED, etc.)
         user_id: ID de l'utilisateur
-        data: Données de l'événement
+        data: DonnÃ©es de l'Ã©vÃ©nement
     """
     logger.info(
         f"Business Event: {event_type}",
@@ -69,14 +69,14 @@ def log_business_event(event_type: str, user_id: int, data: dict):
 
 def log_security_event(event_type: str, user=None, ip: str = None, details: dict = None, **kwargs):
     """
-    Log un événement de sécurité
+    Log un Ã©vÃ©nement de sÃ©curitÃ©
 
     Args:
         event_type: Type (LOGIN_FAILED, UNAUTHORIZED_ACCESS, etc.)
         user: Objet User Django (optionnel)
         ip: Adresse IP (optionnel)
-        details: Détails de l'événement (optionnel)
-        **kwargs: Arguments supplémentaires
+        details: DÃ©tails de l'Ã©vÃ©nement (optionnel)
+        **kwargs: Arguments supplÃ©mentaires
     """
     user_id = user.id if user else kwargs.get("user_id", None)
 

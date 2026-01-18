@@ -12,13 +12,11 @@ from suivi_demande.models import (
 
 
 class Command(BaseCommand):
-    help = (
-        "Seed de données de démonstration: utilisateurs par rôle et dossiers à différents statuts."
-    )
+    help = "Seed de donnÃ©es de dÃ©monstration: utilisateurs par rÃ´le et dossiers Ã  diffÃ©rents statuts."
 
     def add_arguments(self, parser):
         parser.add_argument(
-            "--reset", action="store_true", help="Supprimer les données demo avant de recréer"
+            "--reset", action="store_true", help="Supprimer les donnÃ©es demo avant de recrÃ©er"
         )
 
     @transaction.atomic
@@ -26,11 +24,11 @@ class Command(BaseCommand):
         User = get_user_model()
 
         if options.get("reset"):
-            self.stdout.write("Suppression des dossiers demo…")
+            self.stdout.write("Suppression des dossiers demoâ€¦")
             DossierCredit.objects.all().delete()
-            self.stdout.write("Suppression des profils demo…")
+            self.stdout.write("Suppression des profils demoâ€¦")
             UserProfile.objects.all().delete()
-            self.stdout.write("Suppression des users demo…")
+            self.stdout.write("Suppression des users demoâ€¦")
             User.objects.filter(
                 username__in=["client1", "client2", "gest1", "an1", "resp1", "boe1", "admin"]
             ).delete()
@@ -140,11 +138,11 @@ class Command(BaseCommand):
                 reference=ref,
                 defaults={
                     "client": client,
-                    "produit": "Crédit conso",
+                    "produit": "CrÃ©dit conso",
                     "montant": montant,
                     "statut_agent": s_agent,
                     "statut_client": s_client,
                 },
             )
 
-        self.stdout.write(self.style.SUCCESS("Seed de démo terminé."))
+        self.stdout.write(self.style.SUCCESS("Seed de dÃ©mo terminÃ©."))

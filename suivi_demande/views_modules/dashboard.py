@@ -1,5 +1,5 @@
 """
-Vues des dashboards par rôle et détail des dossiers.
+Vues des dashboards par rÃ´le et dÃ©tail des dossiers.
 """
 
 import statistics
@@ -28,20 +28,20 @@ from ..utils import get_current_namespace
 @login_required
 def dashboard(request):
     """
-    Dashboard principal adapté au rôle de l'utilisateur.
+    Dashboard principal adaptÃ© au rÃ´le de l'utilisateur.
 
-    Affiche des vues différentes selon le rôle :
+    Affiche des vues diffÃ©rentes selon le rÃ´le :
     - CLIENT : Ses dossiers
-    - GESTIONNAIRE : Dossiers à traiter
-    - ANALYSTE : Dossiers à analyser
+    - GESTIONNAIRE : Dossiers Ã  traiter
+    - ANALYSTE : Dossiers Ã  analyser
     - RESPONSABLE_GGR : Dossiers en validation
-    - BOE : Dossiers approuvés
+    - BOE : Dossiers approuvÃ©s
     - SUPER_ADMIN : Gestion utilisateurs
     """
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", UserRoles.CLIENT)
 
-    # Si pas de profil, créer un profil CLIENT par défaut
+    # Si pas de profil, crÃ©er un profil CLIENT par dÃ©faut
     if profile is None:
         profile, created = UserProfile.objects.get_or_create(
             user=request.user,
@@ -80,7 +80,7 @@ def _dashboard_client(request, debug_info):
     """Dashboard pour les clients."""
     debug_info["template_to_use"] = "dashboard_client.html"
 
-    # Dossiers en cours (non terminés)
+    # Dossiers en cours (non terminÃ©s)
     dossiers_en_cours = (
         DossierCredit.objects.filter(client=request.user)
         .exclude(statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE])
@@ -88,7 +88,7 @@ def _dashboard_client(request, debug_info):
         .order_by("-date_soumission")
     )
 
-    # Dossiers traités (terminés)
+    # Dossiers traitÃ©s (terminÃ©s)
     dossiers_traites = (
         DossierCredit.objects.filter(
             client=request.user,
@@ -98,7 +98,7 @@ def _dashboard_client(request, debug_info):
         .order_by("-date_maj")[:20]
     )
 
-    # Tous les dossiers (pour compatibilité)
+    # Tous les dossiers (pour compatibilitÃ©)
     dossiers = (
         DossierCredit.objects.filter(client=request.user)
         .select_related("acteur_courant")
@@ -142,7 +142,7 @@ def _dashboard_gestionnaire(request, debug_info):
         .order_by("-date_soumission")
     )
 
-    # Dossiers récents
+    # Dossiers rÃ©cents
     recents = (
         DossierCredit.objects.select_related("client", "acteur_courant")
         .all()
@@ -175,7 +175,7 @@ def _dashboard_gestionnaire(request, debug_info):
     en_attente_total = en_attente_qs.count()
     en_attente_today = en_attente_qs.filter(date_soumission__date=today).count()
 
-    # Calcul délai moyen
+    # Calcul dÃ©lai moyen
     try:
         delais = []
         now = timezone.now()
@@ -183,10 +183,10 @@ def _dashboard_gestionnaire(request, debug_info):
             if d.date_soumission:
                 delta = now - d.date_soumission
                 delais.append(delta.total_seconds() / 86400.0)
-        delai_moyen_jours = round(statistics.mean(delais), 1) if delais else "—"
+        delai_moyen_jours = round(statistics.mean(delais), 1) if delais else "â€”"
         variation_semaine = 0
     except Exception:
-        delai_moyen_jours = "—"
+        delai_moyen_jours = "â€”"
         variation_semaine = 0
 
     kpi = {
@@ -214,7 +214,7 @@ def _dashboard_gestionnaire(request, debug_info):
         .order_by("-date_soumission")
     )
 
-    # Dossiers traités
+    # Dossiers traitÃ©s
     dossiers_traites = (
         DossierCredit.objects.filter(
             statut_agent__in=[
@@ -231,7 +231,7 @@ def _dashboard_gestionnaire(request, debug_info):
         "-timestamp"
     )[:20]
 
-    # Statistiques supplémentaires
+    # Statistiques supplÃ©mentaires
     total_dossiers = DossierCredit.objects.count()
     today_date = timezone.now().date()
     dossiers_ce_mois = DossierCredit.objects.filter(
@@ -263,11 +263,11 @@ def _dashboard_gestionnaire(request, debug_info):
 
     # Messages d'information
     if total_dossiers == 0:
-        messages.warning(request, "🔍 Aucun dossier n'existe en base de données.")
+        messages.warning(request, "ðŸ” Aucun dossier n'existe en base de donnÃ©es.")
     elif dossiers_en_cours.count() == 0:
-        messages.info(request, f"🔍 {total_dossiers} dossier(s) en base, mais aucun actif.")
+        messages.info(request, f"ðŸ” {total_dossiers} dossier(s) en base, mais aucun actif.")
     else:
-        messages.success(request, f"✓ {dossiers_en_cours.count()} dossier(s) en cours.")
+        messages.success(request, f"âœ“ {dossiers_en_cours.count()} dossier(s) en cours.")
 
     ctx = {
         "dossiers_pending": dossiers_pending,
@@ -447,13 +447,13 @@ def _dashboard_super_admin(request, debug_info):
 @login_required
 def dossier_detail(request, pk):
     """
-    Affiche le détail complet d'un dossier.
+    Affiche le dÃ©tail complet d'un dossier.
 
-    Gère :
+    GÃ¨re :
     - Affichage des informations du dossier
     - Ajout de commentaires
-    - Upload de pièces jointes
-    - Permissions selon le rôle
+    - Upload de piÃ¨ces jointes
+    - Permissions selon le rÃ´le
     """
     dossier = get_object_or_404(
         DossierCredit.objects.select_related("client", "acteur_courant"), pk=pk
@@ -461,13 +461,13 @@ def dossier_detail(request, pk):
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", UserRoles.CLIENT)
 
-    # Contrôle d'accès : le client ne peut voir que ses propres dossiers
+    # ContrÃ´le d'accÃ¨s : le client ne peut voir que ses propres dossiers
     if role == UserRoles.CLIENT and dossier.client_id != request.user.id:
-        messages.error(request, "Accès refusé au dossier demandé.")
+        messages.error(request, "AccÃ¨s refusÃ© au dossier demandÃ©.")
         namespace = get_current_namespace(request)
         return redirect(f"{namespace}:dashboard")
 
-    # Marquer les notifications liées au dossier comme lues
+    # Marquer les notifications liÃ©es au dossier comme lues
     try:
         Notification.objects.filter(
             utilisateur_cible=request.user,
@@ -500,20 +500,20 @@ def dossier_detail(request, pk):
                     message=msg,
                     cible_role=None,
                 )
-                messages.success(request, "Commentaire ajouté.")
+                messages.success(request, "Commentaire ajoutÃ©.")
             namespace = get_current_namespace(request)
             return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
         elif action == "upload_piece":
             if not can_upload:
-                messages.error(request, "Vous ne pouvez pas déposer de pièce à ce stade.")
+                messages.error(request, "Vous ne pouvez pas dÃ©poser de piÃ¨ce Ã  ce stade.")
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
             f = request.FILES.get("fichier")
             type_piece = request.POST.get("type_piece") or "AUTRE"
             if not f:
-                messages.error(request, "Aucun fichier sélectionné.")
+                messages.error(request, "Aucun fichier sÃ©lectionnÃ©.")
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
@@ -533,12 +533,12 @@ def dossier_detail(request, pk):
             if ext not in allowed_exts:
                 messages.error(
                     request,
-                    f"Extension non autorisée ({ext}). Autorisées: {', '.join(sorted(allowed_exts))}.",
+                    f"Extension non autorisÃ©e ({ext}). AutorisÃ©es: {', '.join(sorted(allowed_exts))}.",
                 )
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
-            # Créer la pièce jointe
+            # CrÃ©er la piÃ¨ce jointe
             pj = PieceJointe.objects.create(
                 dossier=dossier,
                 fichier=f,
@@ -546,11 +546,11 @@ def dossier_detail(request, pk):
                 taille=file_size,
                 upload_by=request.user,
             )
-            messages.success(request, "Pièce jointe téléchargée.")
+            messages.success(request, "PiÃ¨ce jointe tÃ©lÃ©chargÃ©e.")
             namespace = get_current_namespace(request)
             return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
-    # Récupérer les données
+    # RÃ©cupÃ©rer les donnÃ©es
     pieces = (
         PieceJointe.objects.filter(dossier=dossier)
         .select_related("upload_by")

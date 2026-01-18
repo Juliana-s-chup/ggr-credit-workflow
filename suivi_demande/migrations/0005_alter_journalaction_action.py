@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='journalaction',
             name='action',
-            field=models.CharField(choices=[('CREATION', 'Création du dossier'), ('MISE_A_JOUR', 'Mise à jour'), ('TRANSITION', "Transition d'état"), ('RETOUR_CLIENT', 'Retour au client'), ('RETOUR_GESTIONNAIRE', 'Retour au gestionnaire'), ('APPROBATION', 'Approbation'), ('REFUS', 'Refus'), ('LIBERATION_FONDS', 'Libération des fonds')], max_length=30),
+            field=models.CharField(choices=[('CREATION', 'CrÃ©ation du dossier'), ('MISE_A_JOUR', 'Mise Ã  jour'), ('TRANSITION', "Transition d'Ã©tat"), ('RETOUR_CLIENT', 'Retour au client'), ('RETOUR_GESTIONNAIRE', 'Retour au gestionnaire'), ('APPROBATION', 'Approbation'), ('REFUS', 'Refus'), ('LIBERATION_FONDS', 'LibÃ©ration des fonds')], max_length=30),
         ),
     ]

@@ -35,7 +35,7 @@ def notifications_mark_all_read(request):
         )
 
         if count > 0:
-            messages.success(request, f"{count} notification(s) marquée(s) comme lue(s).")
+            messages.success(request, f"{count} notification(s) marquÃ©e(s) comme lue(s).")
         else:
             messages.info(request, "Aucune notification non lue.")
 
@@ -45,15 +45,15 @@ def notifications_mark_all_read(request):
 
 @login_required
 def notifications_mark_read(request, pk: int):
-    """Marquer une notification spécifique comme lue."""
+    """Marquer une notification spÃ©cifique comme lue."""
     if request.method == "POST":
         notif = get_object_or_404(Notification, pk=pk, utilisateur_cible=request.user)
         if not notif.lu:
             notif.lu = True
             notif.save(update_fields=["lu"])
-            messages.success(request, "Notification marquée comme lue.")
+            messages.success(request, "Notification marquÃ©e comme lue.")
 
-        # Rediriger vers la page précédente si fournie
+        # Rediriger vers la page prÃ©cÃ©dente si fournie
         namespace = get_current_namespace(request)
         next_url = request.POST.get("next")
         if next_url:

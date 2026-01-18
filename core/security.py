@@ -1,5 +1,5 @@
 """
-Module de Sécurité Renforcée
+Module de SÃ©curitÃ© RenforcÃ©e
 Rate Limiting, Validation, Sanitization
 """
 
@@ -17,12 +17,12 @@ from core.monitoring import log_security_event
 
 def rate_limit(key_prefix: str, limit: int, period: int):
     """
-    Décorateur de rate limiting
+    DÃ©corateur de rate limiting
 
     Args:
-        key_prefix: Préfixe de la clé cache
-        limit: Nombre max de requêtes
-        period: Période en secondes
+        key_prefix: PrÃ©fixe de la clÃ© cache
+        limit: Nombre max de requÃªtes
+        period: PÃ©riode en secondes
 
     Usage:
         @rate_limit('login', limit=5, period=300)  # 5 tentatives / 5min
@@ -41,7 +41,7 @@ def rate_limit(key_prefix: str, limit: int, period: int):
 
             cache_key = f"rate_limit:{key_prefix}:{identifier}"
 
-            # Vérifier le compteur
+            # VÃ©rifier le compteur
             count = cache.get(cache_key, 0)
 
             if count >= limit:
@@ -51,9 +51,11 @@ def rate_limit(key_prefix: str, limit: int, period: int):
                     get_client_ip(request),
                     {"key_prefix": key_prefix, "count": count},
                 )
-                return HttpResponseForbidden(f"Trop de requêtes. Réessayez dans {period} secondes.")
+                return HttpResponseForbidden(
+                    f"Trop de requÃªtes. RÃ©essayez dans {period} secondes."
+                )
 
-            # Incrémenter le compteur
+            # IncrÃ©menter le compteur
             cache.set(cache_key, count + 1, period)
 
             return func(request, *args, **kwargs)
@@ -64,7 +66,7 @@ def rate_limit(key_prefix: str, limit: int, period: int):
 
 
 def get_client_ip(request):
-    """Récupère l'IP réelle du client"""
+    """RÃ©cupÃ¨re l'IP rÃ©elle du client"""
     x_forwarded_for = request.META.get("HTTP_X_FORWARDED_FOR")
     if x_forwarded_for:
         ip = x_forwarded_for.split(",")[0]
@@ -78,13 +80,13 @@ def get_client_ip(request):
 
 def sanitize_html(text: str) -> str:
     """
-    Nettoie le HTML pour éviter XSS
+    Nettoie le HTML pour Ã©viter XSS
 
     Args:
-        text: Texte à nettoyer
+        text: Texte Ã  nettoyer
 
     Returns:
-        Texte nettoyé
+        Texte nettoyÃ©
     """
     allowed_tags = ["p", "br", "strong", "em", "u", "a"]
     allowed_attributes = {"a": ["href", "title"]}
@@ -100,9 +102,9 @@ def sanitize_filename(filename: str) -> str:
         filename: Nom du fichier
 
     Returns:
-        Nom nettoyé
+        Nom nettoyÃ©
     """
-    # Garder seulement alphanumériques, tirets, underscores et point
+    # Garder seulement alphanumÃ©riques, tirets, underscores et point
     filename = re.sub(r"[^a-zA-Z0-9._-]", "_", filename)
 
     # Limiter la longueur
@@ -117,10 +119,10 @@ def sanitize_filename(filename: str) -> str:
 
 def validate_montant(montant: float) -> tuple[bool, str]:
     """
-    Valide un montant de crédit
+    Valide un montant de crÃ©dit
 
     Args:
-        montant: Montant à valider
+        montant: Montant Ã  valider
 
     Returns:
         (is_valid, error_message)
@@ -136,19 +138,19 @@ def validate_montant(montant: float) -> tuple[bool, str]:
 
 def validate_duree(duree_mois: int) -> tuple[bool, str]:
     """
-    Valide une durée de crédit
+    Valide une durÃ©e de crÃ©dit
 
     Args:
-        duree_mois: Durée en mois
+        duree_mois: DurÃ©e en mois
 
     Returns:
         (is_valid, error_message)
     """
     if duree_mois < 1:
-        return False, "La durée minimum est de 1 mois"
+        return False, "La durÃ©e minimum est de 1 mois"
 
     if duree_mois > 360:  # 30 ans
-        return False, "La durée maximum est de 360 mois (30 ans)"
+        return False, "La durÃ©e maximum est de 360 mois (30 ans)"
 
     return True, ""
 
@@ -158,7 +160,7 @@ def validate_duree(duree_mois: int) -> tuple[bool, str]:
 
 def require_roles(allowed_roles: list):
     """
-    Décorateur pour vérifier les rôles
+    DÃ©corateur pour vÃ©rifier les rÃ´les
 
     Usage:
         @require_roles(['GESTIONNAIRE', 'ANALYSTE'])
@@ -181,7 +183,7 @@ def require_roles(allowed_roles: list):
                     get_client_ip(request),
                     {"required_roles": allowed_roles, "user_role": user_role},
                 )
-                return HttpResponseForbidden("Accès non autorisé")
+                return HttpResponseForbidden("AccÃ¨s non autorisÃ©")
 
             return func(request, *args, **kwargs)
 
@@ -195,7 +197,7 @@ def require_roles(allowed_roles: list):
 
 class AuditMixin:
     """
-    Mixin pour ajouter l'audit trail aux modèles
+    Mixin pour ajouter l'audit trail aux modÃ¨les
 
     Usage:
         class MyModel(AuditMixin, models.Model):
@@ -206,7 +208,7 @@ class AuditMixin:
         user = kwargs.pop("user", None)
 
         if user:
-            if not self.pk:  # Création
+            if not self.pk:  # CrÃ©ation
                 self.created_by = user
             self.updated_by = user
 
@@ -218,7 +220,7 @@ class AuditMixin:
 
 def role_required(*roles):
     """
-    Décorateur pour restreindre l'accès selon le rôle utilisateur
+    DÃ©corateur pour restreindre l'accÃ¨s selon le rÃ´le utilisateur
 
     Usage:
         @role_required('SUPER_ADMIN', 'RESPONSABLE_GGR')
@@ -232,19 +234,19 @@ def role_required(*roles):
             if not request.user.is_authenticated:
                 return HttpResponseForbidden("Authentification requise")
 
-            # Vérifier si l'utilisateur a un profil
+            # VÃ©rifier si l'utilisateur a un profil
             if not hasattr(request.user, "profile"):
                 return HttpResponseForbidden("Profil utilisateur manquant")
 
-            # Vérifier si le rôle est autorisé
+            # VÃ©rifier si le rÃ´le est autorisÃ©
             user_role = request.user.profile.role
             if user_role not in roles:
                 log_security_event(
                     "access_denied",
                     user=request.user,
-                    details=f"Rôle {user_role} non autorisé pour {view_func.__name__}",
+                    details=f"RÃ´le {user_role} non autorisÃ© pour {view_func.__name__}",
                 )
-                return HttpResponseForbidden(f"Accès refusé. Rôle requis: {', '.join(roles)}")
+                return HttpResponseForbidden(f"AccÃ¨s refusÃ©. RÃ´le requis: {', '.join(roles)}")
 
             return view_func(request, *args, **kwargs)
 

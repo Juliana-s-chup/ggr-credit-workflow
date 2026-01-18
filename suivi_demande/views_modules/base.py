@@ -22,7 +22,7 @@ def signup(request):
             user = form.save()
             messages.success(
                 request,
-                "Votre compte a été créé. Il sera activé après approbation par un administrateur.",
+                "Votre compte a Ã©tÃ© crÃ©Ã©. Il sera activÃ© aprÃ¨s approbation par un administrateur.",
             )
             return redirect("login")
     else:

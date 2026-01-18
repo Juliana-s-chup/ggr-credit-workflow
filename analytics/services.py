@@ -27,9 +27,9 @@ class AnalyticsService:
     @staticmethod
     def calculer_statistiques_periode(periode="MOIS"):
         """
-        Calcule les statistiques pour une période donnée
+        Calcule les statistiques pour une pÃ©riode donnÃ©e
         """
-        # Déterminer la date de début selon la période
+        # DÃ©terminer la date de dÃ©but selon la pÃ©riode
         now = timezone.now()
         if periode == "JOUR":
             date_debut = now - timedelta(days=1)
@@ -40,7 +40,7 @@ class AnalyticsService:
         else:  # ANNEE
             date_debut = now - timedelta(days=365)
 
-        # Récupérer les dossiers de la période
+        # RÃ©cupÃ©rer les dossiers de la pÃ©riode
         dossiers = DossierCredit.objects.filter(created_at__gte=date_debut)
 
         # Compteurs
@@ -69,14 +69,14 @@ class AnalyticsService:
         )
         montant_moyen = dossiers.aggregate(Avg("montant_demande"))["montant_demande__avg"] or 0
 
-        # Délais (calcul simplifié)
+        # DÃ©lais (calcul simplifiÃ©)
         delai_moyen = AnalyticsService._calculer_delai_moyen(dossiers)
 
         # Taux
         taux_approbation = (approuves / total * 100) if total > 0 else 0
         taux_rejet = (rejetes / total * 100) if total > 0 else 0
 
-        # Créer l'enregistrement statistique
+        # CrÃ©er l'enregistrement statistique
         stats = StatistiquesDossier.objects.create(
             periode=periode,
             total_dossiers=total,
@@ -97,12 +97,12 @@ class AnalyticsService:
     @staticmethod
     def _calculer_delai_moyen(dossiers):
         """
-        Calcule le délai moyen de traitement en jours
+        Calcule le dÃ©lai moyen de traitement en jours
         """
         delais = []
         for dossier in dossiers:
             if dossier.statut_agent in ["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REJETE"]:
-                # Calculer le délai entre création et décision finale
+                # Calculer le dÃ©lai entre crÃ©ation et dÃ©cision finale
                 derniere_action = (
                     JournalAction.objects.filter(dossier=dossier).order_by("-created_at").first()
                 )
@@ -158,9 +158,9 @@ class AnalyticsService:
     @staticmethod
     def obtenir_donnees_graphiques():
         """
-        Retourne les données pour les graphiques Charts.js
+        Retourne les donnÃ©es pour les graphiques Charts.js
         """
-        # Évolution mensuelle des dossiers (12 derniers mois)
+        # Ã‰volution mensuelle des dossiers (12 derniers mois)
         mois_labels = []
         mois_data = []
 
@@ -172,12 +172,12 @@ class AnalyticsService:
             ).count()
             mois_data.append(count)
 
-        # Répartition par statut
+        # RÃ©partition par statut
         statuts = DossierCredit.objects.values("statut_agent").annotate(count=Count("id"))
         statuts_labels = [s["statut_agent"] for s in statuts]
         statuts_data = [s["count"] for s in statuts]
 
-        # Répartition par type de crédit
+        # RÃ©partition par type de crÃ©dit
         types = DossierCredit.objects.values("type_credit").annotate(count=Count("id"))
         types_labels = [t["type_credit"] for t in types]
         types_data = [t["count"] for t in types]
@@ -200,7 +200,7 @@ class AnalyticsService:
 
 class MLPredictionService:
     """
-    Service de prédiction de risque crédit avec Machine Learning
+    Service de prÃ©diction de risque crÃ©dit avec Machine Learning
     """
 
     MODEL_PATH = "analytics/ml_models/credit_risk_model.pkl"
@@ -209,25 +209,25 @@ class MLPredictionService:
     @staticmethod
     def entrainer_modele():
         """
-        Entraîne le modèle de prédiction de risque
-        Note: Version simplifiée pour démonstration
+        EntraÃ®ne le modÃ¨le de prÃ©diction de risque
+        Note: Version simplifiÃ©e pour dÃ©monstration
         """
-        # Récupérer les dossiers terminés (approuvés ou rejetés)
+        # RÃ©cupÃ©rer les dossiers terminÃ©s (approuvÃ©s ou rejetÃ©s)
         dossiers = DossierCredit.objects.filter(
             statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REJETE"]
         )
 
         if dossiers.count() < 10:
-            return None  # Pas assez de données
+            return None  # Pas assez de donnÃ©es
 
-        # Préparer les features
+        # PrÃ©parer les features
         X = []
         y = []
 
         for dossier in dossiers:
             features = MLPredictionService._extraire_features(dossier)
             X.append(features)
-            # Label: 1 si rejeté, 0 si approuvé
+            # Label: 1 si rejetÃ©, 0 si approuvÃ©
             y.append(1 if dossier.statut_agent == "REJETE" else 0)
 
         X = np.array(X)
@@ -237,11 +237,11 @@ class MLPredictionService:
         scaler = StandardScaler()
         X_scaled = scaler.fit_transform(X)
 
-        # Entraînement
+        # EntraÃ®nement
         model = RandomForestClassifier(n_estimators=100, random_state=42)
         model.fit(X_scaled, y)
 
-        # Sauvegarder le modèle
+        # Sauvegarder le modÃ¨le
         os.makedirs("analytics/ml_models", exist_ok=True)
         joblib.dump(model, MLPredictionService.MODEL_PATH)
         joblib.dump(scaler, MLPredictionService.SCALER_PATH)
@@ -265,16 +265,16 @@ class MLPredictionService:
     @staticmethod
     def predire_risque(dossier):
         """
-        Prédit le risque pour un dossier donné
+        PrÃ©dit le risque pour un dossier donnÃ©
         """
-        # Vérifier si le modèle existe
+        # VÃ©rifier si le modÃ¨le existe
         if not os.path.exists(MLPredictionService.MODEL_PATH):
             MLPredictionService.entrainer_modele()
 
         if not os.path.exists(MLPredictionService.MODEL_PATH):
-            return None  # Pas assez de données pour entraîner
+            return None  # Pas assez de donnÃ©es pour entraÃ®ner
 
-        # Charger le modèle
+        # Charger le modÃ¨le
         model = joblib.load(MLPredictionService.MODEL_PATH)
         scaler = joblib.load(MLPredictionService.SCALER_PATH)
 
@@ -282,22 +282,22 @@ class MLPredictionService:
         features = np.array([MLPredictionService._extraire_features(dossier)])
         features_scaled = scaler.transform(features)
 
-        # Prédiction
+        # PrÃ©diction
         probabilite_defaut = model.predict_proba(features_scaled)[0][1]
         score_risque = probabilite_defaut * 100
 
         # Classification
         if score_risque < 30:
             classe_risque = "FAIBLE"
-            recommandation = "Dossier à faible risque. Approbation recommandée."
+            recommandation = "Dossier Ã  faible risque. Approbation recommandÃ©e."
         elif score_risque < 60:
             classe_risque = "MOYEN"
-            recommandation = "Dossier à risque modéré. Analyse approfondie recommandée."
+            recommandation = "Dossier Ã  risque modÃ©rÃ©. Analyse approfondie recommandÃ©e."
         else:
             classe_risque = "ELEVE"
-            recommandation = "Dossier à risque élevé. Prudence recommandée."
+            recommandation = "Dossier Ã  risque Ã©levÃ©. Prudence recommandÃ©e."
 
-        # Créer ou mettre à jour la prédiction
+        # CrÃ©er ou mettre Ã  jour la prÃ©diction
         prediction, created = PredictionRisque.objects.update_or_create(
             dossier=dossier,
             defaults={
@@ -305,7 +305,7 @@ class MLPredictionService:
                 "probabilite_defaut": probabilite_defaut,
                 "classe_risque": classe_risque,
                 "recommandation": recommandation,
-                "confiance": 0.75,  # Simplifié
+                "confiance": 0.75,  # SimplifiÃ©
                 "facteurs_risque": {
                     "montant": float(dossier.montant_demande),
                     "duree": dossier.duree_mois,
@@ -319,7 +319,7 @@ class MLPredictionService:
 
 class ExportService:
     """
-    Service d'export de données (Excel, PDF)
+    Service d'export de donnÃ©es (Excel, PDF)
     """
 
     @staticmethod
@@ -327,7 +327,7 @@ class ExportService:
         """
         Exporte les statistiques en Excel avec pandas
         """
-        # Récupérer les dossiers
+        # RÃ©cupÃ©rer les dossiers
         dossiers = DossierCredit.objects.all().values(
             "reference",
             "client__username",
@@ -338,13 +338,21 @@ class ExportService:
             "updated_at",
         )
 
-        # Créer DataFrame
+        # CrÃ©er DataFrame
         df = pd.DataFrame(list(dossiers))
 
         # Renommer les colonnes
-        df.columns = ["Référence", "Client", "Type", "Montant", "Statut", "Créé le", "Modifié le"]
+        df.columns = [
+            "RÃ©fÃ©rence",
+            "Client",
+            "Type",
+            "Montant",
+            "Statut",
+            "CrÃ©Ã© le",
+            "ModifiÃ© le",
+        ]
 
-        # Statistiques agrégées
+        # Statistiques agrÃ©gÃ©es
         stats = {
             "Total dossiers": [len(df)],
             "Montant total": [df["Montant"].sum()],
@@ -357,7 +365,7 @@ class ExportService:
         }
         df_stats = pd.DataFrame(stats)
 
-        # Créer le fichier Excel
+        # CrÃ©er le fichier Excel
         filename = f'statistiques_credit_{timezone.now().strftime("%Y%m%d")}.xlsx'
         filepath = f"media/exports/{filename}"
 

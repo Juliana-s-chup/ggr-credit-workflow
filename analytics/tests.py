@@ -20,7 +20,7 @@ class StatistiquesServiceTest(TestCase):
     """
 
     def setUp(self):
-        # Créer un utilisateur client
+        # CrÃ©er un utilisateur client
         self.user = User.objects.create_user(
             username="client_test", password="test123", email="client@test.com"
         )
@@ -28,7 +28,7 @@ class StatistiquesServiceTest(TestCase):
             user=self.user, role="CLIENT", full_name="Client Test"
         )
 
-        # Créer des dossiers de test
+        # CrÃ©er des dossiers de test
         for i in range(5):
             DossierCredit.objects.create(
                 reference=f"TEST-2025-{i:03d}",
@@ -53,7 +53,7 @@ class StatistiquesServiceTest(TestCase):
 
     def test_obtenir_kpis_dashboard(self):
         """
-        Test de récupération des KPIs
+        Test de rÃ©cupÃ©ration des KPIs
         """
         kpis = AnalyticsService.obtenir_kpis_dashboard()
 
@@ -63,7 +63,7 @@ class StatistiquesServiceTest(TestCase):
 
     def test_obtenir_donnees_graphiques(self):
         """
-        Test de récupération des données pour graphiques
+        Test de rÃ©cupÃ©ration des donnÃ©es pour graphiques
         """
         graphiques = AnalyticsService.obtenir_donnees_graphiques()
 
@@ -71,22 +71,22 @@ class StatistiquesServiceTest(TestCase):
         self.assertIn("repartition_statuts", graphiques)
         self.assertIn("repartition_types", graphiques)
 
-        # Vérifier la structure
+        # VÃ©rifier la structure
         self.assertIn("labels", graphiques["evolution_mensuelle"])
         self.assertIn("data", graphiques["evolution_mensuelle"])
 
 
 class MLPredictionServiceTest(TestCase):
     """
-    Tests pour le service de prédiction ML
+    Tests pour le service de prÃ©diction ML
     """
 
     def setUp(self):
-        # Créer un utilisateur
+        # CrÃ©er un utilisateur
         self.user = User.objects.create_user(username="client_ml", password="test123")
         UserProfile.objects.create(user=self.user, role="CLIENT", full_name="Client ML")
 
-        # Créer des dossiers pour entraînement (minimum 10)
+        # CrÃ©er des dossiers pour entraÃ®nement (minimum 10)
         for i in range(15):
             DossierCredit.objects.create(
                 reference=f"ML-TEST-{i:03d}",
@@ -99,21 +99,21 @@ class MLPredictionServiceTest(TestCase):
 
     def test_entrainement_modele(self):
         """
-        Test de l'entraînement du modèle ML
+        Test de l'entraÃ®nement du modÃ¨le ML
         """
         model = MLPredictionService.entrainer_modele()
 
-        # Vérifier que le modèle est créé
+        # VÃ©rifier que le modÃ¨le est crÃ©Ã©
         self.assertIsNotNone(model)
 
     def test_prediction_risque(self):
         """
-        Test de prédiction de risque sur un dossier
+        Test de prÃ©diction de risque sur un dossier
         """
-        # Entraîner le modèle d'abord
+        # EntraÃ®ner le modÃ¨le d'abord
         MLPredictionService.entrainer_modele()
 
-        # Créer un nouveau dossier pour prédiction
+        # CrÃ©er un nouveau dossier pour prÃ©diction
         dossier = DossierCredit.objects.create(
             reference="PRED-TEST-001",
             client=self.user,
@@ -123,10 +123,10 @@ class MLPredictionServiceTest(TestCase):
             statut_agent="NOUVEAU",
         )
 
-        # Prédire le risque
+        # PrÃ©dire le risque
         prediction = MLPredictionService.predire_risque(dossier)
 
-        # Vérifications
+        # VÃ©rifications
         self.assertIsNotNone(prediction)
         self.assertIn(prediction.classe_risque, ["FAIBLE", "MOYEN", "ELEVE"])
         self.assertGreaterEqual(prediction.score_risque, 0)
@@ -141,7 +141,7 @@ class AnalyticsDashboardViewTest(TestCase):
     """
 
     def setUp(self):
-        # Créer un utilisateur admin
+        # CrÃ©er un utilisateur admin
         self.user = User.objects.create_user(
             username="admin_test", password="test123", is_staff=True
         )
@@ -154,11 +154,11 @@ class AnalyticsDashboardViewTest(TestCase):
 
     def test_dashboard_analytics_access(self):
         """
-        Test d'accès au dashboard analytics
+        Test d'accÃ¨s au dashboard analytics
         """
         response = self.client.get("/analytics/dashboard/")
 
-        # Vérifier que la page est accessible
+        # VÃ©rifier que la page est accessible
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Analytics")
 
@@ -171,7 +171,7 @@ class AnalyticsDashboardViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response["Content-Type"], "application/json")
 
-        # Vérifier la structure JSON
+        # VÃ©rifier la structure JSON
         data = response.json()
         self.assertIn("total_dossiers", data)
         self.assertIn("taux_approbation", data)
@@ -179,12 +179,12 @@ class AnalyticsDashboardViewTest(TestCase):
 
 class StatistiquesDossierModelTest(TestCase):
     """
-    Tests pour le modèle StatistiquesDossier
+    Tests pour le modÃ¨le StatistiquesDossier
     """
 
     def test_creation_statistiques(self):
         """
-        Test de création d'une entrée statistique
+        Test de crÃ©ation d'une entrÃ©e statistique
         """
         stats = StatistiquesDossier.objects.create(
             periode="MOIS",
@@ -198,13 +198,13 @@ class StatistiquesDossierModelTest(TestCase):
         self.assertEqual(stats.total_dossiers, 100)
         self.assertEqual(stats.taux_approbation, 75.0)
 
-        # Vérifier le __str__
+        # VÃ©rifier le __str__
         self.assertIn("MOIS", str(stats))
 
 
 class PredictionRisqueModelTest(TestCase):
     """
-    Tests pour le modèle PredictionRisque
+    Tests pour le modÃ¨le PredictionRisque
     """
 
     def setUp(self):
@@ -221,14 +221,14 @@ class PredictionRisqueModelTest(TestCase):
 
     def test_creation_prediction(self):
         """
-        Test de création d'une prédiction
+        Test de crÃ©ation d'une prÃ©diction
         """
         prediction = PredictionRisque.objects.create(
             dossier=self.dossier,
             score_risque=45.5,
             probabilite_defaut=0.455,
             classe_risque="MOYEN",
-            recommandation="Analyse approfondie recommandée.",
+            recommandation="Analyse approfondie recommandÃ©e.",
             confiance=0.85,
         )
 

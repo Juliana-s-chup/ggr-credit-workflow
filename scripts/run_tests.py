@@ -9,25 +9,25 @@ import subprocess
 
 
 def run_command(cmd, description):
-    """Exécute une commande et affiche le résultat."""
+    """ExÃ©cute une commande et affiche le rÃ©sultat."""
     print(f"\n{'='*70}")
-    print(f"🧪 {description}")
+    print(f"ðŸ§ª {description}")
     print(f"{'='*70}\n")
 
     result = subprocess.run(cmd, shell=True)
 
     if result.returncode != 0:
-        print(f"\n❌ ÉCHEC: {description}")
+        print(f"\nâŒ Ã‰CHEC: {description}")
         return False
     else:
-        print(f"\n✅ SUCCÈS: {description}")
+        print(f"\nâœ… SUCCÃˆS: {description}")
         return True
 
 
 def main():
     """Fonction principale."""
     print("\n" + "=" * 70)
-    print("🚀 LANCEMENT DE LA SUITE DE TESTS COMPLÈTE")
+    print("ðŸš€ LANCEMENT DE LA SUITE DE TESTS COMPLÃˆTE")
     print("=" * 70)
 
     results = []
@@ -43,30 +43,32 @@ def main():
         )
     )
 
-    # 3. Vérification de la couverture minimale
-    results.append(run_command("coverage report --fail-under=75", "Vérification couverture >= 75%"))
+    # 3. VÃ©rification de la couverture minimale
+    results.append(
+        run_command("coverage report --fail-under=75", "VÃ©rification couverture >= 75%")
+    )
 
-    # 4. Génération du rapport HTML
-    results.append(run_command("coverage html", "Génération rapport HTML"))
+    # 4. GÃ©nÃ©ration du rapport HTML
+    results.append(run_command("coverage html", "GÃ©nÃ©ration rapport HTML"))
 
-    # Résumé final
+    # RÃ©sumÃ© final
     print("\n" + "=" * 70)
-    print("📊 RÉSUMÉ DES TESTS")
+    print("ðŸ“Š RÃ‰SUMÃ‰ DES TESTS")
     print("=" * 70)
 
     total = len(results)
     passed = sum(results)
     failed = total - passed
 
-    print(f"\n✅ Tests réussis: {passed}/{total}")
-    print(f"❌ Tests échoués: {failed}/{total}")
+    print(f"\nâœ… Tests rÃ©ussis: {passed}/{total}")
+    print(f"âŒ Tests Ã©chouÃ©s: {failed}/{total}")
 
     if failed == 0:
-        print("\n🎉 TOUS LES TESTS SONT PASSÉS !")
-        print(f"\n📄 Rapport de couverture: htmlcov/index.html")
+        print("\nðŸŽ‰ TOUS LES TESTS SONT PASSÃ‰S !")
+        print(f"\nðŸ“„ Rapport de couverture: htmlcov/index.html")
         return 0
     else:
-        print("\n⚠️  CERTAINS TESTS ONT ÉCHOUÉ")
+        print("\nâš ï¸  CERTAINS TESTS ONT Ã‰CHOUÃ‰")
         return 1
 
 

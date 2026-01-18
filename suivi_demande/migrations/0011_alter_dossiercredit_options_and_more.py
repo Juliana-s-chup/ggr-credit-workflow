@@ -15,7 +15,7 @@ class Migration(migrations.Migration):
     operations = [
         migrations.AlterModelOptions(
             name='dossiercredit',
-            options={'ordering': ['-date_soumission'], 'verbose_name': 'Dossier de crédit', 'verbose_name_plural': 'Dossiers de crédit'},
+            options={'ordering': ['-date_soumission'], 'verbose_name': 'Dossier de crÃ©dit', 'verbose_name_plural': 'Dossiers de crÃ©dit'},
         ),
         migrations.AlterField(
             model_name='dossiercredit',
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dossiercredit',
             name='statut_agent',
-            field=models.CharField(choices=[('NOUVEAU', 'Nouveau dossier crédit'), ('TRANSMIS_RESP_GEST', 'Transmis au responsable Gestionnaire'), ('TRANSMIS_ANALYSTE', 'Transmis à l’analyste crédit'), ('EN_COURS_ANALYSE', 'En cours d’analyse risqué'), ('EN_COURS_VALIDATION_GGR', 'En cours validation GGR'), ('EN_ATTENTE_DECISION_DG', 'En attente décision DG'), ('APPROUVE_ATTENTE_FONDS', 'Approuvé, en attente de libération de fonds'), ('FONDS_LIBERE', 'Fonds libéré'), ('REFUSE', 'Refusé / Non approuvé')], db_index=True, default='NOUVEAU', max_length=40),
+            field=models.CharField(choices=[('NOUVEAU', 'Nouveau dossier crÃ©dit'), ('TRANSMIS_RESP_GEST', 'Transmis au responsable Gestionnaire'), ('TRANSMIS_ANALYSTE', 'Transmis Ã  lâ€™analyste crÃ©dit'), ('EN_COURS_ANALYSE', 'En cours dâ€™analyse risquÃ©'), ('EN_COURS_VALIDATION_GGR', 'En cours validation GGR'), ('EN_ATTENTE_DECISION_DG', 'En attente dÃ©cision DG'), ('APPROUVE_ATTENTE_FONDS', 'ApprouvÃ©, en attente de libÃ©ration de fonds'), ('FONDS_LIBERE', 'Fonds libÃ©rÃ©'), ('REFUSE', 'RefusÃ© / Non approuvÃ©')], db_index=True, default='NOUVEAU', max_length=40),
         ),
         migrations.AddIndex(
             model_name='dossiercredit',
