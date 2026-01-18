@@ -519,21 +519,6 @@ def transition_dossier(request, pk, action: str):
     # Recuperer le commentaire de retour s'il existe
     commentaire_retour = request.POST.get("commentaire_retour", "").strip()
 
-    # Debug general
-    print(f"?? DEBUG transition_dossier:")
-    print(f"   - Utilisateur: {request.user.username}")
-    print(f"   - Role: {role}")
-    print(f"   - Action: {action}")
-    print(f"   - Dossier: {dossier.reference}")
-    print(f"   - Statut agent: '{dossier.statut_agent}'")
-    print(f"   - Commentaire: '{commentaire_retour}'")
-
-    # Message visible dans l'interface
-    messages.info(
-        request,
-        f"?? DEBUG: Action '{action}' recue pour dossier {dossier.reference} (statut: {dossier.statut_agent})",
-    )
-
     allowed = False
     de_statut = dossier.statut_agent
     vers_statut = None
@@ -552,15 +537,6 @@ def transition_dossier(request, pk, action: str):
                 allowed = True
 
         elif role == UserRoles.GESTIONNAIRE and action == "retour_client":
-            # Debug: afficher les valeurs pour comprendre le probleme
-            print(f"?? DEBUG retour_client:")
-            print(
-                f"   - dossier.statut_agent = '{dossier.statut_agent}' (type: {type(dossier.statut_agent)})"
-            )
-            print(f"   - DossierStatutAgent.NOUVEAU = '{DossierStatutAgent.NOUVEAU}'")
-            print(
-                f"   - DossierStatutAgent.TRANSMIS_RESP_GEST = '{DossierStatutAgent.TRANSMIS_RESP_GEST}'"
-            )
 
             if dossier.statut_agent in [
                 DossierStatutAgent.NOUVEAU,
@@ -814,11 +790,6 @@ def transition_dossier(request, pk, action: str):
                     "Retourne par: {expediteur}"
                 ),
             )
-
-        # Log pour debug
-        print(
-            f"? Notification creee: ID={notification.id}, Client={dossier.client.username}, Action={action}"
-        )
 
         # Ajouter un message de succes pour le gestionnaire
         if action == "retour_client":

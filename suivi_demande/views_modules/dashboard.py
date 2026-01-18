@@ -54,31 +54,22 @@ def dashboard(request):
         )
         role = profile.role
 
-    # Debug info
-    debug_info = {
-        "user": request.user.username,
-        "profile_exists": profile is not None,
-        "role": role,
-        "template_to_use": None,
-    }
-
     if role == UserRoles.CLIENT:
-        return _dashboard_client(request, debug_info)
+        return _dashboard_client(request)
     elif role == UserRoles.GESTIONNAIRE:
-        return _dashboard_gestionnaire(request, debug_info)
+        return _dashboard_gestionnaire(request)
     elif role == UserRoles.ANALYSTE:
-        return _dashboard_analyste(request, debug_info)
+        return _dashboard_analyste(request)
     elif role == UserRoles.RESPONSABLE_GGR:
-        return _dashboard_responsable_ggr(request, debug_info)
+        return _dashboard_responsable_ggr(request)
     elif role == UserRoles.BOE:
-        return _dashboard_boe(request, debug_info)
+        return _dashboard_boe(request)
     else:
-        return _dashboard_super_admin(request, debug_info)
+        return _dashboard_super_admin(request)
 
 
-def _dashboard_client(request, debug_info):
+def _dashboard_client(request):
     """Dashboard pour les clients."""
-    debug_info["template_to_use"] = "dashboard_client.html"
 
     # Dossiers en cours (non termines)
     dossiers_en_cours = (
@@ -134,12 +125,11 @@ def _dashboard_client(request, debug_info):
         "dossiers_approuves": dossiers_approuves,
         "montant_total": montant_total,
         "historique_dossiers": dossiers_traites,
-        "debug_info": debug_info,
     }
     return render(request, "suivi_demande/dashboard_client.html", context)
 
 
-def _dashboard_gestionnaire(request, debug_info):
+def _dashboard_gestionnaire(request):
     """Dashboard pour les gestionnaires."""
     # Dossiers en attente
     dossiers_pending = (
@@ -279,10 +269,6 @@ def _dashboard_gestionnaire(request, debug_info):
         .order_by("-date_soumission")[:20]
     )
 
-    debug_info["template_to_use"] = "dashboard_gestionnaire.html"
-    debug_info["total_dossiers_base"] = total_dossiers
-    debug_info["dossiers_affiches"] = dossiers_en_cours.count()
-
     # Messages d'information
     if total_dossiers == 0:
         messages.warning(request, "ðŸ” Aucun dossier n'existe en base de donnees.")
@@ -309,12 +295,11 @@ def _dashboard_gestionnaire(request, debug_info):
         "portefeuille_total": portefeuille_total,
         "mes_clients": mes_clients,
         "mes_dossiers_crees": mes_dossiers_crees,
-        "debug_info": debug_info,
     }
     return render(request, "suivi_demande/dashboard_gestionnaire.html", ctx)
 
 
-def _dashboard_analyste(request, debug_info):
+def _dashboard_analyste(request):
     """Dashboard pour les analystes."""
     dossiers = (
         DossierCredit.objects.filter(
@@ -367,7 +352,7 @@ def _dashboard_analyste(request, debug_info):
     return render(request, "suivi_demande/dashboard_analyste.html", context)
 
 
-def _dashboard_responsable_ggr(request, debug_info):
+def _dashboard_responsable_ggr(request):
     """Dashboard pour le responsable GGR."""
     dossiers = (
         DossierCredit.objects.filter(
@@ -406,7 +391,7 @@ def _dashboard_responsable_ggr(request, debug_info):
     )
 
 
-def _dashboard_boe(request, debug_info):
+def _dashboard_boe(request):
     """Dashboard pour le BOE (Back Office Engagement)."""
     dossiers = (
         DossierCredit.objects.filter(
@@ -446,7 +431,7 @@ def _dashboard_boe(request, debug_info):
     return render(request, "suivi_demande/dashboard_boe.html", context)
 
 
-def _dashboard_super_admin(request, debug_info):
+def _dashboard_super_admin(request):
     """Dashboard pour le super administrateur."""
     from django.contrib.auth import get_user_model
     from django.contrib.admin.models import LogEntry
