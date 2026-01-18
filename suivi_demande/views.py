@@ -1,4 +1,4 @@
-﻿"""
+"""
 Views pour l'application suivi_demande.
 GÃ¨re les demandes de crÃ©dit, le workflow et les dashboards.
 """
@@ -82,9 +82,7 @@ def test_dossiers_list(request):
 
     # Statistiques par statut
     statuts_stats = (
-        DossierCredit.objects.values("statut_agent")
-        .annotate(count=Count("id"))
-        .order_by("-count")
+        DossierCredit.objects.values("statut_agent").annotate(count=Count("id")).order_by("-count")
     )
 
     context = {
@@ -140,9 +138,7 @@ def signup(request):
                 # Affectation du rÃ´le selon le portail d'origine
                 if portal == "pro":
                     selected_role = form.cleaned_data.get("role")
-                    allowed_roles = {
-                        r for r, _ in UserRoles.choices if r != UserRoles.CLIENT
-                    }
+                    allowed_roles = {r for r, _ in UserRoles.choices if r != UserRoles.CLIENT}
                     if selected_role in allowed_roles:
                         profile.role = selected_role
                     else:
@@ -217,14 +213,12 @@ def dashboard(request):
         dossiers_en_cours = [
             d
             for d in all_dossiers
-            if d.statut_agent
-            not in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            if d.statut_agent not in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ]
         dossiers_traites = [
             d
             for d in all_dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ][:20]
 
         # âœ… OPTIMISÃ‰: Statistiques via Service Layer (1 query au lieu de 3)
@@ -265,22 +259,19 @@ def dashboard(request):
         dossiers_en_cours = [
             d
             for d in all_dossiers
-            if d.statut_agent
-            not in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            if d.statut_agent not in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ]
         dossiers_traites = [
             d
             for d in all_dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ][:20]
 
         # Dossiers en attente (nouveaux + retournÃ©s)
         dossiers_pending = [
             d
             for d in dossiers_en_cours
-            if d.statut_agent
-            in [DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]
+            if d.statut_agent in [DossierStatutAgent.NOUVEAU, DossierStatutAgent.TRANSMIS_RESP_GEST]
         ]
 
         # Dossiers rÃ©cents (10 premiers)
@@ -301,9 +292,7 @@ def dashboard(request):
             ]
         )
         retournes_total = sum(
-            1
-            for d in all_dossiers
-            if d.statut_agent == DossierStatutAgent.TRANSMIS_RESP_GEST
+            1 for d in all_dossiers if d.statut_agent == DossierStatutAgent.TRANSMIS_RESP_GEST
         )
 
         kpi = {
@@ -320,9 +309,9 @@ def dashboard(request):
         }
 
         # Historique actions (optimisÃ©)
-        historique_actions = JournalAction.objects.select_related(
-            "dossier", "acteur"
-        ).order_by("-timestamp")[:20]
+        historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+            "-timestamp"
+        )[:20]
 
         # Taux de validation
         total_decides = stats["approuves"] + stats["refuses"]
@@ -361,9 +350,7 @@ def dashboard(request):
 
         dossiers = list(page.object_list)
         dossiers_en_attente = [
-            d
-            for d in dossiers
-            if d.statut_agent == DossierStatutAgent.TRANSMIS_ANALYSTE
+            d for d in dossiers if d.statut_agent == DossierStatutAgent.TRANSMIS_ANALYSTE
         ]
         dossiers_prioritaires = dossiers[:5]
 
@@ -374,14 +361,13 @@ def dashboard(request):
         dossiers_traites = [
             d
             for d in dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ][:20]
 
         # Historique (optimisÃ©)
-        historique_actions = JournalAction.objects.select_related(
-            "dossier", "acteur"
-        ).order_by("-timestamp")[:20]
+        historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+            "-timestamp"
+        )[:20]
 
         context = {
             "dossiers": dossiers,
@@ -406,14 +392,13 @@ def dashboard(request):
         dossiers_traites = [
             d
             for d in dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ][:20]
 
         # Historique (optimisÃ©)
-        historique_actions = JournalAction.objects.select_related(
-            "dossier", "acteur"
-        ).order_by("-timestamp")[:20]
+        historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+            "-timestamp"
+        )[:20]
 
         return render(
             request,
@@ -441,14 +426,13 @@ def dashboard(request):
         dossiers_traites = [
             d
             for d in dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+            if d.statut_agent in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ][:20]
 
         # Historique (optimisÃ©)
-        historique_actions = JournalAction.objects.select_related(
-            "dossier", "acteur"
-        ).order_by("-timestamp")[:20]
+        historique_actions = JournalAction.objects.select_related("dossier", "acteur").order_by(
+            "-timestamp"
+        )[:20]
 
         context = {
             "dossiers": dossiers,
@@ -465,9 +449,7 @@ def dashboard(request):
         from django.contrib.admin.models import LogEntry
 
         # Tous les utilisateurs
-        all_users = (
-            User.objects.select_related("profile").all().order_by("-date_joined")
-        )
+        all_users = User.objects.select_related("profile").all().order_by("-date_joined")
 
         # Statistiques
         stats_total_users = all_users.count()
@@ -573,17 +555,13 @@ def transition_dossier(request, pk, action: str):
                     )
                     namespace = get_current_namespace(request)
                     return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
-                vers_statut = (
-                    DossierStatutAgent.NOUVEAU
-                )  # Reste nouveau mais avec commentaire
+                vers_statut = DossierStatutAgent.NOUVEAU  # Reste nouveau mais avec commentaire
                 nouveau_statut_client = DossierStatutClient.SE_RAPPROCHER_GEST
                 action_log = "RETOUR_CLIENT"
                 allowed = True
                 print(f"   ? Action retour_client autorisÃ©e")
             else:
-                print(
-                    f"   ? Statut '{dossier.statut_agent}' non autorisÃ© pour retour_client"
-                )
+                print(f"   ? Statut '{dossier.statut_agent}' non autorisÃ© pour retour_client")
 
         elif role == UserRoles.ANALYSTE and action == "transmettre_ggr":
             if dossier.statut_agent in [
@@ -667,9 +645,7 @@ def transition_dossier(request, pk, action: str):
             "ancien_statut_client": ancien_statut_client,
             "nouveau_statut_client": dossier.statut_client,
             "role": role,
-            "commentaire_retour": (
-                commentaire_retour if action == "retour_client" else None
-            ),
+            "commentaire_retour": (commentaire_retour if action == "retour_client" else None),
         },
     )
 
@@ -681,9 +657,7 @@ def transition_dossier(request, pk, action: str):
                 f"ðŸ”” Nouveau message â€¢ Dossier {dossier.reference}\n"
                 f"Votre dossier nÃ©cessite des complÃ©ments. Motif: {commentaire_retour}"
             )
-            titre_notification = (
-                f"ðŸ”” Dossier {dossier.reference} â€¢ ComplÃ©ments requis"
-            )
+            titre_notification = f"ðŸ”” Dossier {dossier.reference} â€¢ ComplÃ©ments requis"
         else:
             message_notification = (
                 f"ðŸ”” Mise Ã  jour â€¢ Dossier {dossier.reference}\n"
@@ -714,12 +688,10 @@ def transition_dossier(request, pk, action: str):
                     message=message_template.format(
                         user_name=user.get_full_name() or user.username,
                         dossier_ref=dossier.reference,
-                        client_name=dossier.client.get_full_name()
-                        or dossier.client.username,
+                        client_name=dossier.client.get_full_name() or dossier.client.username,
                         montant=dossier.montant,
                         produit=dossier.produit,
-                        expediteur=request.user.get_full_name()
-                        or request.user.username,
+                        expediteur=request.user.get_full_name() or request.user.username,
                     ),
                     canal="INTERNE",
                 )
@@ -736,8 +708,7 @@ def transition_dossier(request, pk, action: str):
                                 or dossier.client.username,
                                 montant=dossier.montant,
                                 produit=dossier.produit,
-                                expediteur=request.user.get_full_name()
-                                or request.user.username,
+                                expediteur=request.user.get_full_name() or request.user.username,
                             ),
                             from_email=settings.DEFAULT_FROM_EMAIL,
                             recipient_list=[user.email],
@@ -818,9 +789,7 @@ def transition_dossier(request, pk, action: str):
 
         # Ajouter un message de succÃ¨s pour le gestionnaire
         if action == "retour_client":
-            messages.info(
-                request, f"? Notification envoyÃ©e au client {dossier.client.username}"
-            )
+            messages.info(request, f"? Notification envoyÃ©e au client {dossier.client.username}")
         if dossier.client.email:
             if action == "retour_client":
                 subject = f"[CrÃ©dit du Congo] Dossier {dossier.reference} - ComplÃ©ments requis"
@@ -870,17 +839,13 @@ def transition_dossier(request, pk, action: str):
                 )
                 print(f"? Email envoyÃ© Ã  {dossier.client.email} pour action {action}")
                 if action == "retour_client":
-                    messages.info(
-                        request, f"?? Email envoyÃ© Ã  {dossier.client.email}"
-                    )
+                    messages.info(request, f"?? Email envoyÃ© Ã  {dossier.client.email}")
             except Exception as e:
                 print(f"? Erreur envoi email: {e}")
                 messages.warning(request, f"?? Erreur lors de l'envoi de l'email: {e}")
     except Exception as e:
         print(f"? Erreur notification: {e}")
-        messages.error(
-            request, f"? Erreur lors de la crÃ©ation de la notification: {e}"
-        )
+        messages.error(request, f"? Erreur lors de la crÃ©ation de la notification: {e}")
 
     # Message de succÃ¨s personnalisÃ© selon l'action
     if action == "retour_client":
@@ -914,8 +879,7 @@ def dossier_detail(request, pk):
             utilisateur_cible=request.user,
             lu=False,
         ).filter(
-            Q(titre__icontains=dossier.reference)
-            | Q(message__icontains=dossier.reference)
+            Q(titre__icontains=dossier.reference) | Q(message__icontains=dossier.reference)
         ).update(lu=True)
     except Exception:
         pass
@@ -946,9 +910,7 @@ def dossier_detail(request, pk):
             return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
         elif action == "upload_piece":
             if not can_upload:
-                messages.error(
-                    request, "Vous ne pouvez pas dÃ©poser de piÃ¨ce Ã  ce stade."
-                )
+                messages.error(request, "Vous ne pouvez pas dÃ©poser de piÃ¨ce Ã  ce stade.")
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
 
@@ -962,8 +924,7 @@ def dossier_detail(request, pk):
             file_size = getattr(f, "size", 0) or 0
             if file_size > getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024):
                 max_mb = round(
-                    getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024)
-                    / (1024 * 1024),
+                    getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024) / (1024 * 1024),
                     2,
                 )
                 messages.error(
@@ -975,9 +936,7 @@ def dossier_detail(request, pk):
             # Validation extension
             filename = getattr(f, "name", "")
             ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
-            allowed_exts = getattr(
-                settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"}
-            )
+            allowed_exts = getattr(settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"})
             if ext not in allowed_exts:
                 messages.error(
                     request,
@@ -1021,9 +980,7 @@ def dossier_detail(request, pk):
 @login_required
 def notifications_list(request):
 
-    qs = Notification.objects.filter(utilisateur_cible=request.user).order_by(
-        "-created_at"
-    )
+    qs = Notification.objects.filter(utilisateur_cible=request.user).order_by("-created_at")
     return render(request, "suivi_demande/notifications.html", {"notifications": qs})
 
 
@@ -1031,12 +988,8 @@ def notifications_list(request):
 def notifications_mark_all_read(request):
 
     if request.method == "POST":
-        Notification.objects.filter(utilisateur_cible=request.user, lu=False).update(
-            lu=True
-        )
-        messages.success(
-            request, "Toutes vos notifications ont ÃƒÂ©tÃƒÂ© marquÃƒÂ©es comme lues."
-        )
+        Notification.objects.filter(utilisateur_cible=request.user, lu=False).update(lu=True)
+        messages.success(request, "Toutes vos notifications ont ÃƒÂ©tÃƒÂ© marquÃƒÂ©es comme lues.")
     namespace = get_current_namespace(request)
     return redirect(f"{namespace}:notifications_list")
 
@@ -1074,9 +1027,7 @@ def demande_start(request):
     if user_profile:
         # VÃ©rifier si les informations essentielles sont prÃ©sentes
         required_fields = ["telephone", "adresse", "date_naissance"]
-        profile_complete = all(
-            getattr(user_profile, field, None) for field in required_fields
-        )
+        profile_complete = all(getattr(user_profile, field, None) for field in required_fields)
 
     # Si profil complet, prÃ©-remplir les donnÃ©es et aller Ã  la vÃ©rification
     if profile_complete:
@@ -1085,9 +1036,7 @@ def demande_start(request):
             "nom": request.user.last_name or "",
             "prenom": request.user.first_name or "",
             "date_naissance": (
-                user_profile.date_naissance.isoformat()
-                if user_profile.date_naissance
-                else ""
+                user_profile.date_naissance.isoformat() if user_profile.date_naissance else ""
             ),
             "lieu_naissance": getattr(user_profile, "lieu_naissance", ""),
             "nationalite": getattr(user_profile, "nationalite", ""),
@@ -1134,9 +1083,7 @@ def demande_verification(request):
 
         if action == "confirm":
             # Utilisateur confirme les donnÃ©es, passer Ã  l'Ã©tape 2
-            messages.success(
-                request, "Informations confirmÃ©es. Passons aux dÃ©tails du crÃ©dit."
-            )
+            messages.success(request, "Informations confirmÃ©es. Passons aux dÃ©tails du crÃ©dit.")
             namespace = get_current_namespace(request)
             return redirect(f"{namespace}:demande_step2")
 
@@ -1169,9 +1116,7 @@ def demande_verification(request):
                         user_profile.telephone = cleaned.get(
                             "numero_telephone", user_profile.telephone
                         )
-                        user_profile.adresse = cleaned.get(
-                            "adresse_exacte", user_profile.adresse
-                        )
+                        user_profile.adresse = cleaned.get("adresse_exacte", user_profile.adresse)
                         user_profile.save()
                         messages.success(request, "Votre profil a Ã©tÃ© mis Ã  jour.")
 
@@ -1201,9 +1146,7 @@ def demande_step1(request):
         user_profile = getattr(request.user, "profile", None)
         if user_profile:
             full_name = (
-                (user_profile.full_name or "").strip()
-                if hasattr(user_profile, "full_name")
-                else ""
+                (user_profile.full_name or "").strip() if hasattr(user_profile, "full_name") else ""
             )
             if not full_name:
                 full_name = (
@@ -1499,16 +1442,13 @@ def demande_step4(request):
                 size = getattr(f, "size", 0) or 0
                 if size > getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024):
                     max_mb = round(
-                        getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024)
-                        / (1024 * 1024),
+                        getattr(settings, "UPLOAD_MAX_BYTES", 5 * 1024 * 1024) / (1024 * 1024),
                         2,
                     )
                     return f"Fichier trop volumineux (> {max_mb} Mo)"
                 name = getattr(f, "name", "")
                 ext = name.rsplit(".", 1)[-1].lower() if "." in name else ""
-                allowed = getattr(
-                    settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"}
-                )
+                allowed = getattr(settings, "UPLOAD_ALLOWED_EXTS", {"pdf", "jpg", "jpeg", "png"})
                 if ext not in allowed:
                     return f"Extension non autorisÃ©e ({ext}). AutorisÃ©es: {', '.join(sorted(allowed))}."
                 return None
@@ -1601,9 +1541,7 @@ def demande_step4(request):
                 dossier.wizard_current_step = 4
                 dossier.wizard_completed = True
                 dossier.consent_accepted = bool(cd.get("accepter_conditions", False))
-                dossier.consent_accepted_at = (
-                    timezone.now() if dossier.consent_accepted else None
-                )
+                dossier.consent_accepted_at = timezone.now() if dossier.consent_accepted else None
                 dossier.save(
                     update_fields=[
                         "wizard_current_step",
@@ -1640,59 +1578,42 @@ def demande_step4(request):
                     telephone_domicile=step1.get("telephone_domicile", ""),
                     radical=step1.get("radical", ""),
                     date_ouverture_compte=_d(step1.get("date_ouverture_compte", None)),
-                    date_domiciliation_salaire=_d(
-                        step1.get("date_domiciliation_salaire", None)
-                    ),
+                    date_domiciliation_salaire=_d(step1.get("date_domiciliation_salaire", None)),
                     emploi_occupe=step1.get("emploi_occupe", ""),
                     statut_emploi=step1.get("statut_emploi", "PRIVE"),
                     anciennete_emploi=step1.get("anciennete_emploi", ""),
                     type_contrat=step1.get("type_contrat", "CDI"),
                     nom_employeur=step1.get("nom_employeur", ""),
                     lieu_emploi=step1.get("lieu_emploi", ""),
-                    employeur_client_banque=bool(
-                        step1.get("employeur_client_banque", False)
-                    ),
+                    employeur_client_banque=bool(step1.get("employeur_client_banque", False)),
                     radical_employeur=step1.get("radical_employeur", ""),
                     situation_famille=step1.get("situation_famille", "MARIE"),
-                    nombre_personnes_charge=int(
-                        step1.get("nombre_personnes_charge", 0) or 0
-                    ),
+                    nombre_personnes_charge=int(step1.get("nombre_personnes_charge", 0) or 0),
                     regime_matrimonial=step1.get("regime_matrimonial", ""),
                     participation_enquetes=step1.get("participation_enquetes", ""),
                     salaire_conjoint=step1.get("salaire_conjoint", 0) or 0,
                     emploi_conjoint=step1.get("emploi_conjoint", ""),
                     statut_logement=step1.get("statut_logement", ""),
                     numero_tf=step1.get("numero_tf", ""),
-                    logement_autres_precision=step1.get(
-                        "logement_autres_precision", ""
-                    ),
+                    logement_autres_precision=step1.get("logement_autres_precision", ""),
                     # Nature du prÃªt en cours
                     nature_pret_cours=step1.get("nature_pret_cours", "NOKI") or "NOKI",
                     montant_origine_fcfa=step1.get("montant_origine_fcfa", 0) or 0,
-                    date_derniere_echeance=_d(
-                        step1.get("date_derniere_echeance", None)
-                    ),
+                    date_derniere_echeance=_d(step1.get("date_derniere_echeance", None)),
                     montant_echeance_fcfa=step1.get("montant_echeance_fcfa", 0) or 0,
                     k_restant_du_fcfa=step1.get("k_restant_du_fcfa", 0) or 0,
                     # Section 2
                     salaire_net_moyen_fcfa=step2.get("salaire_net_moyen_fcfa", 0) or 0,
-                    echeances_prets_relevees=step2.get("echeances_prets_relevees", 0)
-                    or 0,
-                    total_echeances_credits_cours=step2.get(
-                        "total_echeances_credits_cours", 0
-                    )
+                    echeances_prets_relevees=step2.get("echeances_prets_relevees", 0) or 0,
+                    total_echeances_credits_cours=step2.get("total_echeances_credits_cours", 0)
                     or 0,
                     salaire_net_avant_endettement_fcfa=step2.get(
                         "salaire_net_avant_endettement_fcfa", 0
                     )
                     or 0,
-                    capacite_endettement_brute_fcfa=step2.get(
-                        "capacite_endettement_brute_fcfa", 0
-                    )
+                    capacite_endettement_brute_fcfa=step2.get("capacite_endettement_brute_fcfa", 0)
                     or 0,
-                    capacite_endettement_nette_fcfa=step2.get(
-                        "capacite_endettement_nette_fcfa", 0
-                    )
+                    capacite_endettement_nette_fcfa=step2.get("capacite_endettement_nette_fcfa", 0)
                     or 0,
                     # Section 3
                     nature_pret=step3.get("nature_pret", "PRET") or "PRET",
@@ -1701,13 +1622,9 @@ def demande_step4(request):
                     demande_duree_mois=int(step3.get("demande_duree_mois", 0) or 0),
                     demande_taux_pourcent=step3.get("demande_taux_pourcent", 0) or 0,
                     demande_periodicite=step3.get("demande_periodicite", "M"),
-                    demande_montant_echeance_fcfa=step3.get(
-                        "demande_montant_echeance_fcfa", 0
-                    )
+                    demande_montant_echeance_fcfa=step3.get("demande_montant_echeance_fcfa", 0)
                     or 0,
-                    demande_date_1ere_echeance=_d(
-                        step3.get("demande_date_1ere_echeance", None)
-                    ),
+                    demande_date_1ere_echeance=_d(step3.get("demande_date_1ere_echeance", None)),
                 )
             except Exception as e:
                 print(f"[ERROR] Sauvegarde CanevasProposition Ã©chouÃ©e: {e}")
@@ -1990,25 +1907,21 @@ def test_notification_view(request):
                     message="Ceci est une notification de test crÃ©Ã©e manuellement.",
                     canal="INTERNE",
                 )
-                messages.success(
-                    request, f"? Notification de test crÃ©Ã©e (ID: {notification.id})"
-                )
+                messages.success(request, f"? Notification de test crÃ©Ã©e (ID: {notification.id})")
             except Exception as e:
                 messages.error(request, f"? Erreur: {e}")
 
         elif action == "list_notifications":
             # Lister les notifications de l'utilisateur
-            notifications = Notification.objects.filter(
-                utilisateur_cible=request.user
-            ).order_by("-created_at")[:10]
+            notifications = Notification.objects.filter(utilisateur_cible=request.user).order_by(
+                "-created_at"
+            )[:10]
 
             context = {"notifications": notifications, "count": notifications.count()}
             return render(request, "core/test_notifications.html", context)
 
     # Statistiques
-    total_notifications = Notification.objects.filter(
-        utilisateur_cible=request.user
-    ).count()
+    total_notifications = Notification.objects.filter(utilisateur_cible=request.user).count()
     unread_notifications = Notification.objects.filter(
         utilisateur_cible=request.user, lu=False
     ).count()
@@ -2016,9 +1929,9 @@ def test_notification_view(request):
     # Derniers dossiers de l'utilisateur (si client)
     dossiers = []
     if hasattr(request.user, "profile") and request.user.profile.role == "CLIENT":
-        dossiers = DossierCredit.objects.filter(client=request.user).order_by(
-            "-date_soumission"
-        )[:5]
+        dossiers = DossierCredit.objects.filter(client=request.user).order_by("-date_soumission")[
+            :5
+        ]
 
     context = {
         "total_notifications": total_notifications,
@@ -2035,9 +1948,9 @@ def test_notification_api(request):
         return JsonResponse({"error": "Non authentifiÃ©"}, status=401)
 
     # RÃ©cupÃ©rer les notifications rÃ©centes
-    notifications = Notification.objects.filter(
-        utilisateur_cible=request.user
-    ).order_by("-created_at")[:5]
+    notifications = Notification.objects.filter(utilisateur_cible=request.user).order_by(
+        "-created_at"
+    )[:5]
 
     data = {
         "notifications": [
