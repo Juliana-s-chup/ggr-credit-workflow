@@ -61,7 +61,7 @@ jobs:
         pip install --no-cache-dir pytest pytest-django pytest-cov flake8 black mypy
     
     - name: Run Black (Code Formatting)
-      run: black --check .
+      run: black --check . --exclude="migrations|venv"
     
     - name: Run Flake8 (Linting)
       run: flake8 . --max-line-length=120 --exclude=migrations,venv
