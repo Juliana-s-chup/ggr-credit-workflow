@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues AJAX et API JSON.
 """
 

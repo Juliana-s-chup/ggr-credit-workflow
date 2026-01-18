@@ -1,4 +1,4 @@
-﻿"""
+"""
 Decorateurs pour la gestion des permissions et des transitions.
 """
 

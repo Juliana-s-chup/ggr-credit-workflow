@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests des vues de l'application suivi_demande.
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests unitaires pour les modeles de l'application suivi_demande.
 """
 

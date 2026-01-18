@@ -1,4 +1,4 @@
-﻿"""
+"""
 Middleware de controle d'acces par portail
 Empeche les clients d'acceder au portail pro et vice-versa
 """

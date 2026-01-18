@@ -1,4 +1,4 @@
-﻿"""
+"""
 Settings pour le portail PROFESSIONNEL
 Sous-domaine : pro.ggr-credit.cg
 """

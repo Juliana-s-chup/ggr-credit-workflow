@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Analytics - Vues pour dashboards et rapports
 Auteur: NGUIMBI Juliana
 Date: Novembre 2025

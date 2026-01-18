@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues pour la gestion du Canevas de Proposition NOKI NOKI
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues de gestion des notifications.
 """
 

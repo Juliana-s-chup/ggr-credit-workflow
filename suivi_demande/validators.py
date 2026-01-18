@@ -1,4 +1,4 @@
-﻿"""
+"""
 Validators pour la securite des uploads et des donnees.
 """
 

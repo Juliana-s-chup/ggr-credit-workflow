@@ -1,4 +1,4 @@
-﻿"""
+"""
 Utilitaires pour l'application suivi_demande.
 Fonctions de notification et helpers.
 """

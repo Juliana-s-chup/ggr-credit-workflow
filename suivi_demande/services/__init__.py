@@ -1,1 +1,1 @@
-﻿"""Services layer pour la logique metier."""
+"""Services layer pour la logique metier."""

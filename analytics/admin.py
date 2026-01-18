@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Analytics - Configuration Admin Django
 """
 

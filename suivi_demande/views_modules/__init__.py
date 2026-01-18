@@ -1,4 +1,4 @@
-﻿"""
+"""
 Views modulaires pour l'application suivi_demande.
 Structure professionnelle avec separation des responsabilites.
 

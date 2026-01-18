@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modeles pour l'application suivi_demande.
 Gere les dossiers de credit, les utilisateurs, les notifications et le workflow.
 """

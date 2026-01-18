@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues de base : home, signup, pending_approval.
 """
 

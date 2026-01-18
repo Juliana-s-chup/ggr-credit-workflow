@@ -1,4 +1,4 @@
-﻿"""
+"""
 Modele de Machine Learning pour le scoring credit.
 Predit la probabilite d'approbation d'un dossier de credit.
 """

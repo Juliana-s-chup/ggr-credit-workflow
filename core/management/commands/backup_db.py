@@ -1,4 +1,4 @@
-﻿"""
+"""
 Commande de Backup de la Base de Donnees
 Usage: python manage.py backup_db
 """

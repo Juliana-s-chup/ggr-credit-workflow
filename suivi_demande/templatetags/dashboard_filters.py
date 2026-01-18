@@ -1,4 +1,4 @@
-﻿from django import template
+from django import template
 from datetime import timedelta
 
 register = template.Library()

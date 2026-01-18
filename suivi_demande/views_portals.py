@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues specifiques aux portails Client et Professionnel
 """
 

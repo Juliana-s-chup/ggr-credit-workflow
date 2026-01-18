@@ -38,10 +38,10 @@ class Command(BaseCommand):
         )
 
         if created:
-            self.stdout.write(self.style.SUCCESS(f"âœ“ Created new user: {username}"))
+            self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Created new user: {username}"))
         else:
             self.stdout.write(
-                self.style.WARNING(f'âš  User "{username}" already exists, updating...')
+                self.style.WARNING(f'Ã¢Å¡Â  User "{username}" already exists, updating...')
             )
             user.is_staff = True
             user.is_superuser = True
@@ -52,7 +52,7 @@ class Command(BaseCommand):
         # Set password
         user.set_password(password)
         user.save()
-        self.stdout.write(self.style.SUCCESS(f"âœ“ Password set"))
+        self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Password set"))
 
         # Create or update profile
         profile, profile_created = UserProfile.objects.get_or_create(
@@ -69,14 +69,14 @@ class Command(BaseCommand):
             profile.role = UserRoles.SUPER_ADMIN
             profile.full_name = "Super Administrateur"
             profile.save()
-            self.stdout.write(self.style.SUCCESS(f"âœ“ Profile updated to SUPER_ADMIN"))
+            self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Profile updated to SUPER_ADMIN"))
         elif profile_created:
-            self.stdout.write(self.style.SUCCESS(f"âœ“ Profile created with SUPER_ADMIN role"))
+            self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Profile created with SUPER_ADMIN role"))
         else:
-            self.stdout.write(self.style.SUCCESS(f"âœ“ Profile already configured"))
+            self.stdout.write(self.style.SUCCESS(f"Ã¢Å“â€œ Profile already configured"))
 
         self.stdout.write(f'\n{"="*60}')
-        self.stdout.write(self.style.SUCCESS("âœ“ SUPER ADMIN ACCOUNT READY"))
+        self.stdout.write(self.style.SUCCESS("Ã¢Å“â€œ SUPER ADMIN ACCOUNT READY"))
         self.stdout.write(f'{"="*60}\n')
         self.stdout.write(f"Username: {self.style.SUCCESS(username)}")
         self.stdout.write(f"Password: {self.style.SUCCESS(password)}")

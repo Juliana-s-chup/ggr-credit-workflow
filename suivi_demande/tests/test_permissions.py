@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests pour les permissions et le controle d'acces.
 """
 

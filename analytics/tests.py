@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Analytics - Tests Unitaires
 Auteur: NGUIMBI Juliana
 Date: Novembre 2025

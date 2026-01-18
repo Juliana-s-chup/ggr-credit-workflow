@@ -1,4 +1,4 @@
-﻿"""
+"""
 URLs pour le Portail PROFESSIONNEL
 Toutes les fonctionnalites de gestion et administration
 """

@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env python
+#!/usr/bin/env python
 """
 Script de lancement des tests avec couverture.
 Usage: python run_tests.py [options]

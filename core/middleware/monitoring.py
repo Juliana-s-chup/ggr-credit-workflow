@@ -1,4 +1,4 @@
-﻿"""
+"""
 Middleware de Monitoring
 Mesure les performances et log les requetes
 """

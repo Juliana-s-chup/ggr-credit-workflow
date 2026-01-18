@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests de securite de l'application.
 """
 

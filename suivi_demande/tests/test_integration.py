@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests d'integration du workflow complet.
 """
 

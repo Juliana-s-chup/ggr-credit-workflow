@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues pour la generation de PDF.
 """
 

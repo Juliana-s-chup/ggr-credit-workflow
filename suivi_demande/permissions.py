@@ -1,4 +1,4 @@
-﻿"""
+"""
 Gestion des permissions pour les dossiers de credit.
 """
 

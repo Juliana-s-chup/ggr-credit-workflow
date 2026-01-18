@@ -1,4 +1,4 @@
-﻿"""
+"""
 Formulaires pour le Canevas de Proposition NOKI NOKI
 """
 

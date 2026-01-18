@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module de Securite Renforcee
 Rate Limiting, Validation, Sanitization
 """

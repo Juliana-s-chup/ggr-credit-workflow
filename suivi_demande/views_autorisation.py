@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues pour les autorisations ponctuelles.
 """
 

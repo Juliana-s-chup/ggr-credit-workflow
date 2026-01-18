@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues des dashboards par role et detail des dossiers.
 """
 

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues pour la gestion des documents d'un dossier de credit
 """
 

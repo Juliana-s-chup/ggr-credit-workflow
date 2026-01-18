@@ -1,4 +1,4 @@
-﻿"""
+"""
 Mixins reutilisables pour les vues avec gestion d'erreurs.
 """
 

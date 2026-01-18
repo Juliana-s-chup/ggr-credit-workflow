@@ -1,4 +1,4 @@
-﻿"""
+"""
 Configuration Django pour l'environnement de PRODUCTION
 """
 

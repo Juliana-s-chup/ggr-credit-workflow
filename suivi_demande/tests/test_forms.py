@@ -1,4 +1,4 @@
-﻿"""
+"""
 Tests des formulaires de l'application suivi_demande.
 """
 

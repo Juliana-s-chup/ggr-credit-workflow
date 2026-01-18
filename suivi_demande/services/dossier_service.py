@@ -1,4 +1,4 @@
-﻿"""
+"""
 Service layer pour la gestion des dossiers de credit.
 Centralise la logique metier et evite la duplication dans les views.
 """

@@ -1,4 +1,4 @@
-﻿"""
+"""
 Constantes pour l'application suivi_demande.
 e‰vite les "magic numbers" et centralise les valeurs configurables.
 """

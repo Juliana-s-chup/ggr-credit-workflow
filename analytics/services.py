@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Analytics - Services de calcul et analyse
 Auteur: NGUIMBI Juliana
 Date: Novembre 2025

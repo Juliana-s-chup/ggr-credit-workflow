@@ -1,4 +1,4 @@
-﻿"""
+"""
 Configuration et helpers pour le logging professionnel de l'application.
 """
 

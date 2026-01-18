@@ -1,4 +1,4 @@
-﻿"""
+"""
 Formulaires pour les autorisations ponctuelles.
 """
 

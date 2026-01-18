@@ -1,4 +1,4 @@
-﻿"""
+"""
 Utilitaires pour la gestion des utilisateurs.
 Centralise la logique de recuperation du role utilisateur.
 """

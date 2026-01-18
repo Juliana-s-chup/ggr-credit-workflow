@@ -1,4 +1,4 @@
-﻿"""
+"""
 URLs pour le Portail CLIENT
 Fonctionnalites limitees aux besoins client
 """

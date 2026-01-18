@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues de gestion du workflow et des transitions de statut.
 """
 

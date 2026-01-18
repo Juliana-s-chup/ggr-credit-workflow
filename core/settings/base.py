@@ -1,4 +1,4 @@
-﻿"""
+"""
 Base settings for ggr_credit_workflow Django project.
 Shared by dev and prod.
 """

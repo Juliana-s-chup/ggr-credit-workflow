@@ -1,4 +1,4 @@
-﻿"""
+"""
 Commande Django pour entrainer le modele de scoring credit.
 Usage: python manage.py train_scoring_model
 """

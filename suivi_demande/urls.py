@@ -1,4 +1,4 @@
-﻿from django.urls import path
+from django.urls import path
 from django.views.generic import RedirectView
 from . import views
 from .pdf_views import dossier_proposition_pdf

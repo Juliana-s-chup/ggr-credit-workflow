@@ -1,4 +1,4 @@
-﻿"""
+"""
 Vues pour la gestion des utilisateurs et les rapports
 """
 

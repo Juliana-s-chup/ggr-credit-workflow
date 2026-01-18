@@ -1,4 +1,4 @@
-﻿"""
+"""
 URL configuration for ggr_credit_workflow project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:

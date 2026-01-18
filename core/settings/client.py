@@ -1,4 +1,4 @@
-﻿"""
+"""
 Settings pour le portail CLIENT
 Sous-domaine : client.ggr-credit.cg
 """

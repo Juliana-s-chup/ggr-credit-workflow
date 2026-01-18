@@ -1,4 +1,4 @@
-﻿"""
+"""
 Formulaires pour le wizard de demande de credit (etapes 3 et 4).
 """
 

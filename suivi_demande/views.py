@@ -1,4 +1,4 @@
-﻿"""
+"""
 Views pour l'application suivi_demande.
 Gere les demandes de credit, le workflow et les dashboards.
 """

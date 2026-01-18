@@ -1,4 +1,4 @@
-﻿"""
+"""
 Module Analytics - Modeles de donnees pour statistiques et KPIs
 Auteur: NGUIMBI Juliana
 Date: Novembre 2025

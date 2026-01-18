@@ -1,4 +1,4 @@
-﻿"""
+"""
 Monitoring et Error Tracking
 Sentry + Logging structure
 """

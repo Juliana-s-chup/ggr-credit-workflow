@@ -1,4 +1,4 @@
-﻿"""
+"""
 Commande de Restauration de la Base de Donnees
 Usage: python manage.py restore_db <backup_file>
 """
