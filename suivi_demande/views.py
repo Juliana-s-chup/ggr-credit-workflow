@@ -205,7 +205,7 @@ def dashboard(request):
     if role == UserRoles.CLIENT:
         debug_info["template_to_use"] = "dashboard_client.html"
 
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Utiliser le Service Layer avec pagination
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Utiliser le Service Layer avec pagination
         page = DossierService.get_dossiers_for_user(
             user=request.user,
             page=request.GET.get("page", 1),
@@ -227,10 +227,10 @@ def dashboard(request):
             in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ][:20]
 
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Statistiques via Service Layer (1 query au lieu de 3)
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Statistiques via Service Layer (1 query au lieu de 3)
         stats = DossierService.get_statistics_for_role(request.user)
 
-        # Historique des actions (dejeÂ  optimise avec select_related)
+        # Historique des actions (dejeÃ‚Â  optimise avec select_related)
         historique_actions = (
             JournalAction.objects.filter(dossier__client=request.user)
             .select_related("dossier", "acteur")
@@ -243,8 +243,8 @@ def dashboard(request):
             "dossiers_en_cours": dossiers_en_cours,
             "dossiers_traites": dossiers_traites,  # Termines
             "historique_actions": historique_actions,
-            "dossiers_approuves": stats["approuves"],  # Ã¢Å“â€¦ Depuis stats
-            "montant_total": stats["montant_total"],  # Ã¢Å“â€¦ Depuis stats
+            "dossiers_approuves": stats["approuves"],  # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Depuis stats
+            "montant_total": stats["montant_total"],  # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Depuis stats
             "historique_dossiers": dossiers_traites,  # compat
             "debug_info": debug_info,
             "page": page,  # Pour pagination future
@@ -252,12 +252,12 @@ def dashboard(request):
         return render(request, "suivi_demande/dashboard_client.html", context)
 
     elif role == UserRoles.GESTIONNAIRE:
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Utiliser Service Layer
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Utiliser Service Layer
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=50
         )
 
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Statistiques en 1 query
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Statistiques en 1 query
         stats = DossierService.get_statistics_for_role(request.user)
 
         # Separer dossiers en cours et traites (en memoire)
@@ -315,7 +315,7 @@ def dashboard(request):
             "retournes_today": 0,
             "en_attente_total": stats["en_cours"],
             "en_attente_today": 0,
-            "delai_moyen_jours": "'â€",
+            "delai_moyen_jours": "'Ã¢â‚¬Â",
             "variation_semaine": 0,
         }
 
@@ -354,7 +354,7 @@ def dashboard(request):
         return render(request, "suivi_demande/dashboard_gestionnaire.html", ctx)
 
     elif role == UserRoles.ANALYSTE:
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Service Layer filtre automatiquement par role
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Service Layer filtre automatiquement par role
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=30
         )
@@ -367,7 +367,7 @@ def dashboard(request):
         ]
         dossiers_prioritaires = dossiers[:5]
 
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Stats via Service Layer
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Stats via Service Layer
         stats = DossierService.get_statistics_for_role(request.user)
 
         # Dossiers traites (separes)
@@ -397,7 +397,7 @@ def dashboard(request):
         return render(request, "suivi_demande/dashboard_analyste.html", context)
 
     elif role == UserRoles.RESPONSABLE_GGR:
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Service Layer filtre automatiquement
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Service Layer filtre automatiquement
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=30
         )
@@ -427,14 +427,14 @@ def dashboard(request):
         )
 
     elif role == UserRoles.BOE:
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Service Layer filtre automatiquement (APPROUVE_ATTENTE_FONDS)
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Service Layer filtre automatiquement (APPROUVE_ATTENTE_FONDS)
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=30
         )
 
         dossiers = list(page.object_list)
 
-        # Ã¢Å“â€¦ OPTIMISeâ€°: Stats via Service Layer
+        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Stats via Service Layer
         stats = DossierService.get_statistics_for_role(request.user)
 
         # Dossiers traites
@@ -654,20 +654,16 @@ def transition_dossier(request, pk, action: str):
         # Personnaliser le message selon l'action
         if action == "retour_client":
             message_notification = (
-                f"Ã°Å¸â€â€ Nouveau message 'Â¢ Dossier {dossier.reference}\n"
+                f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Nouveau message 'Ã‚Â¢ Dossier {dossier.reference}\n"
                 f"Votre dossier necessite des complements. Motif: {commentaire_retour}"
             )
-            titre_notification = (
-                f"Ã°Å¸â€â€ Dossier {dossier.reference} 'Â¢ Complements requis"
-            )
+            titre_notification = f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Dossier {dossier.reference} 'Ã‚Â¢ Complements requis"
         else:
             message_notification = (
-                f"Ã°Å¸â€â€ Mise eÂ  jour 'Â¢ Dossier {dossier.reference}\n"
+                f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Mise eÃ‚Â  jour 'Ã‚Â¢ Dossier {dossier.reference}\n"
                 f"Statut cote client: {dossier.get_statut_client_display()}"
             )
-            titre_notification = (
-                f"Ã°Å¸â€â€ Dossier {dossier.reference} 'Â¢ Mise eÂ  jour"
-            )
+            titre_notification = f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Dossier {dossier.reference} 'Ã‚Â¢ Mise eÃ‚Â  jour"
 
         # Creer la notification pour le client
         notification = Notification.objects.create(
@@ -722,16 +718,18 @@ def transition_dossier(request, pk, action: str):
                             fail_silently=True,
                         )
                         print(
-                            f"Ã¢Å“â€œ Email envoye eÂ  {user.username} ({user.email})"
+                            f"ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ Email envoye eÃ‚Â  {user.username} ({user.email})"
                         )
                         count += 1
                     except Exception as e:
-                        print(f"Ã¢Å“â€” Erreur envoi email eÂ  {user.username}: {e}")
+                        print(
+                            f"ÃƒÂ¢Ã…â€œÃ¢â‚¬â€ Erreur envoi email eÃ‚Â  {user.username}: {e}"
+                        )
 
             if count > 0:
                 messages.success(
                     request,
-                    f"Ã¢Å“â€œ {count} utilisateur(s) notifie(s) de l'arrivee du dossier.",
+                    f"ÃƒÂ¢Ã…â€œÃ¢â‚¬Å“ {count} utilisateur(s) notifie(s) de l'arrivee du dossier.",
                 )
             return count
 
@@ -739,9 +737,9 @@ def transition_dossier(request, pk, action: str):
         if action == "transmettre_analyste":
             notifier_utilisateurs(
                 UserRoles.ANALYSTE,
-                f"Ã°Å¸â€â€ Nouveau dossier eÂ  analyser 'Â¢ {dossier.reference}",
+                f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Nouveau dossier eÃ‚Â  analyser 'Ã‚Â¢ {dossier.reference}",
                 (
-                    "Ã°Å¸â€â€ Nouveau message\n"
+                    "ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Nouveau message\n"
                     "Reference: {dossier_ref}\n"
                     "Client: {client_name}\n"
                     "Montant: {montant} FCFA\n"
@@ -753,9 +751,9 @@ def transition_dossier(request, pk, action: str):
         elif action == "transmettre_ggr":
             notifier_utilisateurs(
                 UserRoles.RESPONSABLE_GGR,
-                f"Ã°Å¸â€â€ Dossier eÂ  valider 'Â¢ {dossier.reference}",
+                f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Dossier eÃ‚Â  valider 'Ã‚Â¢ {dossier.reference}",
                 (
-                    "Ã°Å¸â€â€ Nouveau message\n"
+                    "ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Nouveau message\n"
                     "Reference: {dossier_ref}\n"
                     "Client: {client_name}\n"
                     "Montant: {montant} FCFA\n"
@@ -767,9 +765,9 @@ def transition_dossier(request, pk, action: str):
         elif action == "approuver":
             notifier_utilisateurs(
                 UserRoles.BOE,
-                f"Ã°Å¸â€â€ Dossier approuve 'Â¢ {dossier.reference}",
+                f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Dossier approuve 'Ã‚Â¢ {dossier.reference}",
                 (
-                    "Ã°Å¸â€â€ Nouveau message\n"
+                    "ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Nouveau message\n"
                     "Reference: {dossier_ref}\n"
                     "Client: {client_name}\n"
                     "Montant: {montant} FCFA\n"
@@ -781,9 +779,9 @@ def transition_dossier(request, pk, action: str):
         elif action == "retour_gestionnaire":
             notifier_utilisateurs(
                 UserRoles.GESTIONNAIRE,
-                f"Ã°Å¸â€â€ Dossier retourne 'Â¢ {dossier.reference}",
+                f"ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Dossier retourne 'Ã‚Â¢ {dossier.reference}",
                 (
-                    "Ã°Å¸â€â€ Nouveau message\n"
+                    "ÃƒÂ°Ã…Â¸Ã¢â‚¬ÂÃ¢â‚¬Â Nouveau message\n"
                     "Reference: {dossier_ref}\n"
                     "Client: {client_name}\n"
                     "Montant: {montant} FCFA\n"
@@ -807,9 +805,11 @@ def transition_dossier(request, pk, action: str):
                     f"Cordialement,\nL'equipe credit du Congo"
                 )
             else:
-                subject = f"[credit du Congo] Dossier {dossier.reference} mis eÂ  jour"
+                subject = (
+                    f"[credit du Congo] Dossier {dossier.reference} mis eÃ‚Â  jour"
+                )
                 text_message = (
-                    f"Bonjour,\n\nVotre dossier {dossier.reference} a ete mis eÂ  jour. "
+                    f"Bonjour,\n\nVotre dossier {dossier.reference} a ete mis eÃ‚Â  jour. "
                     f"Nouveau statut cote client: {dossier.get_statut_client_display()}.\n\nCeci est un message automatique."
                 )
             # Preparer le template HTML pour retour client
@@ -843,10 +843,12 @@ def transition_dossier(request, pk, action: str):
                     fail_silently=False,  # Ne pas ignorer les erreurs
                     html_message=html_message,
                 )
-                print(f"? Email envoye eÂ  {dossier.client.email} pour action {action}")
+                print(
+                    f"? Email envoye eÃ‚Â  {dossier.client.email} pour action {action}"
+                )
                 if action == "retour_client":
                     messages.info(
-                        request, f"?? Email envoye eÂ  {dossier.client.email}"
+                        request, f"?? Email envoye eÃ‚Â  {dossier.client.email}"
                     )
             except Exception as e:
                 print(f"? Erreur envoi email: {e}")
@@ -920,7 +922,7 @@ def dossier_detail(request, pk):
         elif action == "upload_piece":
             if not can_upload:
                 messages.error(
-                    request, "Vous ne pouvez pas deposer de piece eÂ  ce stade."
+                    request, "Vous ne pouvez pas deposer de piece eÃ‚Â  ce stade."
                 )
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:dossier_detail", pk=dossier.pk)
@@ -1009,7 +1011,7 @@ def notifications_mark_all_read(request):
         )
         messages.success(
             request,
-            "Toutes vos notifications ont eÆ’Ã‚Â©teÆ’Ã‚Â© marqueÆ’Ã‚Â©es comme lues.",
+            "Toutes vos notifications ont eÃ†â€™Ãƒâ€šÃ‚Â©teÃ†â€™Ãƒâ€šÃ‚Â© marqueÃ†â€™Ãƒâ€šÃ‚Â©es comme lues.",
         )
     namespace = get_current_namespace(request)
     return redirect(f"{namespace}:notifications_list")
@@ -1023,7 +1025,7 @@ def notifications_mark_read(request, pk: int):
         if not notif.lu:
             notif.lu = True
             notif.save(update_fields=["lu"])
-        # Redirige vers la page preÆ’Ã‚Â©ceÆ’Ã‚Â©dente si fournie
+        # Redirige vers la page preÃ†â€™Ãƒâ€šÃ‚Â©ceÃ†â€™Ãƒâ€šÃ‚Â©dente si fournie
         namespace = get_current_namespace(request)
         next_url = request.POST.get("next")
         if next_url:
@@ -1033,7 +1035,7 @@ def notifications_mark_read(request, pk: int):
     return redirect(f"{namespace}:notifications_list")
 
 
-# --- Demande de creÆ’Ã‚Â©dit: Wizard ---
+# --- Demande de creÃ†â€™Ãƒâ€šÃ‚Â©dit: Wizard ---
 
 
 @login_required
@@ -1052,7 +1054,7 @@ def demande_start(request):
             getattr(user_profile, field, None) for field in required_fields
         )
 
-    # Si profil complet, pre-remplir les donnees et aller eÂ  la verification
+    # Si profil complet, pre-remplir les donnees et aller eÃ‚Â  la verification
     if profile_complete:
         # Pre-remplir les donnees de l'etape 1 avec les infos du profil
         step1_data = {
@@ -1093,7 +1095,7 @@ def demande_start(request):
 @login_required
 def demande_verification(request):
     """
-    eâ€°tape de verification rapide pour les clients avec profil complet
+    eÃ¢â‚¬Â°tape de verification rapide pour les clients avec profil complet
     """
     data = request.session.get("demande_wizard", {})
     step1_data = data.get("step1", {})
@@ -1107,7 +1109,7 @@ def demande_verification(request):
         action = request.POST.get("action")
 
         if action == "confirm":
-            # Utilisateur confirme les donnees, passer eÂ  l'etape 2
+            # Utilisateur confirme les donnees, passer eÃ‚Â  l'etape 2
             messages.success(
                 request, "Informations confirmees. Passons aux details du credit."
             )
@@ -1120,7 +1122,7 @@ def demande_verification(request):
             return redirect(f"{namespace}:demande_step1")
 
         elif action == "update_profile":
-            # Mettre eÂ  jour le profil avec les nouvelles donnees si modifiees
+            # Mettre eÃ‚Â  jour le profil avec les nouvelles donnees si modifiees
             form = DemandeStep1Form(request.POST)
             if form.is_valid():
                 # Sauvegarder dans la session
@@ -1136,7 +1138,7 @@ def demande_verification(request):
                 request.session["demande_wizard"] = data
                 request.session.modified = True
 
-                # Optionnellement mettre eÂ  jour le profil utilisateur
+                # Optionnellement mettre eÃ‚Â  jour le profil utilisateur
                 if request.POST.get("update_user_profile"):
                     user_profile = getattr(request.user, "profile", None)
                     if user_profile:
@@ -1147,7 +1149,7 @@ def demande_verification(request):
                             "adresse_exacte", user_profile.adresse
                         )
                         user_profile.save()
-                        messages.success(request, "Votre profil a ete mis eÂ  jour.")
+                        messages.success(request, "Votre profil a ete mis eÃ‚Â  jour.")
 
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:demande_step2")
@@ -1204,7 +1206,7 @@ def demande_step1(request):
             data["step1"] = serialize_form_data(cleaned)
             request.session["demande_wizard"] = data
             request.session.modified = True
-            messages.success(request, "eÆ’'Â°tape 1 enregistreÆ’Ã‚Â©e.")
+            messages.success(request, "eÃ†â€™'Ã‚Â°tape 1 enregistreÃ†â€™Ãƒâ€šÃ‚Â©e.")
             namespace = get_current_namespace(request)
             return redirect(f"{namespace}:demande_step2")
     else:
@@ -1228,7 +1230,7 @@ def demande_step2(request):
             data["step2"] = serialize_form_data(form.cleaned_data)
             request.session["demande_wizard"] = data
             request.session.modified = True
-            messages.success(request, "eÆ’'Â°tape 2 enregistreÆ’Ã‚Â©e.")
+            messages.success(request, "eÃ†â€™'Ã‚Â°tape 2 enregistreÃ†â€™Ãƒâ€šÃ‚Â©e.")
             namespace = get_current_namespace(request)
             return redirect(f"{namespace}:demande_step3")
     else:
@@ -1296,7 +1298,7 @@ def demande_step3(request):
                 data["step3"] = serialize_form_data(cd)
                 request.session["demande_wizard"] = data
                 request.session.modified = True
-                messages.success(request, "eâ€°tape 3 enregistree.")
+                messages.success(request, "eÃ¢â‚¬Â°tape 3 enregistree.")
                 namespace = get_current_namespace(request)
                 return redirect(f"{namespace}:demande_step4")
     else:
@@ -1340,7 +1342,7 @@ def demande_step3(request):
         "employeur_client_banque": "Employeur client banque",
         "radical_employeur": "Radical employeur",
         "situation_famille": "Situation familiale",
-        "nombre_personnes_charge": "Personnes eÂ  charge",
+        "nombre_personnes_charge": "Personnes eÃ‚Â  charge",
         "regime_matrimonial": "Regime matrimonial",
         "participation_enquetes": "Participation aux enquetes",
         "salaire_conjoint": "Salaire conjoint (FCFA)",
@@ -1353,7 +1355,7 @@ def demande_step3(request):
     }
     labels2 = {
         "salaire_net_moyen_fcfa": "Salaire net moyen (FCFA)",
-        "echeances_prets_relevees": "eâ€°cheances prets relevees (FCFA)",
+        "echeances_prets_relevees": "eÃ¢â‚¬Â°cheances prets relevees (FCFA)",
         "total_echeances_credits_cours": "Total echeances credits en cours (FCFA)",
         "salaire_net_avant_endettement_fcfa": "Salaire net avant endettement (FCFA)",
         "capacite_endettement_brute_fcfa": "Capacite d'endettement brute (FCFA)",
@@ -1368,7 +1370,7 @@ def demande_step3(request):
         "demande_periodicite": "Periodicite",
         "demande_date_1ere_echeance": "Date 1re echeance",
         "demande_montant_echeance_fcfa": "Montant echeance (FCFA)",
-        "echeance_calculee": "eâ€°cheance estimee (FCFA)",
+        "echeance_calculee": "eÃ¢â‚¬Â°cheance estimee (FCFA)",
     }
 
     recap1 = map_items(data.get("step1", {}), labels1)
@@ -1418,7 +1420,7 @@ def demande_step4(request):
         "employeur_client_banque": "Employeur client banque",
         "radical_employeur": "Radical employeur",
         "situation_famille": "Situation familiale",
-        "nombre_personnes_charge": "Personnes eÂ  charge",
+        "nombre_personnes_charge": "Personnes eÃ‚Â  charge",
         "regime_matrimonial": "Regime matrimonial",
         "salaire_conjoint": "Salaire conjoint (FCFA)",
         "emploi_conjoint": "Emploi conjoint",
@@ -1431,7 +1433,7 @@ def demande_step4(request):
     }
     labels2 = {
         "salaire_net_moyen_fcfa": "Salaire net moyen (FCFA)",
-        "echeances_prets_relevees": "eâ€°cheances prets relevees (FCFA)",
+        "echeances_prets_relevees": "eÃ¢â‚¬Â°cheances prets relevees (FCFA)",
         "total_echeances_credits_cours": "Total echeances credits en cours (FCFA)",
         "salaire_net_avant_endettement_fcfa": "Salaire net avant endettement (FCFA)",
         "capacite_endettement_brute_fcfa": "Capacite d'endettement brute (FCFA)",
@@ -1447,7 +1449,7 @@ def demande_step4(request):
         "demande_periodicite": "Periodicite",
         "demande_date_1ere_echeance": "Date 1re echeance",
         "demande_montant_echeance_fcfa": "Montant echeance (FCFA)",
-        "echeance_calculee": "eâ€°cheance estimee (FCFA)",
+        "echeance_calculee": "eÃ¢â‚¬Â°cheance estimee (FCFA)",
     }
 
     recap1 = map_items(data.get("step1", {}), labels1)
@@ -1459,7 +1461,7 @@ def demande_step4(request):
         form = DemandeStep4Form(request.POST)
         if form.is_valid():
             cd = form.cleaned_data
-            # eâ€°tape 4: toutes les pieces sont obligatoires
+            # eÃ¢â‚¬Â°tape 4: toutes les pieces sont obligatoires
             cni = request.FILES.get("cni")
             fiche = request.FILES.get("fiche_paie")
             releve = request.FILES.get("releve_bancaire")
@@ -1493,7 +1495,7 @@ def demande_step4(request):
                 ("Carte d'identite (CNI)", cni),
                 ("Fiche de paie", fiche),
                 ("Releve bancaire", releve),
-                ("Billet eÂ  ordre", billet_ordre_f),
+                ("Billet eÃ‚Â  ordre", billet_ordre_f),
                 ("Attestation de l'employeur", attestation_emp_f),
                 ("Attestation de domiciliation irrevocable", attestation_dom_f),
                 ("Assurance deces-invalidite", assurance_f),
@@ -1536,7 +1538,7 @@ def demande_step4(request):
                         },
                     )
 
-            # Creer le dossier eÂ  partir du wizard (MVP)
+            # Creer le dossier eÃ‚Â  partir du wizard (MVP)
             step3 = data.get("step3", {})
             montant = step3.get("demande_montant_fcfa") or 0
 
@@ -1549,7 +1551,7 @@ def demande_step4(request):
             ref = f"DOS-{timezone.now().strftime('%Y%m%d%H%M%S')}-{request.user.id}"
             produit = "credit"
 
-            # Determiner l'utilisateur client eÂ  assigner au dossier
+            # Determiner l'utilisateur client eÃ‚Â  assigner au dossier
             client_user = request.user
             try:
                 step1_data = data.get("step1", {})
@@ -1570,7 +1572,7 @@ def demande_step4(request):
                 acteur_courant=request.user,
             )
 
-            # Mettre eÂ  jour l'etat du wizard et le consentement (eâ€°tape 4)
+            # Mettre eÃ‚Â  jour l'etat du wizard et le consentement (eÃ¢â‚¬Â°tape 4)
             try:
                 dossier.wizard_current_step = 4
                 dossier.wizard_completed = True
@@ -1589,7 +1591,7 @@ def demande_step4(request):
             except Exception:
                 pass
 
-            # Persister le canevas avec les donnees des etapes 1 eÂ  3
+            # Persister le canevas avec les donnees des etapes 1 eÃ‚Â  3
             step1 = data.get("step1", {})
             step2 = data.get("step2", {})
             step3 = data.get("step3", {})
@@ -1691,18 +1693,18 @@ def demande_step4(request):
                     f"Le recapitulatif du dossier n'a pas pu etre cree. Erreur: {e}",
                 )
 
-            # Journal creÆ’Ã‚Â©ation
+            # Journal creÃ†â€™Ãƒâ€šÃ‚Â©ation
             JournalAction.objects.create(
                 dossier=dossier,
                 action="CREATION",
                 de_statut=None,
                 vers_statut=DossierStatutAgent.NOUVEAU,
                 acteur=request.user,
-                commentaire_systeme="CreÆ’Ã‚Â©ation du dossier depuis le wizard Demande",
+                commentaire_systeme="CreÃ†â€™Ãƒâ€šÃ‚Â©ation du dossier depuis le wizard Demande",
                 meta={"wizard": True},
             )
 
-            # Enregistrer les pieÆ’Ã‚Â¨ces jointes
+            # Enregistrer les pieÃ†â€™Ãƒâ€šÃ‚Â¨ces jointes
             try:
                 # Enregistrer toutes les pieces obligatoires
                 PieceJointe.objects.create(
@@ -1765,15 +1767,15 @@ def demande_step4(request):
                 Notification.objects.create(
                     utilisateur_cible=request.user,
                     type="DOSSIER_MAJ",
-                    titre=f"Votre demande a eÆ’Ã‚Â©teÆ’Ã‚Â© creÆ’Ã‚Â©eÆ’Ã‚Â©e ({dossier.reference})",
-                    message="Votre dossier a eÆ’Ã‚Â©teÆ’Ã‚Â© creÆ’Ã‚Â©eÆ’Ã‚Â© et transmis au gestionnaire.",
+                    titre=f"Votre demande a eÃ†â€™Ãƒâ€šÃ‚Â©teÃ†â€™Ãƒâ€šÃ‚Â© creÃ†â€™Ãƒâ€šÃ‚Â©eÃ†â€™Ãƒâ€šÃ‚Â©e ({dossier.reference})",
+                    message="Votre dossier a eÃ†â€™Ãƒâ€šÃ‚Â©teÃ†â€™Ãƒâ€šÃ‚Â© creÃ†â€™Ãƒâ€šÃ‚Â©eÃ†â€™Ãƒâ€šÃ‚Â© et transmis au gestionnaire.",
                     canal="INTERNE",
                 )
                 if request.user.email:
-                    subject = f"[GGR] Demande creÆ’Ã‚Â©eÆ’Ã‚Â©e: {dossier.reference}"
+                    subject = f"[GGR] Demande creÃ†â€™Ãƒâ€šÃ‚Â©eÃ†â€™Ãƒâ€šÃ‚Â©e: {dossier.reference}"
                     text_message = (
-                        f"Bonjour,\n\nVotre demande a eÆ’Ã‚Â©teÆ’Ã‚Â© creÆ’Ã‚Â©eÆ’Ã‚Â©e avec la reÆ’Ã‚Â©feÆ’Ã‚Â©rence {dossier.reference}. "
-                        f"Vous serez notifieÆ’Ã‚Â© des prochaines eÆ’Ã‚Â©tapes.\n\nCeci est un message automatique."
+                        f"Bonjour,\n\nVotre demande a eÃ†â€™Ãƒâ€šÃ‚Â©teÃ†â€™Ãƒâ€šÃ‚Â© creÃ†â€™Ãƒâ€šÃ‚Â©eÃ†â€™Ãƒâ€šÃ‚Â©e avec la reÃ†â€™Ãƒâ€šÃ‚Â©feÃ†â€™Ãƒâ€šÃ‚Â©rence {dossier.reference}. "
+                        f"Vous serez notifieÃ†â€™Ãƒâ€šÃ‚Â© des prochaines eÃ†â€™Ãƒâ€šÃ‚Â©tapes.\n\nCeci est un message automatique."
                     )
                     html_message = render_to_string(
                         "emails/dossier_update_client.html",
@@ -1809,7 +1811,7 @@ def demande_step4(request):
 
             messages.success(
                 request,
-                "Demande soumise avec succes. Vous pouvez maintenant transmettre le dossier eÂ  l'analyste.",
+                "Demande soumise avec succes. Vous pouvez maintenant transmettre le dossier eÃ‚Â  l'analyste.",
             )
             namespace = get_current_namespace(request)
             return redirect(f"{namespace}:transmettre_analyste_page", pk=dossier.pk)
@@ -1885,7 +1887,7 @@ def admin_change_role(request):
     try:
         user = User.objects.get(id=user_id)
 
-        # Creer ou mettre eÂ  jour le profil
+        # Creer ou mettre eÃ‚Â  jour le profil
         profile, created = UserProfile.objects.get_or_create(
             user=user,
             defaults={

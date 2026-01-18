@@ -56,7 +56,7 @@ def canevas_create_or_edit(request, dossier_id):
 
             messages.success(
                 request,
-                f"âœ“ Canevas de proposition {'cree' if is_new else 'mis e  jour'} avec succes.",
+                f"Ã¢Å“â€œ Canevas de proposition {'cree' if is_new else 'mis eÂ  jour'} avec succes.",
             )
 
             # Si nouveau canevas, rediriger vers upload documents
