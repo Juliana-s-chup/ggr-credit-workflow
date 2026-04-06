@@ -1,0 +1,263 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-hand-holding-usd text-primary"></i> Rapports BOE - Libération de Fonds
+                </h1>
+                <p class="text-muted mb-0">Suivi et gestion de la libération des fonds</p>
+            </div>
+            <a href="{% url 'pro:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtres</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="date_debut" class="form-label">Date de début</label>
+                    <input type="date" class="form-control" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="date_fin" class="form-label">Date de fin</label>
+                    <input type="date" class="form-control" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                    <a href="{% url 'pro:reports' %}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPIs principaux -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-folder fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-0">{{ stats.total_dossiers|default:0 }}</h3>
+                    <p class="text-muted mb-0">Total Dossiers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-hourglass-half fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-0">{{ stats.en_attente_liberation|default:0 }}</h3>
+                    <p class="text-muted mb-0">En Attente Libération</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ stats.fonds_liberes|default:0 }}</h3>
+                    <p class="text-muted mb-0">Fonds Libérés</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Performance -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Taux de Libération</h6>
+                    <h4 class="text-success">{{ kpis.taux_liberation|default:0 }}%</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Taux en Attente</h6>
+                    <h4 class="text-warning">{{ kpis.taux_en_attente|default:0 }}%</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Montant Moyen Libéré</h6>
+                    <h4>{{ kpis.montant_moyen_libere|floatformat:0 }} FCFA</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Montants -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted"><i class="fas fa-coins"></i> Montant Total</h6>
+                    <h3>{{ stats.montant_total|floatformat:0 }} FCFA</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted"><i class="fas fa-clock text-warning"></i> Montant en Attente</h6>
+                    <h3 class="text-warning">{{ stats.montant_en_attente|floatformat:0 }} FCFA</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted"><i class="fas fa-check-circle text-success"></i> Montant Libéré</h6>
+                    <h3 class="text-success">{{ stats.montant_libere|floatformat:0 }} FCFA</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Visualisations analytiques</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">📈 Évolution mensuelle des libérations</h6>
+                    <canvas id="chartMonthly" style="max-height: 300px;"></canvas>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">💰 Montants libérés par mois</h6>
+                    <canvas id="chartMontants" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <h6 class="text-center mb-3">📊 Statut des dossiers</h6>
+                    <canvas id="chartStatut" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau détaillé -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">📋 Répartition détaillée par statut</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Statut</th>
+                            <th class="text-end">Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in par_statut %}
+                        <tr>
+                            <td>{{ item.statut_agent }}</td>
+                            <td class="text-end"><strong>{{ item.count }}</strong></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">Aucune donnée disponible</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartsData = {{ charts_json|safe }};
+    
+    // 1. Évolution mensuelle
+    if (chartsData.monthly && chartsData.monthly.labels.length > 0) {
+        new Chart(document.getElementById('chartMonthly').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: chartsData.monthly.labels,
+                datasets: [{
+                    label: 'Fonds libérés',
+                    data: chartsData.monthly.data,
+                    borderColor: 'rgb(40, 167, 69)',
+                    backgroundColor: 'rgba(40, 167, 69, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+    
+    // 2. Montants par mois
+    if (chartsData.montants && chartsData.montants.labels.length > 0) {
+        new Chart(document.getElementById('chartMontants').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: chartsData.montants.labels,
+                datasets: [{
+                    label: 'Montant (FCFA)',
+                    data: chartsData.montants.data,
+                    backgroundColor: 'rgba(54, 162, 235, 0.8)',
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+    
+    // 3. Statut
+    if (chartsData.statut) {
+        new Chart(document.getElementById('chartStatut').getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: chartsData.statut.labels,
+                datasets: [{
+                    data: chartsData.statut.data,
+                    backgroundColor: [
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(40, 167, 69, 0.8)',
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

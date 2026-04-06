@@ -1,0 +1,283 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-chart-line text-primary"></i> Rapports Gestionnaire - Pilotage Global
+                </h1>
+                <p class="text-muted mb-0">Vue d'ensemble et pilotage des dossiers de crédit</p>
+            </div>
+            <a href="{% url 'pro:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtres</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="date_debut" class="form-label">Date de début</label>
+                    <input type="date" class="form-control" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="date_fin" class="form-label">Date de fin</label>
+                    <input type="date" class="form-control" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                    <a href="{% url 'pro:reports' %}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPIs principaux -->
+    <div class="row mb-4">
+        <div class="col-md-2">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-folder fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-0">{{ stats.total_dossiers|default:0 }}</h3>
+                    <p class="text-muted mb-0 small">Total Dossiers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-2x text-info mb-2"></i>
+                    <h3 class="mb-0">{{ stats.dossiers_nouveaux|default:0 }}</h3>
+                    <p class="text-muted mb-0 small">Nouveaux</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-spinner fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-0">{{ stats.dossiers_en_cours|default:0 }}</h3>
+                    <p class="text-muted mb-0 small">En Cours</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ stats.dossiers_approuves|default:0 }}</h3>
+                    <p class="text-muted mb-0 small">Approuvés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-0">{{ stats.dossiers_refuses|default:0 }}</h3>
+                    <p class="text-muted mb-0 small">Refusés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card border-dark">
+                <div class="card-body text-center">
+                    <i class="fas fa-hand-holding-usd fa-2x text-dark mb-2"></i>
+                    <h3 class="mb-0">{{ stats.dossiers_liberes|default:0 }}</h3>
+                    <p class="text-muted mb-0 small">Fonds Libérés</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs secondaires -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Dossiers Traités</h6>
+                    <h4>{{ kpis.processed_count|default:0 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Taux d'Acceptation</h6>
+                    <h4 class="text-success">{{ kpis.acceptance_rate|default:0 }}%</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Taux de Refus</h6>
+                    <h4 class="text-danger">{{ kpis.reject_rate|default:0 }}%</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Dossiers Renvoyés</h6>
+                    <h4 class="text-warning">{{ kpis.rework_count|default:0 }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Montants -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted"><i class="fas fa-coins"></i> Montant Total</h6>
+                    <h3>{{ stats.montant_total|floatformat:0 }} FCFA</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted"><i class="fas fa-check-circle text-success"></i> Montant Approuvé</h6>
+                    <h3 class="text-success">{{ kpis.montant_approuve|floatformat:0 }} FCFA</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Visualisations analytiques</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">📈 Évolution mensuelle des dossiers créés</h6>
+                    <canvas id="chartMonthly" style="max-height: 300px;"></canvas>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">🥧 Répartition par statut</h6>
+                    <canvas id="chartStatuts" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <h6 class="text-center mb-3">📊 Performance des analystes (Top 5)</h6>
+                    <canvas id="chartAnalysts" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau détaillé -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">📋 Répartition détaillée par statut</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Statut</th>
+                            <th class="text-end">Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in par_statut %}
+                        <tr>
+                            <td>{{ item.statut_agent }}</td>
+                            <td class="text-end"><strong>{{ item.count }}</strong></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">Aucune donnée disponible</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartsData = {{ charts_json|safe }};
+    
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: { legend: { position: 'bottom' } }
+    };
+    
+    // 1. Évolution mensuelle
+    if (chartsData.monthly && chartsData.monthly.labels.length > 0) {
+        new Chart(document.getElementById('chartMonthly').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: chartsData.monthly.labels,
+                datasets: [{
+                    label: 'Dossiers créés',
+                    data: chartsData.monthly.data,
+                    borderColor: 'rgb(54, 162, 235)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: { ...commonOptions, scales: { y: { beginAtZero: true } } }
+        });
+    }
+    
+    // 2. Répartition par statut
+    if (chartsData.statuts && chartsData.statuts.labels.length > 0) {
+        new Chart(document.getElementById('chartStatuts').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: chartsData.statuts.labels,
+                datasets: [{
+                    data: chartsData.statuts.data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)',
+                    ]
+                }]
+            },
+            options: commonOptions
+        });
+    }
+    
+    // 3. Performance analystes
+    if (chartsData.analysts && chartsData.analysts.labels.length > 0) {
+        new Chart(document.getElementById('chartAnalysts').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: chartsData.analysts.labels,
+                datasets: [{
+                    label: 'Dossiers approuvés',
+                    data: chartsData.analysts.data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)',
+                }]
+            },
+            options: { ...commonOptions, scales: { y: { beginAtZero: true } } }
+        });
+    }
+});
+</script>
+{% endblock %}

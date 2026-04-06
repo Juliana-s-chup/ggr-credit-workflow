@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Prédictions de Risque - GGR Crédit{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+    .predictions-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    .predictions-header h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 8px; }
+    .predictions-header p { opacity: 0.85; margin-bottom: 16px; }
+    .predictions-header .btn-back {
+        background: rgba(255,255,255,0.15);
+        color: white;
+        border: 1px solid rgba(255,255,255,0.3);
+        padding: 8px 20px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s;
+        margin-right: 10px;
+    }
+    .predictions-header .btn-back:hover {
+        background: rgba(255,255,255,0.25);
+        color: white;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 20px;
+        margin-bottom: 28px;
+    }
+    .kpi-card {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        text-align: center;
+        transition: transform 0.2s;
+    }
+    .kpi-card:hover { transform: translateY(-3px); }
+    .kpi-value {
+        font-size: 2rem;
+        font-weight: 800;
+        line-height: 1.2;
+    }
+    .kpi-label {
+        font-size: 0.82rem;
+        color: #6c757d;
+        margin-top: 6px;
+        font-weight: 500;
+    }
+    .kpi-icon {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+        opacity: 0.7;
+    }
+
+    .predictions-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        background: white;
+        border-radius: 14px;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .predictions-table th {
+        background: #f8f9fa;
+        padding: 12px 16px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #495057;
+        text-align: left;
+    }
+    .predictions-table td {
+        padding: 12px 16px;
+        font-size: 0.85rem;
+        border-top: 1px solid #f0f0f0;
+        vertical-align: middle;
+    }
+
+    .badge-risque {
+        padding: 5px 14px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .badge-risque.faible { background: #d1fae5; color: #065f46; }
+    .badge-risque.moyen { background: #fef3c7; color: #92400e; }
+    .badge-risque.eleve { background: #fee2e2; color: #991b1b; }
+
+    .score-bar {
+        width: 100%;
+        height: 8px;
+        background: #e9ecef;
+        border-radius: 4px;
+        overflow: hidden;
+    }
+    .score-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s;
+    }
+
+    .empty-state {
+        background: white;
+        border-radius: 14px;
+        padding: 60px 24px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="predictions-header">
+    <h1><i class="fas fa-brain"></i> Prédictions de Risque</h1>
+    <p>Analyse prédictive du risque crédit basée sur le Machine Learning</p>
+    <div>
+        <a href="javascript:history.back()" class="btn-back"><i class="fas fa-arrow-left me-1"></i> Retour</a>
+        <a href="{% url 'analytics:dashboard_analytics' %}" class="btn-back"><i class="fas fa-chart-line me-1"></i> Dashboard</a>
+    </div>
+</div>
+
+<!-- KPIs -->
+<div class="stats-grid">
+    <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-brain text-primary"></i></div>
+        <div class="kpi-value" style="color: #0d6efd;">{{ stats.total|default:0 }}</div>
+        <div class="kpi-label">Total prédictions</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-shield-alt text-success"></i></div>
+        <div class="kpi-value" style="color: #198754;">{{ stats.faible|default:0 }}</div>
+        <div class="kpi-label">Risque faible</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-exclamation-triangle text-warning"></i></div>
+        <div class="kpi-value" style="color: #fd7e14;">{{ stats.moyen|default:0 }}</div>
+        <div class="kpi-label">Risque moyen</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-icon"><i class="fas fa-skull-crossbones text-danger"></i></div>
+        <div class="kpi-value" style="color: #dc3545;">{{ stats.eleve|default:0 }}</div>
+        <div class="kpi-label">Risque élevé</div>
+    </div>
+</div>
+
+<!-- Liste des prédictions -->
+{% if predictions %}
+<div style="overflow-x: auto;">
+    <table class="predictions-table">
+        <thead>
+            <tr>
+                <th>Référence</th>
+                <th>Client</th>
+                <th>Montant</th>
+                <th>Score risque</th>
+                <th>Classe</th>
+                <th>Prob. défaut</th>
+                <th>Confiance</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pred in predictions %}
+            <tr>
+                <td><strong>{{ pred.dossier.reference }}</strong></td>
+                <td>{{ pred.dossier.client.get_full_name|default:pred.dossier.client.username }}</td>
+                <td>{{ pred.dossier.montant|floatformat:0 }} FCFA</td>
+                <td>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="fw-bold">{{ pred.score_risque|floatformat:0 }}</span>
+                        <div class="score-bar" style="width: 60px;">
+                            <div class="score-bar-fill" style="width: {{ pred.score_risque }}%;
+                                background: {% if pred.score_risque < 33 %}#198754{% elif pred.score_risque < 66 %}#fd7e14{% else %}#dc3545{% endif %};"></div>
+                        </div>
+                    </div>
+                </td>
+                <td>
+                    <span class="badge-risque {% if pred.classe_risque == 'FAIBLE' %}faible{% elif pred.classe_risque == 'MOYEN' %}moyen{% else %}eleve{% endif %}">
+                        {{ pred.get_classe_risque_display }}
+                    </span>
+                </td>
+                <td>{{ pred.probabilite_defaut|floatformat:2 }}</td>
+                <td>{{ pred.confiance|floatformat:2 }}</td>
+                <td>{{ pred.date_prediction|date:"d/m/Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="empty-state">
+    <i class="fas fa-brain fa-3x text-muted mb-3 d-block"></i>
+    <h4 class="text-muted">Aucune prédiction disponible</h4>
+    <p class="text-muted">Les prédictions seront générées lorsqu'un analyste lancera une analyse de risque sur un dossier.</p>
+</div>
+{% endif %}
+{% endblock %}

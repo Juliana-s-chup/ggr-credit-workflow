@@ -267,10 +267,10 @@
       {% load static %}
       {% if request.resolver_match.namespace == 'client' %}
       <a class="navbar-brand d-flex align-items-center" href="{% url 'client:home' %}" aria-label="Logo - Retour à l'accueil">
-      {% elif request.resolver_match.namespace == 'pro' %}
-      <a class="navbar-brand d-flex align-items-center" href="{% url 'pro:home' %}" aria-label="Logo - Retour à l'accueil">
+      {% elif request.resolver_match.namespace == 'pro' or request.resolver_match.namespace == 'analytics' %}
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'pro:dashboard' %}" aria-label="Logo - Retour à l'accueil">
       {% else %}
-      <a class="navbar-brand d-flex align-items-center" href="#" aria-label="Logo - Retour à l'accueil">
+      <a class="navbar-brand d-flex align-items-center" href="{% url 'pro:dashboard' %}" aria-label="Logo - Retour à l'accueil">
       {% endif %}
         <img src="{% static 'core/img/Credit_Du_Congo.png' %}" 
              alt="Logo" 

@@ -36,7 +36,7 @@ urlpatterns = [
         name="view_documents",
     ),
     # Notifications
-    path("notifications/", views.notifications_list, name="notifications_list"),
+    path("notifications/", views.notifications_list, name="notifications"),
     path(
         "notifications/marquer-tout-lu/",
         views.notifications_mark_all_read,

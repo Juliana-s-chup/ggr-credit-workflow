@@ -13,8 +13,10 @@ from django.views.decorators.http import require_GET
 from datetime import datetime
 
 from .models import UserRoles
+from core.security import rate_limit
 
 
+@rate_limit('login_client', limit=5, period=300)  # 5 tentatives par 5 minutes
 def login_client_view(request):
     """
     Vue de connexion pour le portail CLIENT
@@ -59,6 +61,7 @@ def login_client_view(request):
     )
 
 
+@rate_limit('login_pro', limit=5, period=300)  # 5 tentatives par 5 minutes
 def login_pro_view(request):
     """
     Vue de connexion pour le portail PROFESSIONNEL
@@ -143,36 +146,40 @@ def view_documents(request, dossier_id):
 
 
 @login_required
-def all_dossiers_list(request):
-    """
-    Liste de tous les dossiers pour les professionnels
-    Avec filtres et recherche
-    """
+def all_dossiers_view(request):
+    """Vue de tous les dossiers pour les professionnels avec pagination"""
     from .models import DossierCredit, UserRoles
+    from django.core.paginator import Paginator
+    from .constants import ITEMS_PER_PAGE
 
-    # Verifier le role professionnel
+    # Determiner le role de l'utilisateur
     profile = getattr(request.user, "profile", None)
     role = getattr(profile, "role", None)
 
     # Filtrer selon le role
     if role == UserRoles.GESTIONNAIRE:
-        dossiers = DossierCredit.objects.filter(
+        dossiers_list = DossierCredit.objects.filter(
             statut_agent__in=["NOUVEAU", "INCOMPLET"]
         )
     elif role == UserRoles.ANALYSTE:
-        dossiers = DossierCredit.objects.filter(
+        dossiers_list = DossierCredit.objects.filter(
             statut_agent__in=["TRANSMIS_ANALYSTE", "EN_COURS_ANALYSE"]
         )
     elif role == UserRoles.RESPONSABLE_GGR:
-        dossiers = DossierCredit.objects.filter(
+        dossiers_list = DossierCredit.objects.filter(
             statut_agent__in=["EN_COURS_VALIDATION_GGR", "EN_ATTENTE_DECISION_DG"]
         )
     elif role == UserRoles.BOE:
-        dossiers = DossierCredit.objects.filter(statut_agent="APPROUVE_ATTENTE_FONDS")
+        dossiers_list = DossierCredit.objects.filter(statut_agent="APPROUVE_ATTENTE_FONDS")
     else:  # SUPER_ADMIN
-        dossiers = DossierCredit.objects.all()
+        dossiers_list = DossierCredit.objects.all()
 
-    dossiers = dossiers.order_by("-date_soumission")
+    dossiers_list = dossiers_list.select_related('client', 'acteur_courant').order_by("-date_soumission")
+
+    # Pagination
+    paginator = Paginator(dossiers_list, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    dossiers = paginator.get_page(page_number)
 
     return render(
         request,
@@ -225,15 +232,20 @@ def reports_view(request):
         return role
 
     user_role = get_user_role(request.user)
-    allowed_roles = [
-        UserRoles.GESTIONNAIRE,
-        UserRoles.ANALYSTE,
-        UserRoles.RESPONSABLE_GGR,
-        UserRoles.BOE,
-        UserRoles.SUPER_ADMIN,
-    ]
-    if user_role not in allowed_roles:
-        messages.error(request, "Acces non autorise e  la page Rapports.")
+    
+    # Router chaque rôle vers sa vue de rapports spécifique
+    if user_role == UserRoles.SUPER_ADMIN:
+        return reports_users_view(request)
+    elif user_role == UserRoles.GESTIONNAIRE:
+        return reports_gestionnaire_view(request)
+    elif user_role == UserRoles.ANALYSTE:
+        return reports_analyste_view(request)
+    elif user_role == UserRoles.RESPONSABLE_GGR:
+        return reports_responsable_ggr_view(request)
+    elif user_role == UserRoles.BOE:
+        return reports_boe_view(request)
+    else:
+        messages.error(request, "Acces non autorise e  la page Rapports.")
         return redirect("pro:dashboard")
 
     qs = _scope_queryset_par_role(request.user)
@@ -510,3 +522,650 @@ def stats_view(request):
     """Vue des statistiques detaillees"""
     # e€ implementer selon vos besoins
     return render(request, "portail_pro/stats.html", {})
+
+
+@login_required
+def reports_redirect(request):
+    """Redirection vers la vue des rapports"""
+    return reports_view(request)
+
+
+@login_required
+@require_GET
+def reports_users_view(request):
+    """Vue des rapports utilisateurs pour le super administrateur"""
+    from django.contrib.auth import get_user_model
+    from django.db.models import Count
+    from django.db.models.functions import TruncMonth
+    from .models import UserProfile, UserRoles
+    import json
+    
+    User = get_user_model()
+    
+    # Vérifier que l'utilisateur est bien super admin
+    profile = getattr(request.user, "profile", None)
+    role = getattr(profile, "role", None)
+    if role != UserRoles.SUPER_ADMIN:
+        messages.error(request, "Accès non autorisé à cette page.")
+        return redirect("pro:dashboard")
+    
+    # Filtrage par période
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+    
+    users_qs = User.objects.select_related("profile").all()
+    
+    try:
+        if date_debut:
+            dt_start = datetime.fromisoformat(date_debut)
+            users_qs = users_qs.filter(date_joined__gte=dt_start)
+        if date_fin:
+            dt_end = datetime.fromisoformat(date_fin)
+            users_qs = users_qs.filter(date_joined__lte=dt_end)
+    except Exception:
+        pass
+    
+    # Statistiques générales
+    stats = {
+        "total_users": users_qs.count(),
+        "active_users": users_qs.filter(is_active=True).count(),
+        "inactive_users": users_qs.filter(is_active=False).count(),
+        "users_this_period": users_qs.count(),
+    }
+    
+    # Répartition par rôle
+    par_role = []
+    for role_value, role_label in UserRoles.choices:
+        count = UserProfile.objects.filter(
+            user__in=users_qs, role=role_value
+        ).count()
+        if count > 0:
+            par_role.append({"role": role_label, "count": count})
+    
+    # KPIs
+    total_profiles = UserProfile.objects.filter(user__in=users_qs).count()
+    users_with_profile = users_qs.filter(profile__isnull=False).count()
+    profile_completion_rate = round((users_with_profile / stats["total_users"] * 100), 2) if stats["total_users"] > 0 else 0
+    
+    kpis = {
+        "total_profiles": total_profiles,
+        "profile_completion_rate": profile_completion_rate,
+        "active_rate": round((stats["active_users"] / stats["total_users"] * 100), 2) if stats["total_users"] > 0 else 0,
+    }
+    
+    # Données pour graphiques
+    # 1. Évolution mensuelle des inscriptions
+    monthly_data = (
+        users_qs.annotate(mois=TruncMonth("date_joined"))
+        .values("mois")
+        .annotate(count=Count("id"))
+        .order_by("mois")
+    )
+    chart_monthly = {
+        "labels": [
+            d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_data
+        ],
+        "data": [d["count"] for d in monthly_data],
+    }
+    
+    # 2. Répartition par rôle (camembert)
+    chart_roles = {
+        "labels": [r["role"] for r in par_role],
+        "data": [r["count"] for r in par_role],
+    }
+    
+    # 3. Actifs vs Inactifs
+    chart_status = {
+        "labels": ["Actifs", "Inactifs"],
+        "data": [stats["active_users"], stats["inactive_users"]],
+    }
+    
+    charts_data = {
+        "monthly": chart_monthly,
+        "roles": chart_roles,
+        "status": chart_status,
+    }
+    
+    return render(
+        request,
+        "portail_pro/reports_users.html",
+        {
+            "stats": stats,
+            "par_role": par_role,
+            "kpis": kpis,
+            "charts_json": json.dumps(charts_data),
+        },
+    )
+
+
+@login_required
+@require_GET
+def reports_gestionnaire_view(request):
+    """Vue des rapports pour le Gestionnaire - Pilotage global des dossiers"""
+    from .models import DossierCredit, JournalAction, DossierStatutAgent
+    from django.db.models import Count, Sum, Avg, Q
+    from django.db.models.functions import TruncMonth
+    import json
+    
+    # Tous les dossiers (vue globale du gestionnaire)
+    qs = DossierCredit.objects.all()
+    
+    # Filtrage par période
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+    
+    try:
+        if date_debut:
+            dt_start = datetime.fromisoformat(date_debut)
+            qs = qs.filter(date_soumission__gte=dt_start)
+        if date_fin:
+            dt_end = datetime.fromisoformat(date_fin)
+            qs = qs.filter(date_soumission__lte=dt_end)
+    except Exception:
+        pass
+    
+    # Statistiques générales
+    stats = {
+        "total_dossiers": qs.count(),
+        "dossiers_nouveaux": qs.filter(statut_agent=DossierStatutAgent.NOUVEAU).count(),
+        "dossiers_en_cours": qs.exclude(
+            statut_agent__in=[DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+        ).count(),
+        "dossiers_approuves": qs.filter(statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS).count(),
+        "dossiers_refuses": qs.filter(statut_agent=DossierStatutAgent.REFUSE).count(),
+        "dossiers_liberes": qs.filter(statut_agent=DossierStatutAgent.FONDS_LIBERE).count(),
+        "montant_total": qs.aggregate(total=Sum("montant"))["total"] or 0,
+    }
+    
+    # Répartition par statut
+    par_statut = (
+        qs.values("statut_agent")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    
+    # KPIs spécifiques au gestionnaire
+    finals = [DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
+    processed_count = qs.filter(statut_agent__in=finals).count()
+    approved_count = qs.filter(statut_agent__in=[DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE]).count()
+    refused_count = qs.filter(statut_agent=DossierStatutAgent.REFUSE).count()
+    
+    denom = processed_count or 1
+    acceptance_rate = round((approved_count / denom) * 100, 2)
+    reject_rate = round((refused_count / denom) * 100, 2)
+    
+    # Dossiers avec retour client
+    rework_count = JournalAction.objects.filter(
+        dossier_id__in=qs.values_list("id", flat=True),
+        action__in=["RETOUR_CLIENT", "RETOUR_GESTIONNAIRE"]
+    ).values("dossier_id").distinct().count()
+    
+    kpis = {
+        "processed_count": processed_count,
+        "acceptance_rate": acceptance_rate,
+        "reject_rate": reject_rate,
+        "rework_count": rework_count,
+        "montant_approuve": qs.filter(
+            statut_agent__in=[DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE]
+        ).aggregate(total=Sum("montant"))["total"] or 0,
+    }
+    
+    # Graphiques
+    # 1. Évolution mensuelle des dossiers créés
+    monthly_data = (
+        qs.annotate(mois=TruncMonth("date_soumission"))
+        .values("mois")
+        .annotate(count=Count("id"))
+        .order_by("mois")
+    )
+    chart_monthly = {
+        "labels": [d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_data],
+        "data": [d["count"] for d in monthly_data],
+    }
+    
+    # 2. Répartition par statut
+    chart_statuts = {
+        "labels": [row["statut_agent"] for row in par_statut],
+        "data": [row["count"] for row in par_statut],
+    }
+    
+    # 3. Performance par analyste (top 5)
+    analyst_performance = []
+    try:
+        analysts = qs.filter(
+            statut_agent__in=finals
+        ).values("acteur_courant__username").annotate(
+            total=Count("id"),
+            approuves=Count("id", filter=Q(statut_agent__in=[DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE]))
+        ).order_by("-total")[:5]
+        
+        for analyst in analysts:
+            if analyst["acteur_courant__username"]:
+                analyst_performance.append({
+                    "name": analyst["acteur_courant__username"],
+                    "total": analyst["total"],
+                    "approuves": analyst["approuves"]
+                })
+    except Exception:
+        pass
+    
+    chart_analysts = {
+        "labels": [a["name"] for a in analyst_performance],
+        "data": [a["approuves"] for a in analyst_performance],
+    }
+    
+    charts_data = {
+        "monthly": chart_monthly,
+        "statuts": chart_statuts,
+        "analysts": chart_analysts,
+    }
+    
+    return render(
+        request,
+        "portail_pro/reports_gestionnaire.html",
+        {
+            "stats": stats,
+            "par_statut": par_statut,
+            "kpis": kpis,
+            "charts_json": json.dumps(charts_data),
+        },
+    )
+
+
+@login_required
+@require_GET
+def reports_analyste_view(request):
+    """Vue des rapports pour l'Analyste - Analyses et scoring de crédit"""
+    from .models import DossierCredit, JournalAction, DossierStatutAgent
+    from django.db.models import Count, Sum, Avg, Q
+    from django.db.models.functions import TruncMonth
+    import json
+    
+    # Dossiers assignés à l'analyste ou qu'il a traités
+    dossier_ids = (
+        JournalAction.objects.filter(acteur=request.user)
+        .values_list("dossier_id", flat=True)
+        .distinct()
+    )
+    qs = DossierCredit.objects.filter(
+        Q(id__in=dossier_ids) | Q(acteur_courant=request.user)
+    )
+    
+    # Filtrage par période
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+    
+    try:
+        if date_debut:
+            dt_start = datetime.fromisoformat(date_debut)
+            qs = qs.filter(date_soumission__gte=dt_start)
+        if date_fin:
+            dt_end = datetime.fromisoformat(date_fin)
+            qs = qs.filter(date_soumission__lte=dt_end)
+    except Exception:
+        pass
+    
+    # Statistiques générales
+    stats = {
+        "total_dossiers": qs.count(),
+        "dossiers_en_analyse": qs.filter(
+            statut_agent__in=[DossierStatutAgent.TRANSMIS_ANALYSTE, DossierStatutAgent.EN_COURS_ANALYSE]
+        ).count(),
+        "dossiers_analyses": qs.filter(
+            statut_agent__in=[
+                DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+                DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE
+            ]
+        ).count(),
+        "dossiers_approuves": qs.filter(
+            statut_agent__in=[DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE]
+        ).count(),
+        "dossiers_refuses": qs.filter(statut_agent=DossierStatutAgent.REFUSE).count(),
+        "montant_total": qs.aggregate(total=Sum("montant"))["total"] or 0,
+    }
+    
+    # Répartition par statut
+    par_statut = (
+        qs.values("statut_agent")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    
+    # KPIs spécifiques à l'analyste
+    analyses_terminees = stats["dossiers_analyses"]
+    approuves = stats["dossiers_approuves"]
+    refuses = stats["dossiers_refuses"]
+    
+    denom = analyses_terminees or 1
+    taux_approbation = round((approuves / denom) * 100, 2)
+    taux_refus = round((refuses / denom) * 100, 2)
+    
+    # Délai moyen d'analyse
+    delai_moyen = 0.0
+    try:
+        analyses_avec_delai = []
+        for dossier in qs.filter(statut_agent__in=[
+            DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+            DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+            DossierStatutAgent.FONDS_LIBERE,
+            DossierStatutAgent.REFUSE
+        ]):
+            # Chercher la première action de l'analyste
+            premiere_action = JournalAction.objects.filter(
+                dossier=dossier,
+                acteur=request.user
+            ).order_by("timestamp").first()
+            
+            if premiere_action and dossier.date_maj:
+                delta = (dossier.date_maj - premiere_action.timestamp).total_seconds() / 86400
+                if delta >= 0:
+                    analyses_avec_delai.append(delta)
+        
+        if analyses_avec_delai:
+            delai_moyen = round(sum(analyses_avec_delai) / len(analyses_avec_delai), 2)
+    except Exception:
+        pass
+    
+    kpis = {
+        "analyses_terminees": analyses_terminees,
+        "taux_approbation": taux_approbation,
+        "taux_refus": taux_refus,
+        "delai_moyen": delai_moyen,
+        "montant_analyse": qs.filter(
+            statut_agent__in=[
+                DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+                DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+                DossierStatutAgent.FONDS_LIBERE
+            ]
+        ).aggregate(total=Sum("montant"))["total"] or 0,
+    }
+    
+    # Graphiques
+    # 1. Évolution mensuelle des analyses
+    monthly_data = (
+        qs.filter(statut_agent__in=[
+            DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+            DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+            DossierStatutAgent.FONDS_LIBERE,
+            DossierStatutAgent.REFUSE
+        ])
+        .annotate(mois=TruncMonth("date_maj"))
+        .values("mois")
+        .annotate(count=Count("id"))
+        .order_by("mois")
+    )
+    chart_monthly = {
+        "labels": [d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_data],
+        "data": [d["count"] for d in monthly_data],
+    }
+    
+    # 2. Répartition par statut
+    chart_statuts = {
+        "labels": [row["statut_agent"] for row in par_statut],
+        "data": [row["count"] for row in par_statut],
+    }
+    
+    # 3. Décisions (Approuvé vs Refusé)
+    chart_decisions = {
+        "labels": ["Approuvés", "Refusés", "En cours"],
+        "data": [approuves, refuses, stats["dossiers_en_analyse"]],
+    }
+    
+    charts_data = {
+        "monthly": chart_monthly,
+        "statuts": chart_statuts,
+        "decisions": chart_decisions,
+    }
+    
+    return render(
+        request,
+        "portail_pro/reports_analyste.html",
+        {
+            "stats": stats,
+            "par_statut": par_statut,
+            "kpis": kpis,
+            "charts_json": json.dumps(charts_data),
+        },
+    )
+
+
+@login_required
+@require_GET
+def reports_responsable_ggr_view(request):
+    """Vue des rapports pour le Responsable GGR - Validations et décisions"""
+    from .models import DossierCredit, JournalAction, DossierStatutAgent
+    from django.db.models import Count, Sum, Q
+    from django.db.models.functions import TruncMonth
+    import json
+    
+    # Tous les dossiers (vue globale pour validation)
+    qs = DossierCredit.objects.all()
+    
+    # Filtrage par période
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+    
+    try:
+        if date_debut:
+            dt_start = datetime.fromisoformat(date_debut)
+            qs = qs.filter(date_soumission__gte=dt_start)
+        if date_fin:
+            dt_end = datetime.fromisoformat(date_fin)
+            qs = qs.filter(date_soumission__lte=dt_end)
+    except Exception:
+        pass
+    
+    # Statistiques générales
+    stats = {
+        "total_dossiers": qs.count(),
+        "en_attente_validation": qs.filter(
+            statut_agent=DossierStatutAgent.EN_COURS_VALIDATION_GGR
+        ).count(),
+        "valides_approuves": qs.filter(
+            statut_agent__in=[DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE]
+        ).count(),
+        "refuses": qs.filter(statut_agent=DossierStatutAgent.REFUSE).count(),
+        "en_attente_dg": qs.filter(statut_agent=DossierStatutAgent.EN_ATTENTE_DECISION_DG).count(),
+        "montant_total": qs.aggregate(total=Sum("montant"))["total"] or 0,
+    }
+    
+    # Répartition par statut
+    par_statut = (
+        qs.values("statut_agent")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    
+    # KPIs spécifiques au Responsable GGR
+    decisions_prises = stats["valides_approuves"] + stats["refuses"]
+    approuves = stats["valides_approuves"]
+    refuses = stats["refuses"]
+    
+    denom = decisions_prises or 1
+    taux_approbation = round((approuves / denom) * 100, 2)
+    taux_refus = round((refuses / denom) * 100, 2)
+    
+    # Montants validés
+    montant_valide = qs.filter(
+        statut_agent__in=[DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE]
+    ).aggregate(total=Sum("montant"))["total"] or 0
+    
+    montant_refuse = qs.filter(
+        statut_agent=DossierStatutAgent.REFUSE
+    ).aggregate(total=Sum("montant"))["total"] or 0
+    
+    kpis = {
+        "decisions_prises": decisions_prises,
+        "taux_approbation": taux_approbation,
+        "taux_refus": taux_refus,
+        "montant_valide": montant_valide,
+        "montant_refuse": montant_refuse,
+    }
+    
+    # Graphiques
+    # 1. Évolution mensuelle des validations
+    monthly_data = (
+        qs.filter(statut_agent__in=[
+            DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+            DossierStatutAgent.FONDS_LIBERE,
+            DossierStatutAgent.REFUSE
+        ])
+        .annotate(mois=TruncMonth("date_maj"))
+        .values("mois")
+        .annotate(count=Count("id"))
+        .order_by("mois")
+    )
+    chart_monthly = {
+        "labels": [d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_data],
+        "data": [d["count"] for d in monthly_data],
+    }
+    
+    # 2. Répartition par statut
+    chart_statuts = {
+        "labels": [row["statut_agent"] for row in par_statut],
+        "data": [row["count"] for row in par_statut],
+    }
+    
+    # 3. Décisions (Approuvés vs Refusés vs En attente)
+    chart_decisions = {
+        "labels": ["Approuvés", "Refusés", "En attente validation"],
+        "data": [approuves, refuses, stats["en_attente_validation"]],
+    }
+    
+    charts_data = {
+        "monthly": chart_monthly,
+        "statuts": chart_statuts,
+        "decisions": chart_decisions,
+    }
+    
+    return render(
+        request,
+        "portail_pro/reports_responsable_ggr.html",
+        {
+            "stats": stats,
+            "par_statut": par_statut,
+            "kpis": kpis,
+            "charts_json": json.dumps(charts_data),
+        },
+    )
+
+
+@login_required
+@require_GET
+def reports_boe_view(request):
+    """Vue des rapports pour le BOE - Libération de fonds"""
+    from .models import DossierCredit, JournalAction, DossierStatutAgent
+    from django.db.models import Count, Sum
+    from django.db.models.functions import TruncMonth
+    import json
+    
+    # Dossiers pertinents pour le BOE (approuvés et fonds libérés)
+    qs = DossierCredit.objects.filter(
+        statut_agent__in=[DossierStatutAgent.APPROUVE_ATTENTE_FONDS, DossierStatutAgent.FONDS_LIBERE]
+    )
+    
+    # Filtrage par période
+    date_debut = request.GET.get("date_debut")
+    date_fin = request.GET.get("date_fin")
+    
+    try:
+        if date_debut:
+            dt_start = datetime.fromisoformat(date_debut)
+            qs = qs.filter(date_soumission__gte=dt_start)
+        if date_fin:
+            dt_end = datetime.fromisoformat(date_fin)
+            qs = qs.filter(date_soumission__lte=dt_end)
+    except Exception:
+        pass
+    
+    # Statistiques générales
+    stats = {
+        "total_dossiers": qs.count(),
+        "en_attente_liberation": qs.filter(
+            statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
+        ).count(),
+        "fonds_liberes": qs.filter(
+            statut_agent=DossierStatutAgent.FONDS_LIBERE
+        ).count(),
+        "montant_total": qs.aggregate(total=Sum("montant"))["total"] or 0,
+        "montant_en_attente": qs.filter(
+            statut_agent=DossierStatutAgent.APPROUVE_ATTENTE_FONDS
+        ).aggregate(total=Sum("montant"))["total"] or 0,
+        "montant_libere": qs.filter(
+            statut_agent=DossierStatutAgent.FONDS_LIBERE
+        ).aggregate(total=Sum("montant"))["total"] or 0,
+    }
+    
+    # Répartition par statut
+    par_statut = (
+        qs.values("statut_agent")
+        .annotate(count=Count("id"))
+        .order_by("-count")
+    )
+    
+    # KPIs spécifiques au BOE
+    total = stats["total_dossiers"]
+    liberes = stats["fonds_liberes"]
+    en_attente = stats["en_attente_liberation"]
+    
+    denom = total or 1
+    taux_liberation = round((liberes / denom) * 100, 2)
+    taux_en_attente = round((en_attente / denom) * 100, 2)
+    
+    kpis = {
+        "taux_liberation": taux_liberation,
+        "taux_en_attente": taux_en_attente,
+        "montant_moyen_libere": round(stats["montant_libere"] / liberes, 2) if liberes > 0 else 0,
+    }
+    
+    # Graphiques
+    # 1. Évolution mensuelle des libérations
+    monthly_data = (
+        qs.filter(statut_agent=DossierStatutAgent.FONDS_LIBERE)
+        .annotate(mois=TruncMonth("date_maj"))
+        .values("mois")
+        .annotate(count=Count("id"))
+        .order_by("mois")
+    )
+    chart_monthly = {
+        "labels": [d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_data],
+        "data": [d["count"] for d in monthly_data],
+    }
+    
+    # 2. Montants par mois
+    monthly_montants = (
+        qs.filter(statut_agent=DossierStatutAgent.FONDS_LIBERE)
+        .annotate(mois=TruncMonth("date_maj"))
+        .values("mois")
+        .annotate(montant=Sum("montant"))
+        .order_by("mois")
+    )
+    chart_montants = {
+        "labels": [d["mois"].strftime("%b %Y") if d["mois"] else "" for d in monthly_montants],
+        "data": [float(d["montant"]) for d in monthly_montants],
+    }
+    
+    # 3. Statut (En attente vs Libéré)
+    chart_statut = {
+        "labels": ["En attente libération", "Fonds libérés"],
+        "data": [en_attente, liberes],
+    }
+    
+    charts_data = {
+        "monthly": chart_monthly,
+        "montants": chart_montants,
+        "statut": chart_statut,
+    }
+    
+    return render(
+        request,
+        "portail_pro/reports_boe.html",
+        {
+            "stats": stats,
+            "par_statut": par_statut,
+            "kpis": kpis,
+            "charts_json": json.dumps(charts_data),
+        },
+    )

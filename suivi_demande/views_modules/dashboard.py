@@ -432,7 +432,7 @@ def _dashboard_boe(request):
 
 
 def _dashboard_super_admin(request):
-    """Dashboard pour le super administrateur."""
+    """Dashboard pour le super administrateur - Gestion des utilisateurs uniquement."""
     from django.contrib.auth import get_user_model
     from django.contrib.admin.models import LogEntry
 

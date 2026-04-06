@@ -41,7 +41,7 @@ class AnalyticsService:
             date_debut = now - timedelta(days=365)
 
         # Recuperer les dossiers de la periode
-        dossiers = DossierCredit.objects.filter(created_at__gte=date_debut)
+        dossiers = DossierCredit.objects.filter(date_soumission__gte=date_debut)
 
         # Compteurs
         total = dossiers.count()
@@ -56,21 +56,21 @@ class AnalyticsService:
         approuves = dossiers.filter(
             statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]
         ).count()
-        rejetes = dossiers.filter(statut_agent="REJETE").count()
+        rejetes = dossiers.filter(statut_agent="REFUSE").count()
         archives = dossiers.filter(is_archived=True).count()
 
         # Montants
         montant_total = (
-            dossiers.aggregate(Sum("montant_demande"))["montant_demande__sum"] or 0
+            dossiers.aggregate(Sum("montant"))["montant__sum"] or 0
         )
         montant_approuve = (
             dossiers.filter(
                 statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"]
-            ).aggregate(Sum("montant_demande"))["montant_demande__sum"]
+            ).aggregate(Sum("montant"))["montant__sum"]
             or 0
         )
         montant_moyen = (
-            dossiers.aggregate(Avg("montant_demande"))["montant_demande__avg"] or 0
+            dossiers.aggregate(Avg("montant"))["montant__avg"] or 0
         )
 
         # Delais (calcul simplifie)
@@ -108,17 +108,17 @@ class AnalyticsService:
             if dossier.statut_agent in [
                 "APPROUVE_ATTENTE_FONDS",
                 "FONDS_LIBERE",
-                "REJETE",
+                "REFUSE",
             ]:
                 # Calculer le delai entre creation et decision finale
                 derniere_action = (
                     JournalAction.objects.filter(dossier=dossier)
-                    .order_by("-created_at")
+                    .order_by("-timestamp")
                     .first()
                 )
 
                 if derniere_action:
-                    delai = (derniere_action.created_at - dossier.created_at).days
+                    delai = (derniere_action.timestamp - dossier.date_soumission).days
                     delais.append(delai)
 
         return sum(delais) / len(delais) if delais else 0
@@ -139,12 +139,12 @@ class AnalyticsService:
             ]
         ).count()
         dossiers_ce_mois = DossierCredit.objects.filter(
-            created_at__month=timezone.now().month, created_at__year=timezone.now().year
+            date_soumission__month=timezone.now().month, date_soumission__year=timezone.now().year
         ).count()
 
         # Taux d'approbation
         dossiers_termines = DossierCredit.objects.filter(
-            statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REJETE"]
+            statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REFUSE"]
         )
         total_termines = dossiers_termines.count()
         approuves = dossiers_termines.filter(
@@ -156,8 +156,8 @@ class AnalyticsService:
 
         # Montant total
         montant_total = (
-            DossierCredit.objects.aggregate(Sum("montant_demande"))[
-                "montant_demande__sum"
+            DossierCredit.objects.aggregate(Sum("montant"))[
+                "montant__sum"
             ]
             or 0
         )
@@ -183,7 +183,7 @@ class AnalyticsService:
             date = timezone.now() - timedelta(days=30 * i)
             mois_labels.append(date.strftime("%b %Y"))
             count = DossierCredit.objects.filter(
-                created_at__month=date.month, created_at__year=date.year
+                date_soumission__month=date.month, date_soumission__year=date.year
             ).count()
             mois_data.append(count)
 
@@ -195,8 +195,8 @@ class AnalyticsService:
         statuts_data = [s["count"] for s in statuts]
 
         # Repartition par type de credit
-        types = DossierCredit.objects.values("type_credit").annotate(count=Count("id"))
-        types_labels = [t["type_credit"] for t in types]
+        types = DossierCredit.objects.values("produit").annotate(count=Count("id"))
+        types_labels = [t["produit"] for t in types]
         types_data = [t["count"] for t in types]
 
         return {
@@ -231,7 +231,7 @@ class MLPredictionService:
         """
         # Recuperer les dossiers termines (approuves ou rejetes)
         dossiers = DossierCredit.objects.filter(
-            statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REJETE"]
+            statut_agent__in=["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE", "REFUSE"]
         )
 
         if dossiers.count() < 10:
@@ -245,7 +245,7 @@ class MLPredictionService:
             features = MLPredictionService._extraire_features(dossier)
             X.append(features)
             # Label: 1 si rejete, 0 si approuve
-            y.append(1 if dossier.statut_agent == "REJETE" else 0)
+            y.append(1 if dossier.statut_agent == "REFUSE" else 0)
 
         X = np.array(X)
         y = np.array(y)
@@ -271,7 +271,7 @@ class MLPredictionService:
         Extrait les features d'un dossier pour le ML
         """
         return [
-            float(dossier.montant_demande or 0),
+            float(dossier.montant or 0),
             float(dossier.duree_mois or 0),
             (
                 float(dossier.revenu_mensuel or 0)
@@ -330,7 +330,7 @@ class MLPredictionService:
                 "recommandation": recommandation,
                 "confiance": 0.75,  # Simplifie
                 "facteurs_risque": {
-                    "montant": float(dossier.montant_demande),
+                    "montant": float(dossier.montant),
                     "duree": dossier.duree_mois,
                     "type": dossier.type_credit,
                 },
@@ -346,50 +346,103 @@ class ExportService:
     """
 
     @staticmethod
-    def exporter_statistiques_excel():
+    def exporter_statistiques_excel(user=None):
         """
-        Exporte les statistiques en Excel avec pandas
+        Exporte les statistiques en Excel avec pandas.
+        Filtre les dossiers selon le role de l'utilisateur connecte.
         """
-        # Recuperer les dossiers
-        dossiers = DossierCredit.objects.all().values(
+        # Determiner le role et filtrer les dossiers
+        role_label = "Tous les dossiers"
+        queryset = DossierCredit.objects.all()
+
+        if user and hasattr(user, "profile"):
+            role = user.profile.role
+            if role == "GESTIONNAIRE":
+                queryset = queryset.filter(is_archived=False)
+                role_label = "Gestionnaire - Dossiers actifs"
+            elif role == "ANALYSTE":
+                queryset = queryset.filter(
+                    statut_agent__in=[
+                        "TRANSMIS_ANALYSTE",
+                        "EN_COURS_ANALYSE",
+                        "APPROUVE_ATTENTE_FONDS",
+                        "FONDS_LIBERE",
+                        "REFUSE",
+                    ]
+                )
+                role_label = "Analyste - Dossiers analysés"
+            elif role == "RESPONSABLE_GGR":
+                queryset = queryset.filter(
+                    statut_agent__in=[
+                        "EN_COURS_VALIDATION_GGR",
+                        "EN_ATTENTE_DECISION_DG",
+                        "APPROUVE_ATTENTE_FONDS",
+                        "FONDS_LIBERE",
+                        "REFUSE",
+                    ]
+                )
+                role_label = "Responsable GGR - Dossiers validation"
+            elif role == "BOE":
+                queryset = queryset.filter(
+                    statut_agent__in=[
+                        "APPROUVE_ATTENTE_FONDS",
+                        "FONDS_LIBERE",
+                    ]
+                )
+                role_label = "BOE - Dossiers liberation fonds"
+            # SUPER_ADMIN et CLIENT : pas de filtre supplementaire
+
+        dossiers = queryset.values(
             "reference",
             "client__username",
-            "type_credit",
-            "montant_demande",
+            "produit",
+            "montant",
             "statut_agent",
-            "created_at",
-            "updated_at",
+            "date_soumission",
+            "date_maj",
         )
 
         # Creer DataFrame
         df = pd.DataFrame(list(dossiers))
 
-        # Renommer les colonnes
-        df.columns = [
-            "Reference",
-            "Client",
-            "Type",
-            "Montant",
-            "Statut",
-            "Cree le",
-            "Modifie le",
-        ]
+        if len(df) > 0:
+            df.columns = [
+                "Référence",
+                "Client",
+                "Produit",
+                "Montant",
+                "Statut",
+                "Date soumission",
+                "Date MAJ",
+            ]
+            # Supprimer les timezones pour compatibilite Excel
+            for col in ["Date soumission", "Date MAJ"]:
+                if col in df.columns and hasattr(df[col], "dt"):
+                    df[col] = df[col].dt.tz_localize(None)
+        else:
+            df = pd.DataFrame(columns=[
+                "Référence", "Client", "Produit", "Montant",
+                "Statut", "Date soumission", "Date MAJ",
+            ])
 
         # Statistiques agregees
         stats = {
+            "Rapport": [role_label],
             "Total dossiers": [len(df)],
-            "Montant total": [df["Montant"].sum()],
-            "Montant moyen": [df["Montant"].mean()],
+            "Montant total": [df["Montant"].sum() if len(df) > 0 else 0],
+            "Montant moyen": [df["Montant"].mean() if len(df) > 0 else 0],
             "Taux approbation": [
-                len(df[df["Statut"].isin(["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"])])
+                (len(df[df["Statut"].isin(["APPROUVE_ATTENTE_FONDS", "FONDS_LIBERE"])])
                 / len(df)
-                * 100
+                * 100) if len(df) > 0 else 0
             ],
+            "Date export": [timezone.now().strftime("%d/%m/%Y %H:%M")],
         }
         df_stats = pd.DataFrame(stats)
 
         # Creer le fichier Excel
-        filename = f'statistiques_credit_{timezone.now().strftime("%Y%m%d")}.xlsx'
+        role_suffix = user.profile.role.lower() if user and hasattr(user, "profile") else "global"
+        filename = f'statistiques_{role_suffix}_{timezone.now().strftime("%Y%m%d")}.xlsx'
         filepath = f"media/exports/{filename}"
 
         os.makedirs("media/exports", exist_ok=True)

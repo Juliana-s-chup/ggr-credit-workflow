@@ -155,6 +155,18 @@
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* Animation pour le badge de notifications */
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.9;
+            }
+        }
     </style>
 </head>
 <body>
@@ -193,7 +205,41 @@
                     </h1>
                 </div>
                 <div class="d-flex align-items-center gap-3">
+                    <!-- Badge Notifications -->
                     {% if request.user.is_authenticated %}
+                    <div class="position-relative">
+                        {% if request.resolver_match.namespace == 'client' %}
+                        <a href="{% url 'client:notifications' %}" 
+                           class="btn btn-outline-primary position-relative" 
+                           style="border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                           title="Notifications">
+                            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  style="font-size: 0.65rem; padding: 4px 6px; animation: pulse 2s infinite;">
+                                {{ unread_notifications_count }}
+                                <span class="visually-hidden">notifications non lues</span>
+                            </span>
+                            {% endif %}
+                        </a>
+                        {% elif request.resolver_match.namespace == 'pro' %}
+                        <a href="{% url 'pro:notifications' %}" 
+                           class="btn btn-outline-primary position-relative" 
+                           style="border-radius: 50%; width: 45px; height: 45px; padding: 0; display: flex; align-items: center; justify-content: center;"
+                           title="Notifications">
+                            <i class="fas fa-bell" style="font-size: 1.2rem;"></i>
+                            {% if unread_notifications_count > 0 %}
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" 
+                                  style="font-size: 0.65rem; padding: 4px 6px; animation: pulse 2s infinite;">
+                                {{ unread_notifications_count }}
+                                <span class="visually-hidden">notifications non lues</span>
+                            </span>
+                            {% endif %}
+                        </a>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Bouton Déconnexion -->
                     {% if request.resolver_match.namespace == 'client' %}
                     <form method="post" action="{% url 'client:logout' %}" class="d-inline">
                         {% csrf_token %}

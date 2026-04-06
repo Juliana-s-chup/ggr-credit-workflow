@@ -6,16 +6,20 @@ from .base import *  # noqa
 
 DEBUG = True
 
-# Database: PostgreSQL from environment
+# Database: prefer DATABASE_URL (Docker-friendly), fallback to DB_*
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME", default="credit_db"),
-        "USER": env("DB_USER", default="credit_user"),
-        "PASSWORD": env("DB_PASSWORD", default=""),
-        "HOST": env("DB_HOST", default="127.0.0.1"),
-        "PORT": env("DB_PORT", default="5432"),
-    }
+    "default": env.db(
+        "DATABASE_URL",
+        default=(
+            "postgresql://{user}:{password}@{host}:{port}/{name}".format(
+                user=env("DB_USER", default="credit_user"),
+                password=env("DB_PASSWORD", default=""),
+                host=env("DB_HOST", default="127.0.0.1"),
+                port=env("DB_PORT", default="5432"),
+                name=env("DB_NAME", default="credit_db"),
+            )
+        ),
+    )
 }
 
 # Hosts / CSRF suitable for local dev (can be overridden via .env)

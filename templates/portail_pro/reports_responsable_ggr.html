@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-shield-alt text-primary"></i> Rapports Responsable GGR - Validations
+                </h1>
+                <p class="text-muted mb-0">Validations et décisions sur les dossiers de crédit</p>
+            </div>
+            <a href="{% url 'pro:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtres</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="date_debut" class="form-label">Date de début</label>
+                    <input type="date" class="form-control" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="date_fin" class="form-label">Date de fin</label>
+                    <input type="date" class="form-control" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                    <a href="{% url 'pro:reports' %}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPIs principaux -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-folder fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-0">{{ stats.total_dossiers|default:0 }}</h3>
+                    <p class="text-muted mb-0">Total Dossiers</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-warning">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-0">{{ stats.en_attente_validation|default:0 }}</h3>
+                    <p class="text-muted mb-0">En Attente Validation</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ stats.valides_approuves|default:0 }}</h3>
+                    <p class="text-muted mb-0">Validés/Approuvés</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-0">{{ stats.refuses|default:0 }}</h3>
+                    <p class="text-muted mb-0">Refusés</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPIs Performance -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Décisions Prises</h6>
+                    <h4>{{ kpis.decisions_prises|default:0 }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Taux d'Approbation</h6>
+                    <h4 class="text-success">{{ kpis.taux_approbation|default:0 }}%</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">Taux de Refus</h6>
+                    <h4 class="text-danger">{{ kpis.taux_refus|default:0 }}%</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h6 class="text-muted">En Attente DG</h6>
+                    <h4 class="text-info">{{ stats.en_attente_dg|default:0 }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Montants -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted"><i class="fas fa-check-circle text-success"></i> Montant Validé</h6>
+                    <h3 class="text-success">{{ kpis.montant_valide|floatformat:0 }} FCFA</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="text-muted"><i class="fas fa-times-circle text-danger"></i> Montant Refusé</h6>
+                    <h3 class="text-danger">{{ kpis.montant_refuse|floatformat:0 }} FCFA</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Visualisations analytiques</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">📈 Évolution mensuelle des validations</h6>
+                    <canvas id="chartMonthly" style="max-height: 300px;"></canvas>
+                </div>
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">🥧 Répartition par statut</h6>
+                    <canvas id="chartStatuts" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12 mb-4">
+                    <h6 class="text-center mb-3">📊 Décisions de validation</h6>
+                    <canvas id="chartDecisions" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tableau détaillé -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">📋 Répartition détaillée par statut</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Statut</th>
+                            <th class="text-end">Nombre</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in par_statut %}
+                        <tr>
+                            <td>{{ item.statut_agent }}</td>
+                            <td class="text-end"><strong>{{ item.count }}</strong></td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">Aucune donnée disponible</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartsData = {{ charts_json|safe }};
+    
+    // 1. Évolution mensuelle
+    if (chartsData.monthly && chartsData.monthly.labels.length > 0) {
+        new Chart(document.getElementById('chartMonthly').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: chartsData.monthly.labels,
+                datasets: [{
+                    label: 'Validations',
+                    data: chartsData.monthly.data,
+                    borderColor: 'rgb(153, 102, 255)',
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+    
+    // 2. Répartition par statut
+    if (chartsData.statuts && chartsData.statuts.labels.length > 0) {
+        new Chart(document.getElementById('chartStatuts').getContext('2d'), {
+            type: 'pie',
+            data: {
+                labels: chartsData.statuts.labels,
+                datasets: [{
+                    data: chartsData.statuts.data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)', 'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)', 'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)', 'rgba(255, 159, 64, 0.8)',
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+    
+    // 3. Décisions
+    if (chartsData.decisions) {
+        new Chart(document.getElementById('chartDecisions').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: chartsData.decisions.labels,
+                datasets: [{
+                    label: 'Nombre de dossiers',
+                    data: chartsData.decisions.data,
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(220, 53, 69, 0.8)',
+                        'rgba(255, 193, 7, 0.8)',
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: { legend: { position: 'bottom' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

@@ -58,108 +58,220 @@
 {% endblock %}
 
 {% block content %}
-<!-- Dashboard Section -->
+<!-- Dashboard Section - Grille CSS Compacte -->
 <section class="content-section active" id="dashboard-section">
-    <!-- Échéances à venir (alertes) -->
-    {% if echeances_a_venir %}
-    <div class="card mb-6">
-        <div class="card-header">
-            <h3 class="text-lg font-semibold">
-                <i class="fas fa-calendar-check"></i> Échéances à Venir (7 jours)
-            </h3>
+    <!-- Grille CSS 3x2 -->
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 10px;">
+        <!-- Widget 1: Mes Dossiers -->
+        <div class="card border-0 bg-primary" style="height: 150px; border-radius: 15px; box-shadow: 0 8px 25px rgba(13, 110, 253, 0.35); transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px) scale(1.02)'; this.style.boxShadow='0 12px 35px rgba(13, 110, 253, 0.5)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(13, 110, 253, 0.35)'">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <small class="text-white" style="font-size: 0.65rem; opacity: 0.95; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Mes Dossiers</small>
+                        <h2 class="mb-0 text-white fw-bold" style="font-size: 2.2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">{{ mes_dossiers|length }}</h2>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 12px; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <i class="fas fa-folder-open text-white" style="font-size: 1.6rem;"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-white" style="font-size: 0.65rem; opacity: 0.9; font-weight: 500;">Total</small>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <div class="grid-auto">
-                {% for echeance in echeances_a_venir %}
-                {% with days_until=echeance.date_echeance|days_until %}
-                <div class="card {% if days_until < 0 %}card-danger{% elif days_until <= 3 %}card-warning{% else %}card-primary{% endif %}">
-                    <div class="card-body">
-                        <div class="flex-between mb-4">
-                            <div>
-                                <h4 style="font-weight: bold; font-size: 1.125rem;">{{ echeance.dossier.reference }}</h4>
-                                <p class="text-sm text-muted">{{ echeance.dossier.produit }}</p>
+        
+        <!-- Widget 2: Approuvés -->
+        <div class="card border-0 bg-success" style="height: 150px; border-radius: 15px; box-shadow: 0 8px 25px rgba(25, 135, 84, 0.35); transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px) scale(1.02)'; this.style.boxShadow='0 12px 35px rgba(25, 135, 84, 0.5)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(25, 135, 84, 0.35)'">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <small class="text-white" style="font-size: 0.65rem; opacity: 0.95; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Approuvés</small>
+                        <h2 class="mb-0 text-white fw-bold" style="font-size: 2.2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">{{ dossiers_approuves|default:0 }}</h2>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 12px; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <i class="fas fa-check-circle text-white" style="font-size: 1.6rem;"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-white" style="font-size: 0.65rem; opacity: 0.9; font-weight: 500;">Dossiers</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Widget 3: Montant Total -->
+        <div class="card border-0 bg-warning" style="height: 150px; border-radius: 15px; box-shadow: 0 8px 25px rgba(255, 193, 7, 0.35); transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px) scale(1.02)'; this.style.boxShadow='0 12px 35px rgba(255, 193, 7, 0.5)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(255, 193, 7, 0.35)'">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <small class="fw-bold" style="font-size: 0.65rem; color: #000; letter-spacing: 1px; text-transform: uppercase;">Montant Total</small>
+                        <h2 class="mb-0 fw-bold" style="font-size: 1.8rem; color: #000; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">{{ montant_total|default:0|floatformat:0 }}</h2>
+                        <small class="fw-bold" style="font-size: 0.6rem; color: #000; opacity: 0.8;">FCFA</small>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.1); border-radius: 15px; padding: 12px; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <i class="fas fa-coins" style="font-size: 1.6rem; color: #000;"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Widget 4: Notifications -->
+        <div class="card border-0 bg-info" style="height: 150px; border-radius: 15px; box-shadow: 0 8px 25px rgba(13, 202, 240, 0.35); transition: all 0.3s ease; cursor: pointer;" onmouseover="this.style.transform='translateY(-5px) scale(1.02)'; this.style.boxShadow='0 12px 35px rgba(13, 202, 240, 0.5)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(13, 202, 240, 0.35)'">
+            <div class="card-body p-3">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <small class="text-white" style="font-size: 0.65rem; opacity: 0.95; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;">Notifications</small>
+                        <h2 class="mb-0 text-white fw-bold" style="font-size: 2.2rem; text-shadow: 0 2px 10px rgba(0,0,0,0.1);">{{ unread_notifications_count|default:0 }}</h2>
+                    </div>
+                    <div style="background: rgba(255,255,255,0.2); border-radius: 15px; padding: 12px; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                        <i class="fas fa-bell text-white" style="font-size: 1.6rem;"></i>
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <small class="text-white" style="font-size: 0.65rem; opacity: 0.9; font-weight: 500;">Non lues</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Widget 5: Dossiers Récents -->
+        <div class="card border-0 bg-danger" style="height: 150px; border-radius: 15px; box-shadow: 0 8px 25px rgba(220, 53, 69, 0.35); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px) scale(1.02)'; this.style.boxShadow='0 12px 35px rgba(220, 53, 69, 0.5)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(220, 53, 69, 0.35)'">
+            <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <small class="text-white fw-bold" style="font-size: 0.65rem; letter-spacing: 1px; text-transform: uppercase;">Dossiers Récents</small>
+                    <span class="badge bg-light text-danger" style="font-size: 0.6rem; font-weight: 700;">{{ dossiers|length|default:0 }}</span>
+                </div>
+                <div style="overflow-y: auto; max-height: 120px;">
+                    {% if dossiers %}
+                    {% for d in dossiers|slice:":2" %}
+                    <div style="background: white; border-radius: 10px; padding: 7px; margin-bottom: 6px; box-shadow: 0 3px 12px rgba(0,0,0,0.08); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 5px 18px rgba(0,0,0,0.12)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 3px 12px rgba(0,0,0,0.08)'">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="flex-grow-1">
+                                <a class="text-decoration-none text-danger fw-bold" style="font-size: 0.7rem;" href="{% url 'client:dossier_detail' d.pk %}">{{ d.reference }}</a>
+                                <div class="text-muted" style="font-size: 0.6rem; font-weight: 500;">{{ d.produit|truncatewords:2 }}</div>
                             </div>
-                            <span class="badge {% if days_until < 0 %}badge-danger{% elif days_until <= 3 %}badge-warning{% else %}badge-info{% endif %}">
-                                {% if days_until < 0 %}
-                                    Retard ({{ days_until|abs }}j)
-                                {% elif days_until <= 3 %}
-                                    Urgent
-                                {% else %}
-                                    {{ days_until }} jours
-                                {% endif %}
-                            </span>
-                        </div>
-                        <div class="grid-2col text-sm">
-                            <div>
-                                <div class="text-muted">Date d'échéance</div>
-                                <div class="font-bold">{{ echeance.date_echeance|date:"d/m/Y" }}</div>
-                            </div>
-                            <div>
-                                <div class="text-muted">Montant</div>
-                                <div class="font-bold text-primary">{{ echeance.montant_echeance|floatformat:0 }} FCFA</div>
-                            </div>
-                        </div>
-                        <div style="margin-top: 0.75rem;">
-                            <a href="{% url 'client:dossier_detail' echeance.dossier.pk %}" class="btn btn-sm btn-primary">
-                                <i class="fas fa-eye"></i> Voir le dossier
+                            <a href="{% url 'client:dossier_detail' d.pk %}" class="btn btn-sm btn-danger" style="padding: 5px 10px; font-size: 0.65rem;">
+                                <i class="fas fa-eye"></i>
                             </a>
                         </div>
                     </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3 text-white">
+                        <i class="fas fa-folder-open" style="font-size: 1.5rem;"></i>
+                        <p class="mb-0" style="font-size: 0.65rem; font-weight: 600; margin-top: 5px;">Aucun dossier</p>
+                    </div>
+                    {% endif %}
                 </div>
-                {% endwith %}
-                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Widget 6: Suivi d'avancement -->
+        <div class="card border-0 bg-white" style="height: 150px; border-radius: 15px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); transition: all 0.3s ease;" onmouseover="this.style.transform='translateY(-5px) scale(1.02)'; this.style.boxShadow='0 12px 35px rgba(0,0,0,0.15)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 8px 25px rgba(0,0,0,0.1)'">
+            <div class="card-body p-2">
+                <small class="fw-bold" style="font-size: 0.65rem; letter-spacing: 1px; color: #4a5568; text-transform: uppercase;">Suivi d'avancement</small>
+                <div style="overflow-y: auto; max-height: 125px;" class="mt-1">
+                    {% if journal_recent %}
+                    {% for j in journal_recent|slice:":3" %}
+                    <div style="background: #f8f9fa; border-radius: 10px; padding: 7px; margin-bottom: 6px; box-shadow: 0 3px 12px rgba(0,0,0,0.05); transition: all 0.2s;" onmouseover="this.style.transform='scale(1.03)'; this.style.boxShadow='0 5px 18px rgba(0,0,0,0.08)'" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='0 3px 12px rgba(0,0,0,0.05)'">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary rounded-circle" style="width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-right: 7px; box-shadow: 0 2px 8px rgba(13, 110, 253, 0.3);">
+                                <i class="fas fa-bolt text-white" style="font-size: 0.6rem;"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <a href="{% url 'client:dossier_detail' j.dossier.pk %}" class="text-decoration-none text-primary fw-bold" style="font-size: 0.7rem;">{{ j.dossier.reference }}</a>
+                                <div class="text-muted" style="font-size: 0.6rem; font-weight: 500;">{{ j.action|truncatewords:2 }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <div class="text-center py-3 text-muted">
+                        <i class="fas fa-inbox" style="font-size: 1.5rem;"></i>
+                        <p class="mb-0" style="font-size: 0.65rem; font-weight: 600; margin-top: 5px;">Aucune activité</p>
+                    </div>
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>
-    {% endif %}
     
-    <div class="grid-auto-lg">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-lg font-semibold">Dossiers Récents</h3>
+    <!-- Actions Rapides - Grille -->
+    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+        <a href="javascript:void(0)" data-section="dossiers" class="btn btn-success nav-item-banking" style="font-size: 0.75rem; font-weight: 700; border-radius: 12px; padding: 12px; box-shadow: 0 5px 20px rgba(25, 135, 84, 0.4); transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-3px) scale(1.02)'; this.style.boxShadow='0 8px 30px rgba(25, 135, 84, 0.5)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 5px 20px rgba(25, 135, 84, 0.4)'">
+            <i class="fas fa-folder-open me-2"></i> Mes Dossiers ({{ dossiers_en_cours|length }})
+        </a>
+        <a href="javascript:void(0)" data-section="profil" class="btn btn-info nav-item-banking" style="font-size: 0.75rem; font-weight: 700; border-radius: 12px; padding: 12px; box-shadow: 0 5px 20px rgba(13, 202, 240, 0.4); transition: all 0.3s ease; display: flex; align-items: center; justify-content: center;" onmouseover="this.style.transform='translateY(-3px) scale(1.02)'; this.style.boxShadow='0 8px 30px rgba(13, 202, 240, 0.5)'" onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.boxShadow='0 5px 20px rgba(13, 202, 240, 0.4)'">
+            <i class="fas fa-user-cog me-2"></i> Mon Profil
+        </a>
+    </div>
+    
+    <!-- Échéances à venir (si présentes) -->
+    {% if echeances_a_venir %}
+    <div class="mt-3">
+        <h5 class="mb-2" style="font-size: 0.9rem; font-weight: 700; color: #4a5568;">
+            <i class="fas fa-calendar-check text-warning"></i> Échéances à Venir
+        </h5>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px;">
+            {% for echeance in echeances_a_venir|slice:":3" %}
+            {% with days_until=echeance.date_echeance|days_until %}
+            <div class="card border-0 {% if days_until < 0 %}bg-danger{% elif days_until <= 3 %}bg-warning{% else %}bg-info{% endif %}" style="border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+                <div class="card-body p-3">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <a href="{% url 'client:dossier_detail' echeance.dossier.pk %}" class="text-decoration-none {% if days_until <= 3 %}text-dark{% else %}text-white{% endif %} fw-bold" style="font-size: 0.8rem;">{{ echeance.dossier.reference }}</a>
+                            <div class="{% if days_until <= 3 %}text-dark{% else %}text-white{% endif %}" style="font-size: 0.65rem; opacity: 0.9;">{{ echeance.dossier.produit|truncatewords:3 }}</div>
+                        </div>
+                        <span class="badge {% if days_until < 0 %}bg-dark{% elif days_until <= 3 %}bg-dark{% else %}bg-light text-info{% endif %}" style="font-size: 0.6rem;">
+                            {% if days_until < 0 %}Retard{% elif days_until <= 3 %}Urgent{% else %}{{ days_until }}j{% endif %}
+                        </span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="{% if days_until <= 3 %}text-dark{% else %}text-white{% endif %}" style="font-size: 0.65rem; opacity: 0.9;">{{ echeance.date_echeance|date:"d/m/Y" }}</small>
+                        <small class="{% if days_until <= 3 %}text-dark{% else %}text-white{% endif %} fw-bold" style="font-size: 0.7rem;">{{ echeance.montant_echeance|floatformat:0 }} FCFA</small>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                {% if dossiers %}
-                  {% for d in dossiers|slice:':3' %}
-                    <div class="card-nested">
-                        <a href="{% url 'client:dossier_detail' d.pk %}" class="font-bold text-primary">{{ d.reference }}</a>
-                        <div class="text-sm text-muted">{{ d.produit }}</div>
-                        <div class="flex-between" style="margin-top: 0.5rem;">
-                            <span class="badge {% if d.statut_client == 'APPROUVE' %}badge-success{% elif d.statut_client == 'REFUSE' %}badge-danger{% else %}badge-info{% endif %}">{{ d.get_statut_client_display }}</span>
-                            <span class="font-bold text-primary" style="font-size: 1.125rem;">{{ d.montant|floatformat:0 }} <span class="text-xs">FCFA</span></span>
+            {% endwith %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<!-- Section Dossiers en Cours -->
+<section class="content-section" id="dossiers-section">
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">
+                <i class="fas fa-folder-open text-primary"></i> Mes Dossiers en Cours
+                <span class="badge bg-primary ms-2">{{ dossiers_en_cours|length }}</span>
+            </h5>
+        </div>
+        <div class="card-body">
+            {% if dossiers %}
+            <div class="row g-3">
+                {% for d in dossiers %}
+                <div class="col-lg-6 col-xl-4">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <a href="{% url 'client:dossier_detail' d.pk %}" class="text-decoration-none">
+                                <h6 class="fw-bold text-primary">{{ d.reference }}</h6>
+                            </a>
+                            <div class="text-muted small">{{ d.produit }}</div>
+                            <div class="d-flex justify-content-between align-items-center mt-2">
+                                <span class="badge {% if d.statut_client == 'TERMINE' %}bg-success{% elif d.statut_client == 'REFUSE' %}bg-danger{% else %}bg-info{% endif %}">{{ d.get_statut_client_display }}</span>
+                                <span class="fw-bold text-primary">{{ d.montant|floatformat:0 }} FCFA</span>
+                            </div>
                         </div>
                     </div>
-                  {% endfor %}
-                {% else %}
-                  <div class="text-muted">Aucun dossier récent.</div>
-                {% endif %}
+                </div>
+                {% endfor %}
             </div>
-        </div>
-
-        <div class="card">
-            <div class="card-header">
-                <h3 class="text-lg font-semibold">Suivi d'avancement</h3>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-folder-open fa-3x mb-3"></i>
+                <p>Aucun dossier en cours</p>
             </div>
-            <div class="card-body">
-                {% if journal_recent %}
-                <ul style="list-style: disc; padding-left: 1.25rem;">
-                    {% for j in journal_recent %}
-                    <li style="margin-bottom: 0.5rem;">
-                        <div style="font-size: 0.875rem;">
-                            <span style="font-weight: 600;">{{ j.dossier.reference }}</span> — <span style="text-transform: uppercase;">{{ j.action }}</span>
-                            <span style="color: var(--text-secondary);"> • {{ j.timestamp|date:"d/m/Y H:i" }}</span>
-                        </div>
-                        <div style="font-size: 0.75rem; color: var(--text-secondary);">{{ j.de_statut }} → {{ j.vers_statut }}</div>
-                        {% if j.commentaire_systeme %}
-                        <div style="font-size: 0.75rem;">{{ j.commentaire_systeme }}</div>
-                        {% endif %}
-                    </li>
-                    {% endfor %}
-                </ul>
-                {% else %}
-                <div style="color: var(--text-secondary);">Aucune mise à jour récente.</div>
-                {% endif %}
-            </div>
+            {% endif %}
         </div>
     </div>
 </section>
@@ -192,8 +304,8 @@
                             <td>{{ d.produit }}</td>
                             <td><strong>{{ d.montant|floatformat:0 }} FCFA</strong></td>
                             <td>
-                                {% if d.statut_client == 'APPROUVE' %}
-                                <span class="badge bg-success"><i class="fas fa-check"></i> Approuvé</span>
+                                {% if d.statut_client == 'TERMINE' %}
+                                <span class="badge bg-success"><i class="fas fa-check"></i> Terminé</span>
                                 {% elif d.statut_client == 'REFUSE' %}
                                 <span class="badge bg-danger"><i class="fas fa-times"></i> Refusé</span>
                                 {% else %}
@@ -221,34 +333,60 @@
 <!-- Section Historique -->
 <section class="content-section" id="historique-section">
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h3 class="text-lg font-semibold mb-0"><i class="fas fa-history me-2 text-info"></i>Historique de mes Demandes</h3>
-            <span class="badge bg-secondary">{{ historique_actions|length }}</span>
+        <div class="card-header bg-light d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <i class="fas fa-history text-info"></i> Historique de mes Demandes
+                <span class="badge bg-info ms-2">{{ historique_actions|length }}</span>
+            </h5>
         </div>
         <div class="card-body">
             {% if historique_actions %}
-            <ul class="list-group list-group-flush">
+            <div class="row g-3">
                 {% for action in historique_actions %}
-                <li class="list-group-item d-flex justify-content-between align-items-start">
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center gap-2 mb-1">
-                            <span class="badge bg-primary">{{ action.action }}</span>
-                            <a href="{% url 'client:dossier_detail' action.dossier.pk %}" class="text-primary fw-semibold">{{ action.dossier.reference }}</a>
-                        </div>
-                        <div class="small text-muted">
-                            {% if action.commentaire_systeme %}
-                            {{ action.commentaire_systeme }}
-                            {% endif %}
+                <div class="col-12">
+                    <div class="card shadow-sm border-start border-3 border-info hover-shadow transition">
+                        <div class="card-body p-3">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-primary">{{ action.action }}</span>
+                                        <a href="{% url 'client:dossier_detail' action.dossier.pk %}" class="text-decoration-none">
+                                            <strong class="text-primary"><i class="fas fa-folder"></i> {{ action.dossier.reference }}</strong>
+                                        </a>
+                                    </div>
+                                    <div class="small mb-1">
+                                        <span class="badge bg-info bg-opacity-10 text-info">
+                                            <i class="fas fa-info-circle"></i> Statut : {{ action.dossier.get_statut_client_display }}
+                                        </span>
+                                    </div>
+                                    {% if action.commentaire_systeme %}
+                                    <div class="small text-muted mt-1">
+                                        <i class="fas fa-comment-dots"></i> {{ action.commentaire_systeme }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                <div class="text-end ms-3">
+                                    <div class="small text-muted mb-1">
+                                        <i class="fas fa-clock"></i> {{ action.timestamp|date:"d/m/Y à H:i" }}
+                                    </div>
+                                    <div class="small">
+                                        <span class="badge bg-light text-dark">
+                                            <i class="fas fa-user"></i> {% if action.acteur %}{{ action.acteur.username }}{% else %}Système{% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <div class="small text-muted">{{ action.timestamp|date:"d/m/Y H:i" }}</div>
-                    </div>
-                </li>
+                </div>
                 {% endfor %}
-            </ul>
+            </div>
             {% else %}
-            <p class="text-muted mb-0">Aucune action enregistrée.</p>
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-history fa-3x mb-3 d-block text-info"></i>
+                <p class="mb-0 fw-bold">Aucune action enregistrée</p>
+                <small>L'historique de vos demandes apparaîtra ici</small>
+            </div>
             {% endif %}
         </div>
     </div>
@@ -269,7 +407,7 @@
                     <div class="card-body">
                         <div class="flex-between">
                             <a href="{% url 'client:dossier_detail' d.pk %}" class="font-bold text-primary" style="text-decoration:none; font-size:1.05rem;">{{ d.reference }}</a>
-                            <span class="badge {% if d.statut_client == 'TERMINE' %}badge-success{% elif d.statut_client == 'SE_RAPPROCHER_GEST' %}badge-warning{% else %}badge-info{% endif %}">
+                            <span class="badge {% if d.statut_client == 'TERMINE' %}badge-success{% elif d.statut_client == 'REFUSE' %}badge-danger{% elif d.statut_client == 'SE_RAPPROCHER_GEST' %}badge-warning{% else %}badge-info{% endif %}">
                                 {{ d.get_statut_client_display }}
                             </span>
                         </div>

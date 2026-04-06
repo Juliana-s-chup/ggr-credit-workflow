@@ -1,6 +1,6 @@
 """
 Utilitaires pour l'application suivi_demande.
-Fonctions de notification et helpers.
+Fonctions de notification, gestion des roles et helpers.
 """
 
 from typing import Iterable, Optional
@@ -9,7 +9,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import send_mail
 
-from .models import Notification, DossierCredit
+from .models import Notification, DossierCredit, UserRoles
 
 User = get_user_model()
 
@@ -58,3 +58,60 @@ def get_current_namespace(request):
     # Fallback base sur les settings
     portal_type = getattr(settings, "PORTAL_TYPE", "PROFESSIONAL")
     return "client" if portal_type == "CLIENT" else "pro"
+
+
+# --- Utilitaires de gestion des roles ---
+
+
+def get_user_role(user) -> Optional[str]:
+    """
+    Recupere le role d'un utilisateur de maniere robuste.
+
+    Args:
+        user: Instance de User Django
+
+    Returns:
+        str: Le role de l'utilisateur (CLIENT, GESTIONNAIRE, etc.)
+        None: Si l'utilisateur n'a pas de profil
+    """
+    if not user or not user.is_authenticated:
+        return None
+
+    # Essayer profile (OneToOne standard)
+    if hasattr(user, "profile"):
+        return user.profile.role
+
+    # Essayer userprofile (alternative)
+    if hasattr(user, "userprofile"):
+        return user.userprofile.role
+
+    return None
+
+
+def user_has_role(user, role: str) -> bool:
+    """Verifie si un utilisateur a un role specifique."""
+    user_role = get_user_role(user)
+    return user_role == role
+
+
+def user_has_any_role(user, roles: list) -> bool:
+    """Verifie si un utilisateur a l'un des roles specifies."""
+    user_role = get_user_role(user)
+    return user_role in roles
+
+
+def is_professional_user(user) -> bool:
+    """Verifie si un utilisateur est un professionnel (non-client)."""
+    professional_roles = [
+        UserRoles.GESTIONNAIRE,
+        UserRoles.ANALYSTE,
+        UserRoles.RESPONSABLE_GGR,
+        UserRoles.BOE,
+        UserRoles.SUPER_ADMIN,
+    ]
+    return user_has_any_role(user, professional_roles)
+
+
+def is_client_user(user) -> bool:
+    """Verifie si un utilisateur est un client."""
+    return user_has_role(user, UserRoles.CLIENT)

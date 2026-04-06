@@ -42,22 +42,23 @@ class UserProfile(models.Model):
 class DossierStatutAgent(models.TextChoices):
     NOUVEAU = "NOUVEAU", "Nouveau dossier credit"
     TRANSMIS_RESP_GEST = "TRANSMIS_RESP_GEST", "Transmis au responsable Gestionnaire"
-    TRANSMIS_ANALYSTE = "TRANSMIS_ANALYSTE", "Transmis e  l'analyste credit"
+    TRANSMIS_ANALYSTE = "TRANSMIS_ANALYSTE", "Transmis à l'analyste credit"
     EN_COURS_ANALYSE = "EN_COURS_ANALYSE", "En cours d'analyse risque"
     EN_COURS_VALIDATION_GGR = "EN_COURS_VALIDATION_GGR", "En cours validation GGR"
-    EN_ATTENTE_DECISION_DG = "EN_ATTENTE_DECISION_DG", "En attente decision DG"
+    EN_ATTENTE_DECISION_DG = "EN_ATTENTE_DECISION_DG", "En attente décision DG"
     APPROUVE_ATTENTE_FONDS = (
         "APPROUVE_ATTENTE_FONDS",
-        "Approuve, en attente de liberation de fonds",
+        "Approuvé, en attente de libération de fonds",
     )
-    FONDS_LIBERE = "FONDS_LIBERE", "Fonds libere"
-    REFUSE = "REFUSE", "Refuse / Non approuve"
+    FONDS_LIBERE = "FONDS_LIBERE", "Fonds libéré"
+    REFUSE = "REFUSE", "Refusé / Non approuvé"
 
 
 class DossierStatutClient(models.TextChoices):
     EN_ATTENTE = "EN_ATTENTE", "En attente"
     EN_COURS_TRAITEMENT = "EN_COURS_TRAITEMENT", "En cours de traitement"
-    TERMINE = "TERMINE", "Traitement termine"
+    TERMINE = "TERMINE", "Traitement terminé"
+    REFUSE = "REFUSE", "Demande refusée"
     SE_RAPPROCHER_GEST = "SE_RAPPROCHER_GEST", "Se rapprocher du gestionnaire"
 
 
@@ -108,10 +109,10 @@ class DossierCredit(models.Model):
     wizard_current_step = models.PositiveSmallIntegerField(
         default=1,
         choices=[
-            (1, "e‰tape 1"),
-            (2, "e‰tape 2"),
-            (3, "e‰tape 3"),
-            (4, "e‰tape 4"),
+            (1, "étape 1"),
+            (2, "étape 2"),
+            (3, "étape 3"),
+            (4, "étape 4"),
         ],
     )
     wizard_completed = models.BooleanField(default=False)
@@ -148,13 +149,13 @@ class DossierCredit(models.Model):
 
 class PieceJointe(models.Model):
     TYPE_PIECE_CHOICES = [
-        ("CNI", "Carte Nationale d'Identite"),
+        ("CNI", "Carte Nationale d'Identité"),
         ("FICHE_PAIE", "Fiche de paie"),
-        ("RELEVE_BANCAIRE", "Releve bancaire"),
-        ("BILLET_ORDRE", "Billet e  ordre"),
+        ("RELEVE_BANCAIRE", "Relevé bancaire"),
+        ("BILLET_ORDRE", "Billet à ordre"),
         ("ATTESTATION_EMPLOYEUR", "Attestation de l'employeur"),
         ("ATTESTATION_DOMICILIATION", "Attestation de domiciliation irrevocable"),
-        ("ASSURANCE_DECES_INVALIDITE", "Assurance deces-invalidite"),
+        ("ASSURANCE_DECES_INVALIDITE", "Assurance deces-invalidité"),
         ("AUTRE", "Autre"),
     ]
     dossier = models.ForeignKey(
@@ -197,7 +198,7 @@ class CanevasProposition(models.Model):
         DossierCredit, on_delete=models.CASCADE, related_name="canevas"
     )
 
-    # === EN-TeŠTE ===
+    # === EN-TEŠTE ===
     agence = models.CharField(max_length=100, default="PNBR")
     code_agence = models.CharField(max_length=10, default="10")
     nom_exploitant = models.CharField(max_length=200, default="YOBA")
@@ -205,7 +206,7 @@ class CanevasProposition(models.Model):
     date_proposition = models.DateField(default=timezone.now)
 
     # === SECTION 1: RENSEIGNEMENTS SUR LE DEMANDEUR ===
-    # Identite
+    # Identité
     nom_prenom = models.CharField(max_length=200)
     date_naissance = models.DateField()
     nationalite = models.CharField(max_length=100, default="CONGOLAISE")
@@ -225,7 +226,7 @@ class CanevasProposition(models.Model):
         max_length=50,
         default="PRIVE",
         choices=[
-            ("PRIVE", "Prive"),
+            ("PRIVE", "Privé"),
             ("PUBLIC", "Public"),
         ],
     )
@@ -252,9 +253,9 @@ class CanevasProposition(models.Model):
         max_length=20,
         default="MARIE",
         choices=[
-            ("CELIBATAIRE", "Celibataire"),
-            ("MARIE", "Marie(e)"),
-            ("DIVORCE", "Divorce(e)"),
+            ("CELIBATAIRE", "Célibataire"),
+            ("MARIE", "Marié(e)"),
+            ("DIVORCE", "Divorcé(e)"),
             ("VEUF", "Veuf/Veuve"),
         ],
     )
@@ -263,12 +264,12 @@ class CanevasProposition(models.Model):
         max_length=100,
         blank=True,
         choices=[
-            ("COMMUNAUTE", "Communaute des biens"),
-            ("SEPARATION", "Separation des biens"),
-            ("PARTICIPATION", "Participation aux acquets"),
+            ("COMMUNAUTE", "Communauté des biens"),
+            ("SEPARATION", "Séparation des biens"),
+            ("PARTICIPATION", "Participation aux acquêts"),
             ("AUTRE", "Autres"),
         ],
-    )  # Si marie
+    )  # Si marié
     participation_enquetes = models.CharField(max_length=200, blank=True)
 
     # Logement
@@ -279,14 +280,14 @@ class CanevasProposition(models.Model):
         blank=True,
         choices=[
             ("LOCATAIRE", "Locataire"),
-            ("PROPRIETAIRE", "Proprietaire"),
-            ("AUTRES", "Autres (e  preciser)"),
+            ("PROPRIETAIRE", "Propriétaire"),
+            ("AUTRES", "Autres (à préciser)"),
         ],
     )
-    numero_tf = models.CharField(max_length=100, blank=True)  # Si proprietaire
+    numero_tf = models.CharField(max_length=100, blank=True)  # Si propriétaire
     logement_autres_precision = models.CharField(max_length=200, blank=True)
 
-    # Nature du pret en cours
+    # Nature du prêt en cours
     nature_pret_cours = models.CharField(
         max_length=20,
         default="NOKI",
@@ -304,7 +305,7 @@ class CanevasProposition(models.Model):
     )
     k_restant_du_fcfa = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
-    # === SECTION 2: CAPACITe‰ D'ENDETTEMENT ===
+    # === SECTION 2: CAPACITÉ D'ENDETTEMENT ===
     salaire_net_moyen_fcfa = models.DecimalField(max_digits=12, decimal_places=2)
     echeances_prets_relevees = models.DecimalField(
         max_digits=12, decimal_places=2, default=0
@@ -322,13 +323,13 @@ class CanevasProposition(models.Model):
         max_digits=12, decimal_places=2, default=0
     )
 
-    # === SECTION 3: De‰TAILS DU CRe‰DIT ===
+    # === SECTION 3: DÉTAILS DU CRÉDIT ===
     nature_pret = models.CharField(
         max_length=20,
-        default="PRET",
+        default="PRÊT",
         choices=[
             ("CAUTION", "Caution"),
-            ("PRET", "Pret"),
+            ("PRÊT", "Prêt"),
             ("DECOUVERT", "Decouvert"),
         ],
     )
@@ -391,26 +392,26 @@ class CanevasProposition(models.Model):
 
     def calculer_capacite_endettement(self):
         """
-        Calcule automatiquement la capacite d'endettement.
+        Calcule automatiquement la capacité d'endettement.
 
-        Regle metier : La capacite d'endettement brute est de 40% du salaire net moyen.
-        La capacite nette est la capacite brute moins les echeances en cours.
+        Règle métier : La capacité d'endettement brute est de 40% du salaire net moyen.
+        La capacité nette est la capacité brute moins les échéances en cours.
 
         Raises:
-            ValueError: Si le salaire est negatif ou nul.
+            ValueError: Si le salaire est négatif ou nul.
         """
         from decimal import Decimal
         from .constants import TAUX_ENDETTEMENT_MAX
 
         if self.salaire_net_moyen_fcfa <= 0:
-            raise ValueError("Le salaire net moyen doit etre positif")
+            raise ValueError("Le salaire net moyen doit être positif")
 
-        # Capacite brute = 40% du salaire net moyen
+        # Capacité brute = 40% du salaire net moyen
         self.capacite_endettement_brute_fcfa = (
             self.salaire_net_moyen_fcfa * TAUX_ENDETTEMENT_MAX
         )
 
-        # Capacite nette = Capacite brute - echeances en cours
+        # Capacité nette = Capacité brute - échéances en cours
         self.capacite_endettement_nette_fcfa = max(
             Decimal("0"),
             self.capacite_endettement_brute_fcfa - self.total_echeances_credits_cours,
@@ -422,7 +423,7 @@ class CanevasProposition(models.Model):
         )
 
     def update_doc_flags_from_pieces(self):
-        """Met e  jour les drapeaux documents (etape 4) en fonction des pieces du dossier."""
+        """Met à jour les drapeaux documents (étape 4) en fonction des pièces du dossier."""
         types = set(self.dossier.pieces.values_list("type_piece", flat=True))
         mapping = {
             "CNI": "doc_cni_ok",
@@ -461,14 +462,14 @@ class Commentaire(models.Model):
 
 class JournalAction(models.Model):
     ACTIONS = [
-        ("CREATION", "Creation du dossier"),
-        ("MISE_A_JOUR", "Mise e  jour"),
-        ("TRANSITION", "Transition d'etat"),
+        ("CREATION", "Création du dossier"),
+        ("MISE_A_JOUR", "Mise à jour"),
+        ("TRANSITION", "Transition d'état"),
         ("RETOUR_CLIENT", "Retour au client"),
         ("RETOUR_GESTIONNAIRE", "Retour au gestionnaire"),
         ("APPROBATION", "Approbation"),
         ("REFUS", "Refus"),
-        ("LIBERATION_FONDS", "Liberation des fonds"),
+        ("LIBERATION_FONDS", "Libération des fonds"),
     ]
     dossier = models.ForeignKey(
         DossierCredit, on_delete=models.CASCADE, related_name="journal"
@@ -505,6 +506,14 @@ class Notification(models.Model):
     lu = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     canal = models.CharField(max_length=20, choices=CANAUX, default="INTERNE")
+    dossier = models.ForeignKey(
+        "DossierCredit",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="notifications",
+        help_text="Dossier lié à cette notification"
+    )
 
     def __str__(self):
         return f"Notif {self.type} -> {self.utilisateur_cible}"

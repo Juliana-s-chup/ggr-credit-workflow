@@ -1,156 +1,292 @@
-{% extends 'base-clean.html' %}
+{% extends 'base.html' %}
 {% load static %}
 
 {% block title %}Analytics & Reporting - GGR Crédit{% endblock %}
 
-{% block extra_css %}
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <style>
-    .kpi-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* ===== Analytics Dashboard Styles ===== */
+    .analytics-header {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
         color: white;
-        border-radius: 15px;
-        padding: 25px;
+        border-radius: 16px;
+        padding: 32px;
+        margin-bottom: 28px;
+        position: relative;
+        overflow: hidden;
+    }
+    .analytics-header::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, rgba(255,184,0,0.15) 0%, transparent 70%);
+        border-radius: 50%;
+    }
+    .analytics-header h1 {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 6px;
+        position: relative;
+    }
+    .analytics-header p {
+        opacity: 0.8;
+        margin-bottom: 0;
+        font-size: 0.95rem;
+        position: relative;
+    }
+    .analytics-header .header-actions {
+        position: relative;
+    }
+
+    /* KPI Cards */
+    .kpi-card {
+        border-radius: 14px;
+        padding: 24px;
         margin-bottom: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border: 1px solid rgba(0,0,0,0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
     }
-    
-    .kpi-card.success {
-        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    .kpi-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.12);
     }
-    
-    .kpi-card.warning {
-        background: linear-gradient(135deg, #F0B015 0%, #E65137 100%);
+    .kpi-card .kpi-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 16px;
     }
-    
-    .kpi-card.info {
-        background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    }
-    
+    .kpi-card.primary { background: white; }
+    .kpi-card.primary .kpi-icon { background: rgba(102, 126, 234, 0.12); color: #667eea; }
+    .kpi-card.warning { background: white; }
+    .kpi-card.warning .kpi-icon { background: rgba(255, 184, 0, 0.12); color: #FFB800; }
+    .kpi-card.success { background: white; }
+    .kpi-card.success .kpi-icon { background: rgba(16, 185, 129, 0.12); color: #10b981; }
+    .kpi-card.info { background: white; }
+    .kpi-card.info .kpi-icon { background: rgba(59, 130, 246, 0.12); color: #3b82f6; }
+
     .kpi-value {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin: 10px 0;
+        font-size: 2rem;
+        font-weight: 800;
+        color: #1a1a2e;
+        line-height: 1.1;
+        margin-bottom: 4px;
     }
-    
     .kpi-label {
-        font-size: 0.9rem;
-        opacity: 0.9;
+        font-size: 0.8rem;
+        color: #6b7280;
         text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .chart-container {
-        background: white;
-        border-radius: 15px;
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    }
-    
-    .chart-title {
-        font-size: 1.2rem;
+        letter-spacing: 0.8px;
         font-weight: 600;
+    }
+    .kpi-sublabel {
+        font-size: 0.78rem;
+        color: #9ca3af;
+        margin-top: 4px;
+    }
+
+    /* Chart containers */
+    .chart-card {
+        background: white;
+        border-radius: 14px;
+        padding: 24px;
         margin-bottom: 20px;
-        color: #2c3e50;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+        border: 1px solid rgba(0,0,0,0.04);
+    }
+    .chart-card-title {
+        font-size: 1rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+        color: #1a1a2e;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .chart-card-title i {
+        font-size: 1.1rem;
+        color: #667eea;
+    }
+
+    /* Action cards */
+    .action-item {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #374151;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid #f3f4f6;
+        margin-bottom: 10px;
+    }
+    .action-item:hover {
+        background: #f8f9ff;
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateX(4px);
+    }
+    .action-item .action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+    .action-icon.purple { background: rgba(102, 126, 234, 0.1); color: #667eea; }
+    .action-icon.green  { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+    .action-icon.orange { background: rgba(255, 184, 0, 0.1); color: #e6a600; }
+    .action-icon.blue   { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+    .btn-back {
+        background: rgba(255,255,255,0.15);
+        border: 1px solid rgba(255,255,255,0.25);
+        color: white;
+        padding: 8px 18px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+    }
+    .btn-back:hover {
+        background: rgba(255,255,255,0.25);
+        color: white;
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
     <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <h1 class="h3 mb-2">📊 Analytics & Reporting</h1>
-            <p class="text-muted">Tableau de bord analytique et statistiques des dossiers de crédit</p>
+    <div class="analytics-header">
+        <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+                <h1><i class="fas fa-chart-line me-2"></i> Analytics & Reporting</h1>
+                <p>Tableau de bord analytique et statistiques des dossiers de credit</p>
+            </div>
+            <div class="header-actions d-flex gap-2">
+                <a href="{% url 'pro:dashboard' %}" class="btn-back">
+                    <i class="fas fa-arrow-left me-1"></i> Retour Dashboard
+                </a>
+                <a href="{% url 'analytics:exporter_excel' %}" class="btn-back" style="background: rgba(16,185,129,0.3); border-color: rgba(16,185,129,0.4);">
+                    <i class="fas fa-file-excel me-1"></i> Export Excel
+                </a>
+            </div>
         </div>
     </div>
-    
+
     <!-- KPIs -->
     <div class="row">
-        <div class="col-md-3">
-            <div class="kpi-card">
+        <div class="col-lg-3 col-md-6">
+            <div class="kpi-card primary">
+                <div class="kpi-icon"><i class="fas fa-folder-open"></i></div>
                 <div class="kpi-label">Total Dossiers</div>
-                <div class="kpi-value">{{ kpis.total_dossiers }}</div>
-                <small>📁 Tous les dossiers</small>
+                <div class="kpi-value">{{ kpis.total_dossiers|default:"0" }}</div>
+                <div class="kpi-sublabel">Ensemble des dossiers</div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-lg-3 col-md-6">
             <div class="kpi-card warning">
+                <div class="kpi-icon"><i class="fas fa-spinner"></i></div>
                 <div class="kpi-label">En Cours</div>
-                <div class="kpi-value">{{ kpis.dossiers_en_cours }}</div>
-                <small>⏳ Dossiers actifs</small>
+                <div class="kpi-value">{{ kpis.dossiers_en_cours|default:"0" }}</div>
+                <div class="kpi-sublabel">Dossiers actifs</div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-lg-3 col-md-6">
             <div class="kpi-card success">
+                <div class="kpi-icon"><i class="fas fa-check-circle"></i></div>
                 <div class="kpi-label">Taux Approbation</div>
-                <div class="kpi-value">{{ kpis.taux_approbation }}%</div>
-                <small>✅ Dossiers approuvés</small>
+                <div class="kpi-value">{{ kpis.taux_approbation|default:"0" }}%</div>
+                <div class="kpi-sublabel">Dossiers approuves</div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-lg-3 col-md-6">
             <div class="kpi-card info">
+                <div class="kpi-icon"><i class="fas fa-calendar-alt"></i></div>
                 <div class="kpi-label">Ce Mois</div>
-                <div class="kpi-value">{{ kpis.dossiers_ce_mois }}</div>
-                <small>📅 Nouveaux dossiers</small>
+                <div class="kpi-value">{{ kpis.dossiers_ce_mois|default:"0" }}</div>
+                <div class="kpi-sublabel">Nouveaux dossiers</div>
             </div>
         </div>
     </div>
     
     <!-- Graphiques -->
-    <div class="row mt-4">
-        <!-- Évolution mensuelle -->
+    <div class="row mt-2">
         <div class="col-lg-8">
-            <div class="chart-container">
-                <div class="chart-title">📈 Évolution Mensuelle des Dossiers</div>
+            <div class="chart-card">
+                <div class="chart-card-title"><i class="fas fa-chart-area"></i> Evolution Mensuelle des Dossiers</div>
                 <canvas id="chartEvolution" height="80"></canvas>
             </div>
         </div>
-        
-        <!-- Répartition par statut -->
         <div class="col-lg-4">
-            <div class="chart-container">
-                <div class="chart-title">📊 Répartition par Statut</div>
+            <div class="chart-card">
+                <div class="chart-card-title"><i class="fas fa-chart-pie"></i> Repartition par Statut</div>
                 <canvas id="chartStatuts" height="160"></canvas>
             </div>
         </div>
     </div>
     
     <div class="row">
-        <!-- Répartition par type -->
         <div class="col-lg-6">
-            <div class="chart-container">
-                <div class="chart-title">🏦 Répartition par Type de Crédit</div>
+            <div class="chart-card">
+                <div class="chart-card-title"><i class="fas fa-university"></i> Repartition par Type de Credit</div>
                 <canvas id="chartTypes" height="100"></canvas>
             </div>
         </div>
-        
-        <!-- Actions rapides -->
         <div class="col-lg-6">
-            <div class="chart-container">
-                <div class="chart-title">⚡ Actions Rapides</div>
-                <div class="list-group">
-                    <a href="{% url 'analytics:rapport_statistiques' %}" class="list-group-item list-group-item-action">
-                        📄 Générer Rapport Statistiques
-                    </a>
-                    <a href="{% url 'analytics:predictions_risque' %}" class="list-group-item list-group-item-action">
-                        🤖 Prédictions de Risque ML
-                    </a>
-                    <a href="{% url 'analytics:exporter_excel' %}" class="list-group-item list-group-item-action">
-                        📊 Exporter Excel
-                    </a>
-                    <a href="#" class="list-group-item list-group-item-action" onclick="actualiserKPIs()">
-                        🔄 Actualiser les KPIs
-                    </a>
-                </div>
+            <div class="chart-card">
+                <div class="chart-card-title"><i class="fas fa-bolt"></i> Actions Rapides</div>
+                <a href="{% url 'analytics:rapport_statistiques' %}" class="action-item">
+                    <div class="action-icon purple"><i class="fas fa-file-alt"></i></div>
+                    <div>
+                        <div>Generer Rapport Statistiques</div>
+                        <small class="text-muted">Rapport detaille PDF</small>
+                    </div>
+                </a>
+                <a href="{% url 'analytics:predictions_risque' %}" class="action-item">
+                    <div class="action-icon green"><i class="fas fa-robot"></i></div>
+                    <div>
+                        <div>Predictions de Risque ML</div>
+                        <small class="text-muted">Intelligence artificielle</small>
+                    </div>
+                </a>
+                <a href="{% url 'analytics:exporter_excel' %}" class="action-item">
+                    <div class="action-icon orange"><i class="fas fa-file-excel"></i></div>
+                    <div>
+                        <div>Exporter en Excel</div>
+                        <small class="text-muted">Telecharger les donnees</small>
+                    </div>
+                </a>
+                <a href="#" class="action-item" onclick="actualiserKPIs(); return false;">
+                    <div class="action-icon blue"><i class="fas fa-sync-alt"></i></div>
+                    <div>
+                        <div>Actualiser les KPIs</div>
+                        <small class="text-muted">Rafraichir les statistiques</small>
+                    </div>
+                </a>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}
 
-{% block extra_js %}
+{% block extra_scripts %}
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
@@ -177,33 +313,25 @@ new Chart(ctxEvolution, {
             label: 'Nombre de dossiers',
             data: graphiquesData.evolution_mensuelle.data,
             borderColor: '#667eea',
-            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+            backgroundColor: 'rgba(102, 126, 234, 0.08)',
             borderWidth: 3,
             fill: true,
             tension: 0.4,
             pointRadius: 5,
-            pointHoverRadius: 7,
+            pointHoverRadius: 8,
+            pointBackgroundColor: '#667eea',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
         }]
     },
     options: {
         responsive: true,
         plugins: {
-            legend: {
-                display: true,
-                position: 'top',
-            },
-            tooltip: {
-                mode: 'index',
-                intersect: false,
-            }
+            legend: { display: true, position: 'top' },
+            tooltip: { mode: 'index', intersect: false }
         },
         scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0
-                }
-            }
+            y: { beginAtZero: true, ticks: { precision: 0 } }
         }
     }
 });
@@ -216,25 +344,15 @@ new Chart(ctxStatuts, {
         labels: graphiquesData.repartition_statuts.labels,
         datasets: [{
             data: graphiquesData.repartition_statuts.data,
-            backgroundColor: [
-                '#667eea',
-                '#764ba2',
-                '#f093fb',
-                '#4facfe',
-                '#43e97b',
-                '#fa709a',
-            ],
-            borderWidth: 2,
+            backgroundColor: ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'],
+            borderWidth: 3,
             borderColor: '#fff',
         }]
     },
     options: {
         responsive: true,
-        plugins: {
-            legend: {
-                position: 'bottom',
-            }
-        }
+        cutout: '65%',
+        plugins: { legend: { position: 'bottom', labels: { padding: 12, usePointStyle: true } } }
     }
 });
 
@@ -247,34 +365,16 @@ new Chart(ctxTypes, {
         datasets: [{
             label: 'Nombre de dossiers',
             data: graphiquesData.repartition_types.data,
-            backgroundColor: [
-                'rgba(102, 126, 234, 0.8)',
-                'rgba(118, 75, 162, 0.8)',
-                'rgba(240, 176, 21, 0.8)',
-            ],
-            borderColor: [
-                '#667eea',
-                '#764ba2',
-                '#F0B015',
-            ],
+            backgroundColor: ['rgba(102,126,234,0.8)', 'rgba(118,75,162,0.8)', 'rgba(240,176,21,0.8)'],
+            borderColor: ['#667eea', '#764ba2', '#F0B015'],
             borderWidth: 2,
+            borderRadius: 6,
         }]
     },
     options: {
         responsive: true,
-        plugins: {
-            legend: {
-                display: false,
-            }
-        },
-        scales: {
-            y: {
-                beginAtZero: true,
-                ticks: {
-                    precision: 0
-                }
-            }
-        }
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
     }
 });
 

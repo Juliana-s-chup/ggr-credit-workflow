@@ -4,7 +4,7 @@
   <div class="navbar-container">
     <!-- Logo / Brand -->
     <div class="navbar-brand">
-      <a href="{% url 'home' %}" aria-label="Retour à l'accueil GGR Crédit">
+      <a href="{% url 'pro:dashboard' %}" aria-label="Retour à l'accueil GGR Crédit">
         <svg class="navbar-logo" width="120" height="40" viewBox="0 0 120 40" aria-hidden="true">
           <text x="10" y="28" font-family="Inter" font-weight="700" font-size="24" fill="var(--brand-500)">GGR</text>
           <text x="60" y="28" font-family="Inter" font-size="16" fill="var(--neutral-700)">Crédit</text>
@@ -28,7 +28,7 @@
     <nav id="navbar-menu" class="navbar-menu" aria-label="Navigation principale">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a href="{% url 'dashboard' %}" 
+          <a href="{% url 'pro:dashboard' %}" 
              class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}"
              {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
             <svg class="nav-icon" aria-hidden="true">
@@ -39,7 +39,7 @@
         </li>
         
         <li class="nav-item">
-          <a href="{% url 'dossiers:list' %}" 
+          <a href="{% url 'pro:all_dossiers' %}" 
              class="nav-link {% if 'dossiers' in request.path %}active{% endif %}"
              {% if 'dossiers' in request.path %}aria-current="page"{% endif %}>
             <svg class="nav-icon" aria-hidden="true">
@@ -69,7 +69,7 @@
           
           <ul class="dropdown-menu" role="menu">
             <li role="none">
-              <a href="{% url 'profile' %}" 
+              <a href="{% url 'pro:dashboard' %}" 
                  class="dropdown-item" 
                  role="menuitem">
                 <svg class="dropdown-icon" aria-hidden="true">
@@ -79,7 +79,7 @@
               </a>
             </li>
             <li role="none">
-              <a href="{% url 'settings' %}" 
+              <a href="{% url 'pro:dashboard' %}" 
                  class="dropdown-item" 
                  role="menuitem">
                 <svg class="dropdown-icon" aria-hidden="true">
@@ -90,7 +90,7 @@
             </li>
             <li role="separator" class="dropdown-divider"></li>
             <li role="none">
-              <a href="{% url 'logout' %}" 
+              <a href="{% url 'pro:logout' %}" 
                  class="dropdown-item" 
                  role="menuitem">
                 <svg class="dropdown-icon" aria-hidden="true">
@@ -105,7 +105,7 @@
         <!-- Notifications -->
         {% if unread_notifications_count > 0 %}
         <li class="nav-item">
-          <a href="{% url 'notifications' %}" 
+          <a href="{% url 'pro:notifications' %}" 
              class="nav-link nav-link-notifications"
              aria-label="{{ unread_notifications_count }} notification(s) non lue(s)">
             <svg class="nav-icon" aria-hidden="true">
@@ -119,7 +119,7 @@
         {% else %}
         <!-- Not Authenticated -->
         <li class="nav-item">
-          <a href="{% url 'login' %}" class="nav-link">
+          <a href="{% url 'pro:login' %}" class="nav-link">
             Connexion
           </a>
         </li>

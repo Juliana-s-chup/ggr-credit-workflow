@@ -73,14 +73,17 @@ def predictions_risque(request):
     """
     Page des predictions de risque ML
     """
-    # Recuperer les predictions recentes
-    predictions = PredictionRisque.objects.select_related("dossier").all()[:20]
+    # Queryset de base (sans slice) pour les statistiques
+    all_predictions = PredictionRisque.objects.select_related("dossier").all()
 
     # Statistiques des predictions
-    total_predictions = predictions.count()
-    risque_faible = predictions.filter(classe_risque="FAIBLE").count()
-    risque_moyen = predictions.filter(classe_risque="MOYEN").count()
-    risque_eleve = predictions.filter(classe_risque="ELEVE").count()
+    total_predictions = all_predictions.count()
+    risque_faible = all_predictions.filter(classe_risque="FAIBLE").count()
+    risque_moyen = all_predictions.filter(classe_risque="MOYEN").count()
+    risque_eleve = all_predictions.filter(classe_risque="ELEVE").count()
+
+    # Predictions recentes pour l'affichage (avec slice)
+    predictions = all_predictions[:20]
 
     context = {
         "predictions": predictions,
@@ -122,13 +125,13 @@ def predire_dossier(request, dossier_id):
 
 
 @login_required
-@role_required("SUPER_ADMIN", "RESPONSABLE_GGR")
+@role_required("SUPER_ADMIN", "RESPONSABLE_GGR", "ANALYSTE", "GESTIONNAIRE", "BOE")
 def exporter_excel(request):
     """
     Exporte les statistiques en Excel
     """
     try:
-        filepath = ExportService.exporter_statistiques_excel()
+        filepath = ExportService.exporter_statistiques_excel(user=request.user)
 
         # Retourner le fichier
         response = FileResponse(

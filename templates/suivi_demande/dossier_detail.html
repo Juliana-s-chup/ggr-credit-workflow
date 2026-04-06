@@ -7,7 +7,6 @@
   <div class="col-12">
     <div class="card">
       <div class="card-body d-flex flex-wrap gap-2">
-        <a class="btn btn-sm btn-outline-primary" href="#" onclick="alert('Fonctionnalité en développement'); return false;">Télécharger la proposition (PDF)</a>
         {% if can_tx_transmettre_analyste %}
           <form method="post" action="{% url 'pro:transition_dossier' dossier.pk 'transmettre_analyste' %}">
             {% csrf_token %}
@@ -306,7 +305,10 @@
               <li class="list-group-item">
                 <div class="small text-muted">{{ j.timestamp|date:"d/m/Y H:i" }} • {% if j.acteur %}{{ j.acteur.username }}{% else %}Système{% endif %}</div>
                 <div>
-                  <strong>{{ j.action }}</strong> — {{ j.de_statut }} → {{ j.vers_statut }}
+                  <strong>{{ j.action }}</strong>
+                  {% if user.profile.role != 'CLIENT' and j.de_statut and j.vers_statut %}
+                   — {{ j.de_statut }} → {{ j.vers_statut }}
+                  {% endif %}
                 </div>
                 {% if j.commentaire_systeme %}
                   <div class="text-muted small">{{ j.commentaire_systeme }}</div>

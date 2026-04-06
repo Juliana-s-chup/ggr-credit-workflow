@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row mb-4">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h3 mb-0">
+                    <i class="fas fa-chart-bar text-primary"></i> Rapports sur les Utilisateurs
+                </h1>
+                <p class="text-muted mb-0">Statistiques et analyses des utilisateurs de l'application</p>
+            </div>
+            <a href="{% url 'pro:dashboard' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtres de période -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtres</h5>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label for="date_debut" class="form-label">Date de début</label>
+                    <input type="date" class="form-control" id="date_debut" name="date_debut" value="{{ request.GET.date_debut }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="date_fin" class="form-label">Date de fin</label>
+                    <input type="date" class="form-control" id="date_fin" name="date_fin" value="{{ request.GET.date_fin }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary me-2">
+                        <i class="fas fa-search"></i> Filtrer
+                    </button>
+                    <a href="{% url 'pro:reports' %}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Réinitialiser
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- KPIs principaux -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                    <h3 class="mb-0">{{ stats.total_users|default:0 }}</h3>
+                    <p class="text-muted mb-0">Total Utilisateurs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-success">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ stats.active_users|default:0 }}</h3>
+                    <p class="text-muted mb-0">Utilisateurs Actifs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-danger">
+                <div class="card-body text-center">
+                    <i class="fas fa-ban fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-0">{{ stats.inactive_users|default:0 }}</h3>
+                    <p class="text-muted mb-0">Utilisateurs Inactifs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-info">
+                <div class="card-body text-center">
+                    <i class="fas fa-percentage fa-2x text-info mb-2"></i>
+                    <h3 class="mb-0">{{ kpis.active_rate|default:0 }}%</h3>
+                    <p class="text-muted mb-0">Taux d'Activation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-chart-line"></i> Visualisations analytiques</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Évolution mensuelle -->
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">📈 Évolution des inscriptions par mois</h6>
+                    <canvas id="chartMonthly" style="max-height: 300px;"></canvas>
+                </div>
+                
+                <!-- Répartition par rôle -->
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">🥧 Répartition par rôle</h6>
+                    <canvas id="chartRoles" style="max-height: 300px;"></canvas>
+                </div>
+            </div>
+            
+            <div class="row">
+                <!-- Actifs vs Inactifs -->
+                <div class="col-md-6 mb-4">
+                    <h6 class="text-center mb-3">📊 Statut des utilisateurs</h6>
+                    <canvas id="chartStatus" style="max-height: 300px;"></canvas>
+                </div>
+                
+                <!-- Tableau récapitulatif -->
+                <div class="col-md-6 mb-4">
+                    <h6 class="mb-3">📋 Répartition détaillée par rôle</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Rôle</th>
+                                    <th class="text-end">Nombre</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in par_role %}
+                                <tr>
+                                    <td>{{ item.role }}</td>
+                                    <td class="text-end"><strong>{{ item.count }}</strong></td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="2" class="text-center text-muted">Aucune donnée disponible</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chartsData = {{ charts_json|safe }};
+    
+    // Configuration commune
+    const commonOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        plugins: {
+            legend: {
+                position: 'bottom',
+            }
+        }
+    };
+    
+    // 1. Évolution mensuelle
+    if (chartsData.monthly && chartsData.monthly.labels.length > 0) {
+        const ctxMonthly = document.getElementById('chartMonthly').getContext('2d');
+        new Chart(ctxMonthly, {
+            type: 'line',
+            data: {
+                labels: chartsData.monthly.labels,
+                datasets: [{
+                    label: 'Inscriptions',
+                    data: chartsData.monthly.data,
+                    borderColor: 'rgb(75, 192, 192)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    tension: 0.1,
+                    fill: true
+                }]
+            },
+            options: {
+                ...commonOptions,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    // 2. Répartition par rôle
+    if (chartsData.roles && chartsData.roles.labels.length > 0) {
+        const ctxRoles = document.getElementById('chartRoles').getContext('2d');
+        new Chart(ctxRoles, {
+            type: 'pie',
+            data: {
+                labels: chartsData.roles.labels,
+                datasets: [{
+                    data: chartsData.roles.data,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.8)',
+                        'rgba(54, 162, 235, 0.8)',
+                        'rgba(255, 206, 86, 0.8)',
+                        'rgba(75, 192, 192, 0.8)',
+                        'rgba(153, 102, 255, 0.8)',
+                        'rgba(255, 159, 64, 0.8)',
+                    ]
+                }]
+            },
+            options: commonOptions
+        });
+    }
+    
+    // 3. Actifs vs Inactifs
+    if (chartsData.status) {
+        const ctxStatus = document.getElementById('chartStatus').getContext('2d');
+        new Chart(ctxStatus, {
+            type: 'doughnut',
+            data: {
+                labels: chartsData.status.labels,
+                datasets: [{
+                    data: chartsData.status.data,
+                    backgroundColor: [
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(220, 53, 69, 0.8)',
+                    ]
+                }]
+            },
+            options: commonOptions
+        });
+    }
+});
+</script>
+{% endblock %}

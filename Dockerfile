@@ -36,8 +36,13 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Copier le code de l'application
 COPY --chown=django:django . .
 
-# Collecter les static files
+# S'assurer que les dossiers ont les bonnes permissions
+RUN chown -R django:django /app/staticfiles /app/media /app/logs
+
+# Collecter les static files en tant qu'utilisateur django
+USER django
 RUN python manage.py collectstatic --noinput --settings=core.settings.base
+USER root
 
 # Changer vers l'utilisateur non-root
 USER django
@@ -47,7 +52,10 @@ EXPOSE 8000
 
 # Healthcheck
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/health/', timeout=5)"
+    CMD python -c "import sys, urllib.request; \
+url='http://127.0.0.1:8000/health/'; \
+urllib.request.urlopen(url, timeout=5).read(); \
+sys.exit(0)"
 
 # Commande de démarrage
 CMD ["gunicorn", "core.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4", "--timeout", "120"]

@@ -20,7 +20,7 @@ from ..models import (
     CanevasProposition,
     PieceJointe,
 )
-from ..user_utils import get_user_role
+from ..utils import get_user_role
 from ..models import UserRoles
 
 

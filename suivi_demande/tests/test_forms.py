@@ -6,8 +6,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from django.test import TestCase
 
-from ..forms_demande import DemandeStep1Form, DemandeStep2Form
-from ..forms_demande_extra import DemandeStep3Form, DemandeStep4Form
+from ..forms_demande import DemandeStep1Form, DemandeStep2Form, DemandeStep3Form, DemandeStep4Form
 from ..forms import SignupForm
 
 

@@ -22,7 +22,7 @@
       
       <!-- Dashboard -->
       <li class="sidebar-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
-        <a href="{% url 'dashboard' %}" 
+        <a href="{% url 'pro:dashboard' %}" 
            class="sidebar-link"
            {% if request.resolver_match.url_name == 'dashboard' %}aria-current="page"{% endif %}>
           <svg class="sidebar-icon" aria-hidden="true">
@@ -34,7 +34,7 @@
       
       <!-- Dossiers -->
       <li class="sidebar-item {% if 'dossiers' in request.path %}active{% endif %}">
-        <a href="{% url 'dossiers:list' %}" 
+        <a href="{% url 'pro:all_dossiers' %}" 
            class="sidebar-link"
            {% if 'dossiers' in request.path %}aria-current="page"{% endif %}>
           <svg class="sidebar-icon" aria-hidden="true">
@@ -50,7 +50,7 @@
       <!-- Nouvelle Demande -->
       {% if user.profile.role == 'CLIENT' %}
       <li class="sidebar-item">
-        <a href="{% url 'dossiers:create' %}" class="sidebar-link">
+        <a href="{% url 'pro:demande_start' %}" class="sidebar-link">
           <svg class="sidebar-icon" aria-hidden="true">
             <use xlink:href="#icon-plus"></use>
           </svg>
@@ -61,7 +61,7 @@
       
       <!-- Notifications -->
       <li class="sidebar-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
-        <a href="{% url 'notifications' %}" 
+        <a href="{% url 'pro:notifications' %}" 
            class="sidebar-link"
            {% if request.resolver_match.url_name == 'notifications' %}aria-current="page"{% endif %}>
           <svg class="sidebar-icon" aria-hidden="true">
@@ -79,7 +79,7 @@
       
       <!-- Documents -->
       <li class="sidebar-item">
-        <a href="{% url 'documents' %}" class="sidebar-link">
+        <a href="{% url 'pro:all_dossiers' %}" class="sidebar-link">
           <svg class="sidebar-icon" aria-hidden="true">
             <use xlink:href="#icon-file"></use>
           </svg>
@@ -89,7 +89,7 @@
       
       <!-- Aide -->
       <li class="sidebar-item">
-        <a href="{% url 'help' %}" class="sidebar-link">
+        <a href="{% url 'pro:dashboard' %}" class="sidebar-link">
           <svg class="sidebar-icon" aria-hidden="true">
             <use xlink:href="#icon-help"></use>
           </svg>
@@ -99,7 +99,7 @@
       
       <!-- Paramètres -->
       <li class="sidebar-item">
-        <a href="{% url 'settings' %}" class="sidebar-link">
+        <a href="{% url 'pro:dashboard' %}" class="sidebar-link">
           <svg class="sidebar-icon" aria-hidden="true">
             <use xlink:href="#icon-settings"></use>
           </svg>

@@ -13,7 +13,7 @@
       <a class="btn btn-outline-secondary" href="{% url 'pro:dashboard' %}">
         <i class="fas fa-arrow-left"></i> Dashboard
       </a>
-      <a class="btn btn-success" href="#" onclick="alert('Fonctionnalité Export Excel en développement'); return false;">
+      <a class="btn btn-success" href="{% url 'analytics:exporter_excel' %}">
         <i class="fas fa-file-excel"></i> Exporter Excel
       </a>
     </div>

@@ -3,6 +3,7 @@ psycopg2-binary>=2.9.9,<3.0
 django-environ>=0.11.2,<1.0
 whitenoise>=6.6.0,<7.0
 gunicorn>=21.2.0,<22.0
+reportlab>=4.0.4,<5.0
 openpyxl>=3.1.2,<4.0
 
 # Machine Learning & Data Science
@@ -16,6 +17,7 @@ seaborn>=0.12.0,<1.0
 # Sécurité et Validation
 python-magic>=0.4.27,<1.0
 django-ratelimit>=4.1.0,<5.0
+bleach>=6.1.0,<7.0
 
 # Qualité du code
 black>=23.0.0,<24.0

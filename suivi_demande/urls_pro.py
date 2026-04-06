@@ -14,8 +14,6 @@ from . import (
     views_autorisation,
 )
 
-# from .pdf_views import dossier_proposition_pdf  # TODO: Vue manquante
-
 app_name = "pro"
 
 urlpatterns = [
@@ -26,7 +24,7 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path("", views.dashboard, name="home"),  # Redirection racine
     # Gestion des dossiers (toutes les fonctions)
-    path("dossiers/", views_portals.all_dossiers_list, name="all_dossiers"),
+    path("dossiers/", views_portals.all_dossiers_view, name="all_dossiers"),
     path("dossier/<int:pk>/", views.dossier_detail, name="dossier_detail"),
     # Creation de dossier (gestionnaire)
     path("nouveau-dossier/", views.create_application, name="create_dossier"),
@@ -46,17 +44,6 @@ urlpatterns = [
         views.transition_dossier,
         name="transition_dossier",
     ),
-    # path('dossier/<int:pk>/archiver/', views.archive_dossier, name='archive_dossier'),  # TODO: Vue manquante
-    # path('dossier/<int:pk>/desarchiver/', views.unarchive_dossier, name='unarchive_dossier'),  # TODO: Vue manquante
-    # Canevas de proposition (NOKI NOKI)
-    # path('dossier/<int:dossier_id>/canevas/', views_canevas.canevas_create_or_edit, name='canevas_form'),  # TODO: Vue manquante
-    # path('dossier/<int:dossier_id>/canevas/pdf/', views_canevas.canevas_view_pdf, name='canevas_pdf'),  # TODO: Vue manquante
-    # Gestion des documents
-    # path('dossier/<int:dossier_id>/documents/', views_documents.upload_documents, name='upload_documents'),  # TODO: Vue manquante
-    # path('dossier/<int:dossier_id>/documents/upload/', views_documents.upload_document_ajax, name='upload_document_ajax'),  # TODO: Vue manquante
-    # path('dossier/<int:dossier_id>/documents/<int:piece_id>/delete/', views_documents.delete_document_ajax, name='delete_document_ajax'),  # TODO: Vue manquante
-    # PDF et exports
-    # path('dossier/<int:pk>/proposition.pdf', dossier_proposition_pdf, name='dossier_proposition_pdf'),  # TODO: Vue manquante
     # Gestion des utilisateurs (admin/gestionnaire)
     path(
         "utilisateur/<int:user_id>/toggle-status/",
@@ -74,10 +61,6 @@ urlpatterns = [
         name="admin_edit_user",
     ),
     path("utilisateur/creer/", views_admin.admin_create_user, name="admin_create_user"),
-    # Notifications
-    # path('notifications/', views.notifications_list, name='notifications_list'),  # TODO: Vue manquante
-    # path('notifications/marquer-tout-lu/', views.notifications_mark_all_read, name='notifications_mark_all'),  # TODO: Vue manquante
-    # path('notifications/<int:pk>/marquer-lu/', views.notifications_mark_read, name='notifications_mark_read'),  # TODO: Vue manquante
     # Demandes de credit (wizard - 4 etapes pour gestionnaire)
     path("demande/", views.demande_start, name="demande_start"),
     path(
@@ -93,4 +76,10 @@ urlpatterns = [
         views.create_application,
         name="gestionnaire_create_dossier",
     ),
+    # Rapports et analytics
+    path("rapports/", views_portals.reports_redirect, name="reports"),
+    # Notifications
+    path("notifications/", views.notifications_list, name="notifications"),
+    path("notifications/marquer-tout-lu/", views.notifications_mark_all_read, name="notifications_mark_all"),
+    path("notifications/<int:pk>/marquer-lu/", views.notifications_mark_read, name="notifications_mark_read"),
 ]

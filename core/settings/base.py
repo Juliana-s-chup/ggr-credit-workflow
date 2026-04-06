@@ -5,15 +5,38 @@ Shared by dev and prod.
 
 from pathlib import Path
 import environ
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 # django-environ
-env = environ.Env(DEBUG=(bool, True))
+env = environ.Env(DEBUG=(bool, False))
 environ.Env.read_env(BASE_DIR / ".env")
 
-SECRET_KEY = env("SECRET_KEY", default="insecure-dev-key-change-me")
-DEBUG = env("DEBUG", default=True)
+# SECURITE: SECRET_KEY obligatoire, pas de valeur par defaut
+try:
+    SECRET_KEY = env("SECRET_KEY")
+    if SECRET_KEY == "insecure-dev-key-change-me":
+        raise ImproperlyConfigured(
+            "SECRET_KEY must be changed from default value! "
+            "Generate a secure key with: python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'"
+        )
+except environ.ImproperlyConfigured:
+    raise ImproperlyConfigured(
+        "SECRET_KEY environment variable is required! "
+        "Set it in your .env file or environment."
+    )
+
+# DEBUG: False par defaut (securite production)
+DEBUG = env.bool("DEBUG", default=False)
+
+# ALLOWED_HOSTS: Obligatoire en production
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
+if not DEBUG and not ALLOWED_HOSTS:
+    raise ImproperlyConfigured(
+        "ALLOWED_HOSTS must be set when DEBUG=False! "
+        "Set ALLOWED_HOSTS in your .env file (comma-separated list)."
+    )
 
 # Core apps
 INSTALLED_APPS = [
@@ -24,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "suivi_demande",
+    "analytics",
 ]
 
 MIDDLEWARE = [
@@ -51,24 +75,60 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "suivi_demande.context_processors.notifications",
-            ]
+            ],
         },
     }
 ]
 
+# Cache Configuration (en mémoire pour le développement)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000
+        }
+    }
+}
+
+# Session Configuration (utiliser la base de données)
+SESSION_ENGINE = "django.contrib.sessions.backends.db"
+SESSION_COOKIE_AGE = 3600  # 1 heure
+SESSION_COOKIE_SECURE = not DEBUG  # HTTPS uniquement en production
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+# Security Headers (uniquement en production)
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SECURE_HSTS_SECONDS = 31536000  # 1 an
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
+
+# CSRF Protection
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_HTTPONLY = True
+
+# WSGI Application
 WSGI_APPLICATION = "core.wsgi.application"
 
 # Configuration PostgreSQL (utilisee par defaut)
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": env("DB_NAME", default="credit_db"),
-        "USER": env("DB_USER", default="credit_user"),
-        "PASSWORD": env("DB_PASSWORD", default=""),
-        # En dev local, utiliser localhost par defaut (au lieu de "db" prevu pour Docker)
-        "HOST": env("DB_HOST", default="localhost"),
-        "PORT": env("DB_PORT", default="5434"),
-    }
+    "default": env.db(
+        "DATABASE_URL",
+        default=(
+            "postgresql://{user}:{password}@{host}:{port}/{name}".format(
+                user=env("DB_USER", default="credit_user"),
+                password=env("DB_PASSWORD", default=""),
+                host=env("DB_HOST", default="localhost"),
+                port=env("DB_PORT", default="5432"),
+                name=env("DB_NAME", default="credit_db"),
+            )
+        ),
+    )
 }
 
 # Internationalization
@@ -88,10 +148,6 @@ LOGIN_REDIRECT_URL = "pro:dashboard"
 LOGOUT_REDIRECT_URL = "login"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-# Custom session serializer (dates/Decimal -> strings)
-# SESSION_SERIALIZER = "suivi_demande.session_serializers.JSONDateDecimalSerializer"
-# Temporarily disabled - using default Django session serializer
 
 # Security/hosts (overridden in client.py and pro.py)
 # ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])

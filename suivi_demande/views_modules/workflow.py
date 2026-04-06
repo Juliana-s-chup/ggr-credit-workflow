@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Vues de gestion du workflow et des transitions de statut.
 """
@@ -122,7 +123,7 @@ def transition_dossier(request, pk, action: str):
                 DossierStatutAgent.EN_COURS_ANALYSE,
             ]:
                 vers_statut = DossierStatutAgent.REFUSE
-                nouveau_statut_client = DossierStatutClient.SE_RAPPROCHER_GEST
+                nouveau_statut_client = DossierStatutClient.REFUSE
                 action_log = "REFUS"
                 allowed = True
 
@@ -205,16 +206,16 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
     # Notification pour le client
     if action == "retour_client":
         message_notification = (
-            f"ðŸ”” Nouveau message '¢ Dossier {dossier.reference}\n"
-            f"Votre dossier necessite des complements. Motif: {commentaire_retour}"
+            f"📣 Nouveau message • Dossier {dossier.reference}\n"
+            f"Votre dossier nécessite des compléments. Motif: {commentaire_retour}"
         )
-        titre_notification = f"ðŸ”” Dossier {dossier.reference} '¢ Complements requis"
+        titre_notification = f"📣 Dossier {dossier.reference} • Compléments requis"
     else:
         message_notification = (
-            f"ðŸ”” Mise e  jour '¢ Dossier {dossier.reference}\n"
-            f"Statut cote client: {dossier.get_statut_client_display()}"
+            f"📣 Mise à jour • Dossier {dossier.reference}\n"
+            f"Statut côté client: {dossier.get_statut_client_display()}"
         )
-        titre_notification = f"ðŸ”” Dossier {dossier.reference} '¢ Mise e  jour"
+        titre_notification = f"📣 Dossier {dossier.reference} • Mise à jour"
 
     # Creer la notification pour le client
     Notification.objects.create(
@@ -223,6 +224,7 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
         titre=titre_notification,
         message=message_notification,
         canal="INTERNE",
+        dossier=dossier,
     )
 
     # Notifier les groupes selon l'action
@@ -231,8 +233,9 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.ANALYSTE,
-            f"ðŸ”” Nouveau dossier e  analyser '¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
+            f"🆕 Nouveau dossier à analyser • {dossier.reference}",
+            "🆕 Nouveau dossier de crédit\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
+            type_notif="NOUVEAU_DOSSIER",
         )
 
     elif action == "transmettre_ggr":
@@ -240,8 +243,9 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.RESPONSABLE_GGR,
-            f"ðŸ”” Dossier e  valider '¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
+            f"✅ Dossier à valider • {dossier.reference}",
+            "✅ Dossier transmis pour validation GGR\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nTransmis par: {expediteur}",
+            type_notif="VALIDATION_REQUISE",
         )
 
     elif action == "approuver":
@@ -249,8 +253,9 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.BOE,
-            f"ðŸ”” Dossier approuve '¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nApprouve par: {expediteur}",
+            f"💰 Dossier approuvé • {dossier.reference}",
+            "💰 Dossier approuvé - Libération de fonds requise\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nProduit: {produit}\nApprouvé par: {expediteur}",
+            type_notif="LIBERATION_FONDS",
         )
 
     elif action == "retour_gestionnaire":
@@ -258,8 +263,9 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
             request,
             dossier,
             UserRoles.GESTIONNAIRE,
-            f"ðŸ”” Dossier retourne '¢ {dossier.reference}",
-            "ðŸ”” Nouveau message\nReference: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nRetourne par: {expediteur}",
+            f"🔙 Dossier retourné • {dossier.reference}",
+            "🔙 Dossier retourné par l'analyste\nRéférence: {dossier_ref}\nClient: {client_name}\nMontant: {montant} FCFA\nRetourné par: {expediteur}",
+            type_notif="RETOUR_DOSSIER",
         )
 
     # Email au client
@@ -267,7 +273,7 @@ def _handle_notifications(request, dossier, action, commentaire_retour):
         _send_email_to_client(request, dossier, action, commentaire_retour)
 
 
-def _notifier_groupe(request, dossier, role_cible, titre, message_template):
+def _notifier_groupe(request, dossier, role_cible, titre, message_template, type_notif="NOUVEAU_MESSAGE"):
     """Notifie tous les utilisateurs d'un role donne."""
     utilisateurs = User.objects.filter(profile__role=role_cible, is_active=True)
 
@@ -275,7 +281,7 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
     for user in utilisateurs:
         Notification.objects.create(
             utilisateur_cible=user,
-            type="NOUVEAU_MESSAGE",
+            type=type_notif,
             titre=titre,
             message=message_template.format(
                 user_name=user.get_full_name() or user.username,
@@ -286,6 +292,7 @@ def _notifier_groupe(request, dossier, role_cible, titre, message_template):
                 expediteur=request.user.get_full_name() or request.user.username,
             ),
             canal="INTERNE",
+            dossier=dossier,
         )
 
         # Email

@@ -32,8 +32,7 @@ from xhtml2pdf import pisa
 # Imports locaux
 from .decorators import transition_allowed
 from .forms import SignupForm
-from .forms_demande import DemandeStep1Form, DemandeStep2Form
-from .forms_demande_extra import DemandeStep3Form, DemandeStep4Form
+from .forms_demande import DemandeStep1Form, DemandeStep2Form, DemandeStep3Form, DemandeStep4Form
 from .models import (
     DossierCredit,
     DossierStatutAgent,
@@ -47,11 +46,10 @@ from .models import (
     CanevasProposition,
 )
 from .permissions import can_upload_piece, get_transition_flags
-from .utils import get_current_namespace
+from .utils import get_current_namespace, get_user_role, user_has_role, is_professional_user
 
 # Nouveaux imports - Service Layer et Utilitaires
 from .services.dossier_service import DossierService
-from .user_utils import get_user_role, user_has_role, is_professional_user
 from .validators import validate_file_upload, sanitize_filename
 
 User = get_user_model()
@@ -76,9 +74,12 @@ def serialize_form_data(data):
 
 @login_required
 def test_dossiers_list(request):
-    """Vue de test pour afficher TOUS les dossiers en base"""
-    all_dossiers = DossierCredit.objects.all().order_by("-date_soumission")
-    total_dossiers = all_dossiers.count()
+    """Vue de test pour afficher TOUS les dossiers en base avec pagination"""
+    from django.core.paginator import Paginator
+    from .constants import ITEMS_PER_PAGE
+
+    dossiers_list = DossierCredit.objects.select_related('client', 'acteur_courant').order_by("-date_soumission")
+    total_dossiers = dossiers_list.count()
 
     # Statistiques par statut
     statuts_stats = (
@@ -86,6 +87,11 @@ def test_dossiers_list(request):
         .annotate(count=Count("id"))
         .order_by("-count")
     )
+
+    # Pagination
+    paginator = Paginator(dossiers_list, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    all_dossiers = paginator.get_page(page_number)
 
     context = {
         "all_dossiers": all_dossiers,
@@ -194,18 +200,9 @@ def dashboard(request):
         )
         role = profile.role
 
-    # Debug visible dans l'interface
-    debug_info = {
-        "user": request.user.username,
-        "profile_exists": hasattr(request.user, "profile"),
-        "role": role,
-        "template_to_use": None,
-    }
-
     if role == UserRoles.CLIENT:
-        debug_info["template_to_use"] = "dashboard_client.html"
 
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Utiliser le Service Layer avec pagination
+        # Optimisation: Utiliser le Service Layer avec pagination
         page = DossierService.get_dossiers_for_user(
             user=request.user,
             page=request.GET.get("page", 1),
@@ -227,10 +224,10 @@ def dashboard(request):
             in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
         ][:20]
 
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Statistiques via Service Layer (1 query au lieu de 3)
+        # Optimisation: Statistiques via Service Layer (1 query au lieu de 3)
         stats = DossierService.get_statistics_for_role(request.user)
 
-        # Historique des actions (dejeÃ‚Â  optimise avec select_related)
+        # Historique des actions (déjà optimisé avec select_related)
         historique_actions = (
             JournalAction.objects.filter(dossier__client=request.user)
             .select_related("dossier", "acteur")
@@ -243,21 +240,20 @@ def dashboard(request):
             "dossiers_en_cours": dossiers_en_cours,
             "dossiers_traites": dossiers_traites,  # Termines
             "historique_actions": historique_actions,
-            "dossiers_approuves": stats["approuves"],  # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Depuis stats
-            "montant_total": stats["montant_total"],  # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ Depuis stats
+            "dossiers_approuves": stats["approuves"],
+            "montant_total": stats["montant_total"],
             "historique_dossiers": dossiers_traites,  # compat
-            "debug_info": debug_info,
             "page": page,  # Pour pagination future
         }
         return render(request, "suivi_demande/dashboard_client.html", context)
 
     elif role == UserRoles.GESTIONNAIRE:
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Utiliser Service Layer
+        # Optimisation: Utiliser Service Layer
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=50
         )
 
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Statistiques en 1 query
+        # Optimisation: Statistiques en 1 query
         stats = DossierService.get_statistics_for_role(request.user)
 
         # Separer dossiers en cours et traites (en memoire)
@@ -330,10 +326,6 @@ def dashboard(request):
             round((stats["approuves"] / total_decides) * 100, 1) if total_decides else 0
         )
 
-        debug_info["template_to_use"] = "dashboard_gestionnaire.html"
-        debug_info["total_dossiers_base"] = stats["total"]
-        debug_info["dossiers_affiches"] = len(dossiers_en_cours)
-
         ctx = {
             "dossiers_pending": dossiers_pending,
             "recents": recents,
@@ -348,13 +340,12 @@ def dashboard(request):
             "portefeuille_total": stats["montant_total"],
             "mes_clients": [],
             "mes_dossiers_crees": recents[:20],
-            "debug_info": debug_info,
             "page": page,
         }
         return render(request, "suivi_demande/dashboard_gestionnaire.html", ctx)
 
     elif role == UserRoles.ANALYSTE:
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Service Layer filtre automatiquement par role
+        # Optimisation: Service Layer filtre automatiquement par role
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=30
         )
@@ -367,16 +358,21 @@ def dashboard(request):
         ]
         dossiers_prioritaires = dossiers[:5]
 
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Stats via Service Layer
+        # Stats via Service Layer
         stats = DossierService.get_statistics_for_role(request.user)
 
-        # Dossiers traites (separes)
-        dossiers_traites = [
-            d
-            for d in dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-        ][:20]
+        # Récupérer les dossiers traités séparément (transmis au GGR, refusés)
+        dossiers_traites = DossierCredit.objects.select_related(
+            "client", "client__profile", "acteur_courant"
+        ).filter(
+            statut_agent__in=[
+                DossierStatutAgent.EN_COURS_VALIDATION_GGR,
+                DossierStatutAgent.EN_ATTENTE_DECISION_DG,
+                DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
+        ).order_by("-date_soumission")[:20]
 
         # Historique (optimise)
         historique_actions = JournalAction.objects.select_related(
@@ -397,18 +393,23 @@ def dashboard(request):
         return render(request, "suivi_demande/dashboard_analyste.html", context)
 
     elif role == UserRoles.RESPONSABLE_GGR:
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Service Layer filtre automatiquement
+        # Dossiers en cours de validation
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=30
         )
 
         dossiers = list(page.object_list)
-        dossiers_traites = [
-            d
-            for d in dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-        ][:20]
+        
+        # Récupérer les dossiers traités séparément (approuvés, refusés, fonds libérés)
+        dossiers_traites = DossierCredit.objects.select_related(
+            "client", "client__profile", "acteur_courant"
+        ).filter(
+            statut_agent__in=[
+                DossierStatutAgent.APPROUVE_ATTENTE_FONDS,
+                DossierStatutAgent.FONDS_LIBERE,
+                DossierStatutAgent.REFUSE,
+            ]
+        ).order_by("-date_soumission")[:20]
 
         # Historique (optimise)
         historique_actions = JournalAction.objects.select_related(
@@ -427,23 +428,22 @@ def dashboard(request):
         )
 
     elif role == UserRoles.BOE:
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Service Layer filtre automatiquement (APPROUVE_ATTENTE_FONDS)
+        # Dossiers en attente de libération de fonds
         page = DossierService.get_dossiers_for_user(
             user=request.user, page=request.GET.get("page", 1), per_page=30
         )
 
         dossiers = list(page.object_list)
 
-        # ÃƒÂ¢Ã…â€œÃ¢â‚¬Â¦ OPTIMISeÃ¢â‚¬Â°: Stats via Service Layer
+        # Stats via Service Layer
         stats = DossierService.get_statistics_for_role(request.user)
 
-        # Dossiers traites
-        dossiers_traites = [
-            d
-            for d in dossiers
-            if d.statut_agent
-            in [DossierStatutAgent.FONDS_LIBERE, DossierStatutAgent.REFUSE]
-        ][:20]
+        # Récupérer les dossiers traités séparément (fonds libérés)
+        dossiers_traites = DossierCredit.objects.select_related(
+            "client", "client__profile", "acteur_courant"
+        ).filter(
+            statut_agent=DossierStatutAgent.FONDS_LIBERE
+        ).order_by("-date_soumission")[:20]
 
         # Historique (optimise)
         historique_actions = JournalAction.objects.select_related(
@@ -599,7 +599,7 @@ def transition_dossier(request, pk, action: str):
                 DossierStatutAgent.EN_COURS_ANALYSE,
             ]:
                 vers_statut = DossierStatutAgent.REFUSE
-                nouveau_statut_client = DossierStatutClient.SE_RAPPROCHER_GEST
+                nouveau_statut_client = DossierStatutClient.REFUSE
                 action_log = "REFUS"
                 allowed = True
 
@@ -883,13 +883,15 @@ def dossier_detail(request, pk):
         namespace = get_current_namespace(request)
         return redirect(f"{namespace}:dashboard")
 
-    # Marquer les notifications liees au dossier comme lues (sans champ FK: match sur la reference)
+    # Marquer les notifications liees au dossier comme lues
     try:
+        # Marquer via le champ dossier (nouveau) ou via recherche dans titre/message (ancien)
         Notification.objects.filter(
             utilisateur_cible=request.user,
             lu=False,
         ).filter(
-            Q(titre__icontains=dossier.reference)
+            Q(dossier=dossier)
+            | Q(titre__icontains=dossier.reference)
             | Q(message__icontains=dossier.reference)
         ).update(lu=True)
     except Exception:
@@ -1014,7 +1016,7 @@ def notifications_mark_all_read(request):
             "Toutes vos notifications ont eÃ†â€™Ãƒâ€šÃ‚Â©teÃ†â€™Ãƒâ€šÃ‚Â© marqueÃ†â€™Ãƒâ€šÃ‚Â©es comme lues.",
         )
     namespace = get_current_namespace(request)
-    return redirect(f"{namespace}:notifications_list")
+    return redirect(f"{namespace}:notifications")
 
 
 @login_required
@@ -1030,9 +1032,9 @@ def notifications_mark_read(request, pk: int):
         next_url = request.POST.get("next")
         if next_url:
             return redirect(next_url)
-        return redirect(f"{namespace}:notifications_list")
+        return redirect(f"{namespace}:notifications")
     namespace = get_current_namespace(request)
-    return redirect(f"{namespace}:notifications_list")
+    return redirect(f"{namespace}:notifications")
 
 
 # --- Demande de creÃ†â€™Ãƒâ€šÃ‚Â©dit: Wizard ---
@@ -1700,7 +1702,7 @@ def demande_step4(request):
                 de_statut=None,
                 vers_statut=DossierStatutAgent.NOUVEAU,
                 acteur=request.user,
-                commentaire_systeme="CreÃ†â€™Ãƒâ€šÃ‚Â©ation du dossier depuis le wizard Demande",
+                commentaire_systeme="Création du dossier depuis le wizard Demande",
                 meta={"wizard": True},
             )
 

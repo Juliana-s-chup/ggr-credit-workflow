@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='dossiercredit',
             name='statut_agent',
-            field=models.CharField(choices=[('NOUVEAU', 'Nouveau dossier credit'), ('TRANSMIS_RESP_GEST', 'Transmis au responsable Gestionnaire'), ('TRANSMIS_ANALYSTE', 'Transmis e  l'analyste credit'), ('EN_COURS_ANALYSE', 'En cours d'analyse risque'), ('EN_COURS_VALIDATION_GGR', 'En cours validation GGR'), ('EN_ATTENTE_DECISION_DG', 'En attente decision DG'), ('APPROUVE_ATTENTE_FONDS', 'Approuve, en attente de liberation de fonds'), ('FONDS_LIBERE', 'Fonds libere'), ('REFUSE', 'Refuse / Non approuve')], db_index=True, default='NOUVEAU', max_length=40),
+            field=models.CharField(choices=[('NOUVEAU', 'Nouveau dossier credit'), ('TRANSMIS_RESP_GEST', 'Transmis au responsable Gestionnaire'), ('TRANSMIS_ANALYSTE', 'Transmis e  l\'analyste credit'), ('EN_COURS_ANALYSE', 'En cours d\'analyse risque'), ('EN_COURS_VALIDATION_GGR', 'En cours validation GGR'), ('EN_ATTENTE_DECISION_DG', 'En attente decision DG'), ('APPROUVE_ATTENTE_FONDS', 'Approuve, en attente de liberation de fonds'), ('FONDS_LIBERE', 'Fonds libere'), ('REFUSE', 'Refuse / Non approuve')], db_index=True, default='NOUVEAU', max_length=40),
         ),
         migrations.AddIndex(
             model_name='dossiercredit',

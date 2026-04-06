@@ -38,6 +38,11 @@ except Exception:
 urlpatterns = [
     # Health check pour Docker
     path("health/", health_check, name="health_check"),
+    # Module analytics
+    path(
+        "analytics/",
+        include(("analytics.urls", "analytics"), namespace="analytics"),
+    ),
     # Auth URLs (login, logout, password reset, etc.)
     path("accounts/", include("django.contrib.auth.urls")),
     # Convenience redirects
