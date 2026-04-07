@@ -114,12 +114,20 @@ ggr-credit-workflow/
 │
 ├── suivi_demande/               # Application metier principale
 │   ├── models.py                # Modeles (DossierCredit, UserProfile, etc.)
-│   ├── views.py                 # Vues principales
+│   ├── views/                   # Vues (package modulaire)
+│   │   ├── __init__.py          #   Reexporte toutes les vues
+│   │   ├── auth.py              #   Inscription, approbation
+│   │   ├── dashboard.py         #   Dashboard par role
+│   │   ├── dossier.py           #   Detail, liste, creation dossiers
+│   │   ├── workflow.py          #   Transitions d'etat
+│   │   ├── wizard.py            #   Wizard demande credit (4 etapes)
+│   │   ├── notifications.py     #   Gestion des notifications
+│   │   ├── admin.py             #   Administration utilisateurs
+│   │   └── helpers.py           #   Fonctions utilitaires
 │   ├── views_portals.py         # Vues specifiques aux portails
-│   ├── views_admin.py           # Vues administration utilisateurs
+│   ├── views_admin.py           # Vues admin avancees (toggle, edit)
 │   ├── views_canevas.py         # Vues canevas de proposition
 │   ├── views_documents.py       # Upload/gestion des documents
-│   ├── views_modules/           # Vues modulaires (dashboard, workflow, etc.)
 │   ├── services/                # Couche service (logique metier)
 │   │   └── dossier_service.py   #   Filtrage et gestion des dossiers
 │   ├── forms.py                 # Formulaire inscription
@@ -134,7 +142,6 @@ ggr-credit-workflow/
 │   ├── decorators.py            # Decorateurs metier
 │   ├── constants.py             # Constantes (montants, delais)
 │   ├── utils.py                 # Utilitaires (notifications, roles, helpers)
-│   ├── logging_config.py        # Helpers de logging metier
 │   ├── ml/                      # Machine Learning (credit scoring)
 │   ├── tests/                   # Tests (7 fichiers)
 │   │   ├── test_models.py
@@ -167,7 +174,7 @@ ggr-credit-workflow/
 │
 ├── static/                      # Fichiers statiques
 │   ├── css/                     # Design system, charte graphique
-│   └── js/src/modules/          # Modules JS (navbar, sidebar, alerts)
+│   └── core/css/                # Palette de couleurs
 │
 ├── docs/                        # Documentation
 │   ├── architecture/            # Schemas techniques
